@@ -13,7 +13,7 @@ import (
 )
 
 type RefreshTokenRepository interface {
-	CreateRefreshToken(ctx context.Context, userID int64) (*domain.RefreshToken, error)
+	CreateRefreshToken(ctx context.Context, userID string) (*domain.RefreshToken, error)
 	FindRefreshTokenByToken(ctx context.Context, token string) (*domain.RefreshToken, error)
 	DeleteRefreshTokenByToken(ctx context.Context, token string) error
 }
@@ -29,7 +29,7 @@ func MakeRedisRefreshTokenRepository(db *redis.Client) *RedisRefreshTokenReposit
 	}
 }
 
-func (r *RedisRefreshTokenRepository) CreateRefreshToken(ctx context.Context, userID int64) (*domain.RefreshToken, error) {
+func (r *RedisRefreshTokenRepository) CreateRefreshToken(ctx context.Context, userID string) (*domain.RefreshToken, error) {
 	tok := make([]byte, domain.RefreshTokenLength)
 	if _, err := rand.Read(tok); err != nil {
 		return nil, err

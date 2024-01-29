@@ -1,5 +1,5 @@
 create table users (
-    id bigint not null primary key,
+    id varchar(63) not null primary key,
 
     discord_id varchar(255) not null unique,
     name varchar(255) not null,

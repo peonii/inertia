@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -50,14 +49,9 @@ func (a *api) authMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		uids, err := jt.Claims.GetSubject()
+		uid, err := jt.Claims.GetSubject()
 		if err != nil {
 			a.sendError(w, r, http.StatusUnauthorized, err, "failed to get subject from jwt")
-		}
-
-		uid, err := strconv.ParseInt(uids, 10, 64)
-		if err != nil {
-			a.sendError(w, r, http.StatusUnauthorized, err, "failed to parse uid from jwt")
 		}
 
 		ctx := r.Context()

@@ -63,13 +63,13 @@ func (a *api) makeRouter() *chi.Mux {
 		r.Get("/health", a.healthHandler)
 
 		r.Post("/oauth2/token", a.tokenCreationHandler)
-		r.Post("/oauth2/token/refresh", a.tokenRefreshHandler)
 
 		// Auth-only routes
 		r.Route("/", func(r chi.Router) {
 			r.Use(a.authMiddleware)
 
 			r.Get("/users/@me", a.userMeHandler)
+			r.Get("/users/{id}", a.userByIdHandler)
 		})
 	})
 

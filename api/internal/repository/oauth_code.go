@@ -13,7 +13,7 @@ import (
 )
 
 type OAuthCodeRepository interface {
-	CreateOAuthCode(ctx context.Context, userID int64) (*domain.OAuthCode, error)
+	CreateOAuthCode(ctx context.Context, userID string) (*domain.OAuthCode, error)
 	FindOAuthCodeByToken(ctx context.Context, token string) (*domain.OAuthCode, error)
 	DeleteOAuthCodeByToken(ctx context.Context, token string) error
 }
@@ -29,7 +29,7 @@ func MakeRedisOAuthCodeRepository(db *redis.Client) *RedisOAuthCodeRepository {
 	}
 }
 
-func (r *RedisOAuthCodeRepository) CreateOAuthCode(ctx context.Context, userID int64) (*domain.OAuthCode, error) {
+func (r *RedisOAuthCodeRepository) CreateOAuthCode(ctx context.Context, userID string) (*domain.OAuthCode, error) {
 	tok := make([]byte, domain.OAuthCodeLength)
 	if _, err := rand.Read(tok); err != nil {
 		return nil, err

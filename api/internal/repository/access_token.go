@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 )
 
 type AccessTokenRepository interface {
-	CreateAccessToken(userID int64) (string, error)
+	CreateAccessToken(userID string) (string, error)
 }
 
 type JWTAccessTokenRepository struct {
@@ -21,13 +20,13 @@ func MakeJWTAccessTokenRepository() *JWTAccessTokenRepository {
 	return &JWTAccessTokenRepository{}
 }
 
-func (r *JWTAccessTokenRepository) CreateAccessToken(userID int64) (string, error) {
+func (r *JWTAccessTokenRepository) CreateAccessToken(userID string) (string, error) {
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, domain.AccessToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(domain.AccessTokenExpiryTime)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "inertia",
-			Subject:   fmt.Sprintf("%d", userID),
+			Subject:   userID,
 		},
 	})
 

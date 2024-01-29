@@ -6,7 +6,7 @@ type OAuthCode struct {
 	Code      string    `json:"code"`
 	CreatedAt time.Time `json:"created_at"`
 	ExpiresAt time.Time `json:"expires_at"`
-	UserID    int64     `json:"user_id"`
+	UserID    string    `json:"user_id"`
 }
 
 const (
