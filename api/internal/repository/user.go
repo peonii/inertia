@@ -10,14 +10,14 @@ import (
 
 type UserRepository interface {
 	FindAll(ctx context.Context) ([]*domain.User, error)
-	FindOne(ctx context.Context, id int64) (*domain.User, error)
+	FindOne(ctx context.Context, id string) (*domain.User, error)
 
 	FindByDiscordID(ctx context.Context, discordID string) (*domain.User, error)
 
 	Create(ctx context.Context, user *domain.UserCreate) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 
-	Delete(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id string) error
 }
 
 type PostgresUserRepository struct {
@@ -67,7 +67,7 @@ func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, e
 	return users, nil
 }
 
-func (r *PostgresUserRepository) FindOne(ctx context.Context, id int64) (*domain.User, error) {
+func (r *PostgresUserRepository) FindOne(ctx context.Context, id string) (*domain.User, error) {
 	query := `
 		SELECT
 			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
@@ -131,7 +131,7 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *domain.UserCr
 		return nil, err
 	}
 
-	id := node.Generate().Int64()
+	id := node.Generate().String()
 
 	var u domain.User
 	if err := r.db.QueryRow(ctx, query,
@@ -195,7 +195,7 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *domain.User) 
 	return &u, nil
 }
 
-func (r *PostgresUserRepository) Delete(ctx context.Context, id int64) error {
+func (r *PostgresUserRepository) Delete(ctx context.Context, id string) error {
 	query := `
 		DELETE FROM users
 		WHERE id = $1

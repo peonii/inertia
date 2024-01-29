@@ -51,10 +51,14 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 	stateEnc := base64.URLEncoding.EncodeToString(state)
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "state",
-		Value:    stateEnc,
+		Name:  "state",
+		Value: stateEnc,
+
 		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Now().Add(5 * time.Minute),
+		HttpOnly: true,
+		Secure:   true,
+
+		Expires: time.Now().Add(5 * time.Minute),
 	})
 
 	discordEndpoint := fmt.Sprintf("https://discord.com/oauth2/authorize?response_type=code&client_id=%s&scope=identify%%20email&state=%s&redirect_uri=%s",
@@ -205,9 +209,16 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("%s?code=%s", redirectUri, oauthCode.Code), http.StatusFound)
 }
 
+const (
+	grantTypeAuthorizationCode = "authorization_code"
+	grantTypeRefreshToken      = "refresh_token"
+)
+
 func (a *api) tokenCreationHandler(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		Code string `json:"code"`
+		Code         string `json:"code"`          // Only used for authorization_code grant type
+		RefreshToken string `json:"refresh_token"` // Only used for refresh_token grant type
+		GrantType    string `json:"grant_type"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -215,70 +226,79 @@ func (a *api) tokenCreationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code, err := a.oauthCodeRepo.FindOAuthCodeByToken(r.Context(), req.Code)
-	if err != nil {
-		a.sendError(w, r, http.StatusBadRequest, err, "invalid code")
-	}
+	if req.GrantType == grantTypeAuthorizationCode {
+		code, err := a.oauthCodeRepo.FindOAuthCodeByToken(r.Context(), req.Code)
+		if err != nil {
+			a.sendError(w, r, http.StatusBadRequest, err, "invalid code")
+			return
+		}
 
-	if code.ExpiresAt.Before(time.Now()) {
-		a.sendError(w, r, http.StatusBadRequest, err, "code expired")
-	}
+		if code.ExpiresAt.Before(time.Now()) {
+			a.sendError(w, r, http.StatusBadRequest, err, "code expired")
+			return
+		}
 
-	rt, err := a.refreshTokenRepo.CreateRefreshToken(r.Context(), code.UserID)
-	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
+		rt, err := a.refreshTokenRepo.CreateRefreshToken(r.Context(), code.UserID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
+			return
+		}
+
+		at, err := a.accessTokenRepo.CreateAccessToken(code.UserID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
+			return
+		}
+
+		if err := a.oauthCodeRepo.DeleteOAuthCodeByToken(r.Context(), req.Code); err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to clean up")
+			return
+		}
+
+		resp := struct {
+			AccessToken  string `json:"access_token"`
+			RefreshToken string `json:"refresh_token"`
+			ExpiresIn    int    `json:"expires_in"`
+			TokenType    string `json:"token_type"`
+		}{
+			AccessToken:  at,
+			RefreshToken: rt.Token,
+			ExpiresIn:    5 * 60,
+			TokenType:    "Bearer",
+		}
+
+		a.sendJson(w, http.StatusOK, resp)
+	} else if req.GrantType == grantTypeRefreshToken {
+		rt, err := a.refreshTokenRepo.FindRefreshTokenByToken(r.Context(), req.RefreshToken)
+		if err != nil {
+			a.sendError(w, r, http.StatusBadRequest, err, "invalid refresh token")
+			return
+		}
+
+		if rt.ExpiresAt.Before(time.Now()) {
+			a.sendError(w, r, http.StatusBadRequest, err, "refresh token expired")
+			return
+		}
+
+		at, err := a.accessTokenRepo.CreateAccessToken(rt.UserID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
+			return
+		}
+
+		resp := struct {
+			AccessToken string `json:"access_token"`
+			ExpiresIn   int    `json:"expires_in"`
+			TokenType   string `json:"token_type"`
+		}{
+			AccessToken: at,
+			ExpiresIn:   5 * 60,
+			TokenType:   "Bearer",
+		}
+
+		a.sendJson(w, http.StatusOK, resp)
+	} else {
+		a.sendError(w, r, http.StatusBadRequest, nil, "unsupported grant type")
 		return
 	}
-
-	at, err := a.accessTokenRepo.CreateAccessToken(code.UserID)
-	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
-		return
-	}
-
-	resp := struct {
-		AccessToken  string `json:"access_token"`
-		RefreshToken string `json:"refresh_token"`
-	}{
-		AccessToken:  at,
-		RefreshToken: rt.Token,
-	}
-
-	a.sendJson(w, http.StatusOK, resp)
-}
-
-func (a *api) tokenRefreshHandler(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		RefreshToken string `json:"refresh_token"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode request body")
-		return
-	}
-
-	rt, err := a.refreshTokenRepo.FindRefreshTokenByToken(r.Context(), req.RefreshToken)
-	if err != nil {
-		a.sendError(w, r, http.StatusBadRequest, err, "invalid refresh token")
-		return
-	}
-
-	if rt.ExpiresAt.Before(time.Now()) {
-		a.sendError(w, r, http.StatusBadRequest, err, "refresh token expired")
-		return
-	}
-
-	at, err := a.accessTokenRepo.CreateAccessToken(rt.UserID)
-	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create token")
-		return
-	}
-
-	resp := struct {
-		AccessToken string `json:"access_token"`
-	}{
-		AccessToken: at,
-	}
-
-	a.sendJson(w, http.StatusOK, resp)
 }

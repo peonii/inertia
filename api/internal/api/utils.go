@@ -35,3 +35,8 @@ func (a *api) sendError(w http.ResponseWriter, r *http.Request, code int, err er
 		Code:  code,
 	})
 }
+
+func (a *api) session(r *http.Request) string {
+	uid := r.Context().Value(UserIDKey).(string)
+	return uid
+}
