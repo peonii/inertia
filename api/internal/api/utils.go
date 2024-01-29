@@ -7,6 +7,11 @@ import (
 	"go.uber.org/zap"
 )
 
+type apiError struct {
+	Error string `json:"error"`
+	Code  int    `json:"code"`
+}
+
 func (a *api) sendJson(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -25,7 +30,8 @@ func (a *api) sendError(w http.ResponseWriter, r *http.Request, code int, err er
 		zap.String("user_agent", r.UserAgent()),
 	)
 
-	a.sendJson(w, code, map[string]string{
-		"error": err.Error(),
+	a.sendJson(w, code, apiError{
+		Error: msg,
+		Code:  code,
 	})
 }

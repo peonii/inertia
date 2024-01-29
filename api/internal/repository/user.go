@@ -12,6 +12,8 @@ type UserRepository interface {
 	FindAll(ctx context.Context) ([]*domain.User, error)
 	FindOne(ctx context.Context, id int64) (*domain.User, error)
 
+	FindByDiscordID(ctx context.Context, discordID string) (*domain.User, error)
+
 	Create(ctx context.Context, user *domain.UserCreate) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) (*domain.User, error)
 
@@ -31,7 +33,7 @@ func MakePostgresUserRepository(db *pgxpool.Pool) *PostgresUserRepository {
 
 func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
 	query := `
-		SELECT 
+		SELECT
 			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
 		FROM users
 	`
@@ -67,7 +69,7 @@ func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, e
 
 func (r *PostgresUserRepository) FindOne(ctx context.Context, id int64) (*domain.User, error) {
 	query := `
-		SELECT 
+		SELECT
 			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
 		FROM users
 		WHERE id = $1
@@ -75,6 +77,32 @@ func (r *PostgresUserRepository) FindOne(ctx context.Context, id int64) (*domain
 
 	var user domain.User
 	if err := r.db.QueryRow(ctx, query, id).Scan(
+		&user.ID,
+		&user.DiscordID,
+		&user.Name,
+		&user.Email,
+		&user.Image,
+		&user.AccessToken,
+		&user.RefreshToken,
+		&user.AuthLevel,
+		&user.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *PostgresUserRepository) FindByDiscordID(ctx context.Context, discordID string) (*domain.User, error) {
+	query := `
+		SELECT
+			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+		FROM users
+		WHERE discord_id = $1
+		`
+
+	var user domain.User
+	if err := r.db.QueryRow(ctx, query, discordID).Scan(
 		&user.ID,
 		&user.DiscordID,
 		&user.Name,

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/api"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -19,12 +20,24 @@ func APICmd(ctx context.Context) *cobra.Command {
 				return err
 			}
 
+			cfg := &api.APIConfig{
+				DiscordClientID:     os.Getenv("DISCORD_CLIENT_ID"),
+				DiscordClientSecret: os.Getenv("DISCORD_CLIENT_SECRET"),
+				DiscordRedirectURI:  os.Getenv("DISCORD_REDIRECT_URI"),
+			}
+
 			db, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
 			if err != nil {
 				return err
 			}
 
-			a := api.MakeAPI(ctx, db, logger)
+			rs, err := redis.ParseURL(os.Getenv("REDIS_URL"))
+			if err != nil {
+				return err
+			}
+			rdc := redis.NewClient(rs)
+
+			a := api.MakeAPI(ctx, cfg, db, rdc, logger)
 			srv := a.MakeServer(3001)
 
 			go func() { _ = srv.ListenAndServe() }()
