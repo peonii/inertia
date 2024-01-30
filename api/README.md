@@ -22,3 +22,7 @@ This is the recommended way to locally run the API.
 5. Set `DATABASE_URL` to Postgres connection string
 6. Set `REDIS_URL` to Redis connection string
 7. Run `go run ./cmd/inertia api` in this directory
+
+## Documentation
+
+The API's OpenAPI documentation is available at `http://localhost:3001/docs` when running locally.
