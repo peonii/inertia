@@ -9,8 +9,8 @@ This is the API for Inertia.
 This is the recommended way to locally run the API.
 
 1. Install [Docker](https://docs.docker.com/get-docker/)
-2. Run `docker compose up` in this directory
-3. Populate the `.env` with values in `.env.example`
+2. Populate the `.env` with values in `.env.example`
+3. Run `docker compose up` in this directory
 4. The API will be available at `http://localhost:3001`
 
 ### Running locally (not recommended!)
