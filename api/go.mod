@@ -6,6 +6,9 @@ require (
 	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/go-andiamo/chioas v1.14.0 // indirect
+	github.com/go-andiamo/splitter v1.2.5 // indirect
+	github.com/go-andiamo/urit v1.2.1 // indirect
 	github.com/go-chi/chi/v5 v5.0.11 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.17.0 // indirect
@@ -27,6 +30,8 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

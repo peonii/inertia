@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-andiamo/chioas"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/repository"
@@ -54,24 +55,157 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 func (a *api) makeRouter() *chi.Mux {
 	r := chi.NewRouter()
 
+	apiSpec := chioas.Definition{
+		AutoHeadMethods: true,
+		DocOptions: chioas.DocOptions{
+			ServeDocs:       true,
+			HideHeadMethods: true,
+			Title:           "Inertia 5 API",
+		},
+		Paths: chioas.Paths{
+			"/api/v5": {
+				Paths: chioas.Paths{
+					"/health": {
+						Tag: "Health",
+						Methods: chioas.Methods{
+							http.MethodGet: {
+								Description: "Check if the API is online",
+								Handler:     a.healthHandler,
+								Responses: chioas.Responses{
+									http.StatusOK: {
+										SchemaRef: "health",
+									},
+								},
+							},
+						},
+					},
+					"/users": {
+						Tag: "Users",
+						Paths: chioas.Paths{
+							"/@me": {
+								Methods: chioas.Methods{
+									http.MethodGet: {
+										Description: "Get your current user data",
+										Handler:     a.userMeHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: {
+												SchemaRef: "user_full",
+											},
+										},
+									},
+								},
+							},
+							"/{id}": {
+								Methods: chioas.Methods{
+									http.MethodGet: {
+										Description: "Get a user by their ID",
+										Handler:     a.userByIdHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: {
+												SchemaRef: "user",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Components: &chioas.Components{
+			Schemas: chioas.Schemas{
+				{
+					Name:               "health",
+					RequiredProperties: []string{"status"},
+					Properties: chioas.Properties{
+						{
+							Name: "status",
+							Type: "string",
+						},
+					},
+				},
+				{
+					Name:               "user_full",
+					RequiredProperties: []string{"id", "discord_id", "name", "email", "image", "access_token", "refresh_token", "auth_level", "created_at"},
+					Properties: chioas.Properties{
+						{
+							Name: "id",
+							Type: "string",
+						},
+						{
+							Name: "discord_id",
+							Type: "string",
+						},
+						{
+							Name: "name",
+							Type: "string",
+						},
+						{
+							Name: "email",
+							Type: "string",
+						},
+						{
+							Name: "image",
+							Type: "string",
+						},
+						{
+							Name: "access_token",
+							Type: "string",
+						},
+						{
+							Name: "refresh_token",
+							Type: "string",
+						},
+						{
+							Name: "auth_level",
+							Type: "integer",
+						},
+						{
+							Name: "created_at",
+							Type: "string",
+						},
+					},
+				},
+				{
+					Name:               "user",
+					RequiredProperties: []string{"id", "discord_id", "name", "image", "auth_level", "created_at"},
+					Properties: chioas.Properties{
+						{
+							Name: "id",
+							Type: "string",
+						},
+						{
+							Name: "discord_id",
+							Type: "string",
+						},
+						{
+							Name: "name",
+							Type: "string",
+						},
+						{
+							Name: "image",
+							Type: "string",
+						},
+						{
+							Name: "auth_level",
+							Type: "integer",
+						},
+						{
+							Name: "created_at",
+							Type: "string",
+						},
+					},
+				},
+			},
+		},
+	}
+
 	r.Use(a.loggingMiddleware)
 
-	r.Get("/oauth2/authorize", a.authorizeHandler)
-	r.Get("/oauth2/callback", a.authorizeCallbackHandler)
-
-	r.Route("/api/v5", func(r chi.Router) {
-		r.Get("/health", a.healthHandler)
-
-		r.Post("/oauth2/token", a.tokenCreationHandler)
-
-		// Auth-only routes
-		r.Route("/", func(r chi.Router) {
-			r.Use(a.authMiddleware)
-
-			r.Get("/users/@me", a.userMeHandler)
-			r.Get("/users/{id}", a.userByIdHandler)
-		})
-	})
+	if err := apiSpec.SetupRoutes(r, apiSpec); err != nil {
+		panic(err)
+	}
 
 	return r
 }
