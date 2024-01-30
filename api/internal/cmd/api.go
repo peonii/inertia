@@ -4,6 +4,9 @@ import (
 	"context"
 	"os"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // required for postgres
+	_ "github.com/golang-migrate/migrate/v4/source/file"       // required for file://
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/api"
 	"github.com/redis/go-redis/v9"
@@ -36,6 +39,21 @@ func APICmd(ctx context.Context) *cobra.Command {
 				return err
 			}
 			rdc := redis.NewClient(rs)
+
+			m, err := migrate.New("file://migrations", os.Getenv("DATABASE_URL"))
+			if err != nil {
+				return err
+			}
+
+			if err := m.Up(); err != nil {
+				if err == migrate.ErrNoChange {
+					logger.Info("No migrations to run")
+				} else {
+					return err
+				}
+			} else {
+				logger.Info("Migrations ran successfully")
+			}
 
 			a := api.MakeAPI(ctx, cfg, db, rdc, logger)
 			srv := a.MakeServer(3001)
