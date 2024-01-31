@@ -62,13 +62,15 @@ const Layout: React.FC = () => {
         options={{
           headerTitle: "Login",
           headerBackTitle: "Login",
+          headerShown: false,
         }}
       />
       <Stack.Screen
-        name="afterlogin"
+        name="home"
         options={{
-          headerTitle: "afterLogin",
-          headerBackTitle: "afterLogin",
+          headerTitle: "Home",
+          headerBackTitle: "Home",
+          headerShown: false,
         }}
       />
     </Stack>
