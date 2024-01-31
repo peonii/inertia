@@ -8,6 +8,7 @@ import (
 	"github.com/go-andiamo/chioas"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/peonii/inertia/internal/domain"
 	"github.com/peonii/inertia/internal/repository"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
@@ -27,6 +28,7 @@ type api struct {
 	config *APIConfig
 
 	userRepo repository.UserRepository
+	gameRepo repository.GameRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -38,6 +40,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	ocr := repository.MakeRedisOAuthCodeRepository(rdc)
 	atr := repository.MakeJWTAccessTokenRepository()
 	rtr := repository.MakeRedisRefreshTokenRepository(rdc)
+	gr := repository.MakePostgresGameRepository(db)
 
 	return &api{
 		db:     db,
@@ -49,6 +52,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		oauthCodeRepo:    ocr,
 		accessTokenRepo:  atr,
 		refreshTokenRepo: rtr,
+		gameRepo:         gr,
 	}
 }
 
@@ -63,46 +67,47 @@ func (a *api) makeRouter() *chi.Mux {
 			Title:           "Inertia 5 API",
 		},
 		Paths: chioas.Paths{
-			"/api/v5": {
+			"/api/v5": chioas.Path{
 				Paths: chioas.Paths{
-					"/health": {
+					"/health": chioas.Path{
 						Tag: "Health",
 						Methods: chioas.Methods{
-							http.MethodGet: {
+							http.MethodGet: chioas.Method{
 								Description: "Check if the API is online",
 								Handler:     a.healthHandler,
 								Responses: chioas.Responses{
-									http.StatusOK: {
+									http.StatusOK: chioas.Response{
 										SchemaRef: "health",
 									},
 								},
 							},
 						},
 					},
-					"/users": {
-						Tag: "Users",
+					"/users": chioas.Path{
+						Tag:         "Users",
+						Middlewares: chi.Middlewares{a.authMiddleware},
 						Paths: chioas.Paths{
-							"/@me": {
+							"/@me": chioas.Path{
 								Methods: chioas.Methods{
-									http.MethodGet: {
+									http.MethodGet: chioas.Method{
 										Description: "Get your current user data",
 										Handler:     a.userMeHandler,
 										Responses: chioas.Responses{
-											http.StatusOK: {
-												SchemaRef: "user_full",
+											http.StatusOK: chioas.Response{
+												Schema: domain.User{},
 											},
 										},
 									},
 								},
 							},
-							"/{id}": {
+							"/{id}": chioas.Path{
 								Methods: chioas.Methods{
-									http.MethodGet: {
+									http.MethodGet: chioas.Method{
 										Description: "Get a user by their ID",
 										Handler:     a.userByIdHandler,
 										Responses: chioas.Responses{
-											http.StatusOK: {
-												SchemaRef: "user",
+											http.StatusOK: chioas.Response{
+												Schema: domain.UserPublic{},
 											},
 										},
 									},
@@ -110,90 +115,75 @@ func (a *api) makeRouter() *chi.Mux {
 							},
 						},
 					},
-				},
-			},
-		},
-		Components: &chioas.Components{
-			Schemas: chioas.Schemas{
-				{
-					Name:               "health",
-					RequiredProperties: []string{"status"},
-					Properties: chioas.Properties{
-						{
-							Name: "status",
-							Type: "string",
+					"/games": chioas.Path{
+						Tag:         "Games",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get all games",
+										Handler:     a.allGamesHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:  domain.Game{},
+												IsArray: true,
+											},
+										},
+									},
+								},
+							},
+							"/@me": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get your current user's hosted games",
+										Handler:     a.hostedGamesHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:  domain.Game{},
+												IsArray: true,
+											},
+										},
+									},
+								},
+							},
+							"/{id}": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get game by ID",
+										Handler:     a.gameByIdHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema: domain.Game{},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
-				},
-				{
-					Name:               "user_full",
-					RequiredProperties: []string{"id", "discord_id", "name", "email", "image", "access_token", "refresh_token", "auth_level", "created_at"},
-					Properties: chioas.Properties{
-						{
-							Name: "id",
-							Type: "string",
-						},
-						{
-							Name: "discord_id",
-							Type: "string",
-						},
-						{
-							Name: "name",
-							Type: "string",
-						},
-						{
-							Name: "email",
-							Type: "string",
-						},
-						{
-							Name: "image",
-							Type: "string",
-						},
-						{
-							Name: "access_token",
-							Type: "string",
-						},
-						{
-							Name: "refresh_token",
-							Type: "string",
-						},
-						{
-							Name: "auth_level",
-							Type: "integer",
-						},
-						{
-							Name: "created_at",
-							Type: "string",
-						},
-					},
-				},
-				{
-					Name:               "user",
-					RequiredProperties: []string{"id", "discord_id", "name", "image", "auth_level", "created_at"},
-					Properties: chioas.Properties{
-						{
-							Name: "id",
-							Type: "string",
-						},
-						{
-							Name: "discord_id",
-							Type: "string",
-						},
-						{
-							Name: "name",
-							Type: "string",
-						},
-						{
-							Name: "image",
-							Type: "string",
-						},
-						{
-							Name: "auth_level",
-							Type: "integer",
-						},
-						{
-							Name: "created_at",
-							Type: "string",
+					"/oauth2": chioas.Path{
+						Tag: "OAuth2",
+						Paths: chioas.Paths{
+							"/token": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Get new access token",
+										Handler:     a.tokenCreationHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:      domain.AccessTokenAuthCodeResponse{},
+												Description: "Authorization code grant",
+												Comment:     "Refresh token grant is very similar",
+											},
+										},
+										Request: &chioas.Request{
+											Schema:  domain.AccessTokenRequest{},
+											Comment: "Only provide code/refresh token adequate to the grant type",
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -202,6 +192,11 @@ func (a *api) makeRouter() *chi.Mux {
 	}
 
 	r.Use(a.loggingMiddleware)
+
+	r.Route("/oauth2", func(r chi.Router) {
+		r.Get("/authorize", a.authorizeHandler)
+		r.Get("/callback", a.authorizeCallbackHandler)
+	})
 
 	if err := apiSpec.SetupRoutes(r, apiSpec); err != nil {
 		panic(err)

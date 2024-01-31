@@ -61,6 +61,10 @@ func (a *api) authMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, UserIDKey, uid)
 
+		a.logger.Info("authenticated user",
+			zap.String("uid", uid),
+		)
+
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
