@@ -7,7 +7,7 @@ import (
 )
 
 func (a *api) userMeHandler(w http.ResponseWriter, r *http.Request) {
-	uid := r.Context().Value("uid").(string)
+	uid := a.session(r)
 
 	user, err := a.userRepo.FindOne(r.Context(), uid)
 	if err != nil {
@@ -27,5 +27,5 @@ func (a *api) userByIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.sendJson(w, http.StatusOK, user)
+	a.sendJson(w, http.StatusOK, user.ToPublic())
 }

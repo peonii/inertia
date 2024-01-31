@@ -22,6 +22,10 @@ func (a *api) loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+type UserIDContextKey string
+
+const UserIDKey UserIDContextKey = "uid"
+
 func (a *api) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
@@ -55,7 +59,11 @@ func (a *api) authMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "uid", uid)
+		ctx = context.WithValue(ctx, UserIDKey, uid)
+
+		a.logger.Info("authenticated user",
+			zap.String("uid", uid),
+		)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

@@ -51,10 +51,14 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 	stateEnc := base64.URLEncoding.EncodeToString(state)
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "state",
-		Value:    stateEnc,
+		Name:  "state",
+		Value: stateEnc,
+
 		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Now().Add(5 * time.Minute),
+		HttpOnly: true,
+		Secure:   true,
+
+		Expires: time.Now().Add(5 * time.Minute),
 	})
 
 	discordEndpoint := fmt.Sprintf("https://discord.com/oauth2/authorize?response_type=code&client_id=%s&scope=identify%%20email&state=%s&redirect_uri=%s",
@@ -226,10 +230,12 @@ func (a *api) tokenCreationHandler(w http.ResponseWriter, r *http.Request) {
 		code, err := a.oauthCodeRepo.FindOAuthCodeByToken(r.Context(), req.Code)
 		if err != nil {
 			a.sendError(w, r, http.StatusBadRequest, err, "invalid code")
+			return
 		}
 
 		if code.ExpiresAt.Before(time.Now()) {
 			a.sendError(w, r, http.StatusBadRequest, err, "code expired")
+			return
 		}
 
 		rt, err := a.refreshTokenRepo.CreateRefreshToken(r.Context(), code.UserID)
