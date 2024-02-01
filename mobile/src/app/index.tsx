@@ -13,7 +13,7 @@ const CenteredView = styled.View`
   align-items: center;
   justify-content: center;
   height: 100%;
-  background-color: #121212;
+  background-color: #252525;
 `;
 
 const IndexScreen: React.FC = () => {
@@ -22,7 +22,7 @@ const IndexScreen: React.FC = () => {
   });
   return (
     <CenteredView>
-      <MassiveText>Chu.</MassiveText>
+      <MassiveText>Chuj</MassiveText>
     </CenteredView>
   );
 };
