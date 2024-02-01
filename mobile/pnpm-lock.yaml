@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@emotion/native':
     specifier: ^11.11.0
@@ -22,12 +26,9 @@ dependencies:
   expo-font:
     specifier: ~11.10.2
     version: 11.10.2(expo@50.0.4)
-<<<<<<< HEAD
   expo-linear-gradient:
     specifier: ~12.7.1
     version: 12.7.1(expo@50.0.4)
-=======
->>>>>>> db27a8a052a1eea967fa97db1d9b04f66172925a
   expo-linking:
     specifier: ~6.2.2
     version: 6.2.2(expo@50.0.4)
@@ -8077,7 +8078,3 @@ packages:
   /yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
