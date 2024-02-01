@@ -11,6 +11,9 @@ dependencies:
   '@emotion/react':
     specifier: ^11.11.3
     version: 11.11.3(@types/react@18.2.48)(react@18.2.0)
+  '@expo-google-fonts/inter':
+    specifier: ^0.2.3
+    version: 0.2.3
   '@types/react':
     specifier: ~18.2.45
     version: 18.2.48
@@ -20,6 +23,9 @@ dependencies:
   expo-constants:
     specifier: ~15.4.5
     version: 15.4.5(expo@50.0.4)
+  expo-font:
+    specifier: ~11.10.2
+    version: 11.10.2(expo@50.0.4)
   expo-linking:
     specifier: ~6.2.2
     version: 6.2.2(expo@50.0.4)
@@ -1698,6 +1704,10 @@ packages:
     resolution: {integrity: sha512-gMsVel9D7f2HLkBma9VbtzZRehRogVRfbr++f06nL2vnCGCNlzOD+/MUov/F4p8myyAHspEhVobgjpX64q5m6A==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
+
+  /@expo-google-fonts/inter@0.2.3:
+    resolution: {integrity: sha512-iHK9FI+dnE45X5c2Z5hSFwNH4zUWethizpbv3XUn0FIGw5jwvzriENz0a6wCdkI4/d+1QkurnHo5XHti7TbNJA==}
+    dev: false
 
   /@expo/bunyan@4.0.0:
     resolution: {integrity: sha512-Ydf4LidRB/EBI+YrB+cVLqIseiRfjUI/AeHBgjGMtq3GroraDu81OV7zqophRgupngoL3iS3JUMDMnxO7g39qA==}
