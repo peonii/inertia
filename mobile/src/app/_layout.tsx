@@ -30,7 +30,6 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      console.log(fontsLoaded, fontError);
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);

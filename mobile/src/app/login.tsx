@@ -66,6 +66,7 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
+            // TODO add discord authorization
             router.replace("/home");
           }}
         >
