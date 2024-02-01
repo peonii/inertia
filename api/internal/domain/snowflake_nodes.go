@@ -4,4 +4,5 @@ const (
 	UserSnowflakeNode = iota
 	GameSnowflakeNode
 	TeamSnowflakeNode
+	LocationSnowflakeNode
 )
