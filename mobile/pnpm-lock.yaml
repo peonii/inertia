@@ -22,9 +22,12 @@ dependencies:
   expo-font:
     specifier: ~11.10.2
     version: 11.10.2(expo@50.0.4)
+<<<<<<< HEAD
   expo-linear-gradient:
     specifier: ~12.7.1
     version: 12.7.1(expo@50.0.4)
+=======
+>>>>>>> db27a8a052a1eea967fa97db1d9b04f66172925a
   expo-linking:
     specifier: ~6.2.2
     version: 6.2.2(expo@50.0.4)

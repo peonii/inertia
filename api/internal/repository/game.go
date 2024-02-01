@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 
+	"github.com/bwmarrin/snowflake"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/domain"
 )
@@ -32,7 +33,7 @@ func MakePostgresGameRepository(db *pgxpool.Pool) *PostgresGameRepository {
 func (r *PostgresGameRepository) FindAll(ctx context.Context) ([]*domain.Game, error) {
 	query := `
 		SELECT
-			id, name, official, host_id, created_at
+			id, name, official, host_id, time_start, time_end, loc_lat, loc_lng, created_at
 		FROM games
 	`
 
@@ -49,6 +50,10 @@ func (r *PostgresGameRepository) FindAll(ctx context.Context) ([]*domain.Game, e
 			&game.Name,
 			&game.Official,
 			&game.HostID,
+			&game.TimeStart,
+			&game.TimeEnd,
+			&game.LocLat,
+			&game.LocLng,
 			&game.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -63,7 +68,7 @@ func (r *PostgresGameRepository) FindAll(ctx context.Context) ([]*domain.Game, e
 func (r *PostgresGameRepository) FindOne(ctx context.Context, id string) (*domain.Game, error) {
 	query := `
 		SELECT
-			id, name, official, host_id, created_at
+			id, name, official, host_id, time_start, time_end, loc_lat, loc_lng, created_at
 		FROM games
 		WHERE id = $1
 	`
@@ -74,6 +79,10 @@ func (r *PostgresGameRepository) FindOne(ctx context.Context, id string) (*domai
 		&game.Name,
 		&game.Official,
 		&game.HostID,
+		&game.TimeStart,
+		&game.TimeEnd,
+		&game.LocLat,
+		&game.LocLng,
 		&game.CreatedAt,
 	); err != nil {
 		return nil, err
@@ -85,7 +94,7 @@ func (r *PostgresGameRepository) FindOne(ctx context.Context, id string) (*domai
 func (r *PostgresGameRepository) FindAllByHostID(ctx context.Context, hostID string) ([]*domain.Game, error) {
 	query := `
 		SELECT
-			id, name, official, host_id, created_at
+			id, name, official, host_id, time_start, time_end, loc_lat, loc_lng, created_at
 		FROM games
 		WHERE host_id = $1
 	`
@@ -103,6 +112,10 @@ func (r *PostgresGameRepository) FindAllByHostID(ctx context.Context, hostID str
 			&game.Name,
 			&game.Official,
 			&game.HostID,
+			&game.TimeStart,
+			&game.TimeEnd,
+			&game.LocLat,
+			&game.LocLng,
 			&game.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -112,4 +125,48 @@ func (r *PostgresGameRepository) FindAllByHostID(ctx context.Context, hostID str
 	}
 
 	return games, nil
+}
+
+func (r *PostgresGameRepository) Create(ctx context.Context, game *domain.GameCreate) (*domain.Game, error) {
+	query := `
+		INSERT INTO games (
+			id, name, official, host_id, time_start, time_end, loc_lat, loc_lng
+		) VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8
+		) RETURNING
+			id, name, official, host_id, time_start, time_end, loc_lat, loc_lng, created_at
+	`
+
+	node, err := snowflake.NewNode(domain.GameSnowflakeNode)
+	if err != nil {
+		return nil, err
+	}
+
+	id := node.Generate().String()
+
+	var g domain.Game
+	if err := r.db.QueryRow(ctx, query,
+		id,
+		game.Name,
+		false,
+		game.HostID,
+		game.TimeStart,
+		game.TimeEnd,
+		game.LocLat,
+		game.LocLng,
+	).Scan(
+		&g.ID,
+		&g.Name,
+		&g.Official,
+		&g.HostID,
+		&g.TimeStart,
+		&g.TimeEnd,
+		&g.LocLat,
+		&g.LocLng,
+		&g.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &g, nil
 }

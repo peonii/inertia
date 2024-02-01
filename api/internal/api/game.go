@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/peonii/inertia/internal/domain"
 )
 
 func (a *api) allGamesHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,4 +40,24 @@ func (a *api) gameByIdHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.sendJson(w, http.StatusOK, game)
+}
+
+func (a *api) createGameHandler(w http.ResponseWriter, r *http.Request) {
+	uid := a.session(r)
+
+	var gamec domain.GameCreate
+	if err := json.NewDecoder(r.Body).Decode(&gamec); err != nil {
+		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode game")
+		return
+	}
+
+	gamec.HostID = uid
+
+	game, err := a.gameRepo.Create(r.Context(), &gamec)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create game")
+		return
+	}
+
+	a.sendJson(w, http.StatusCreated, game)
 }

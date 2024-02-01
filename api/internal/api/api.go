@@ -29,6 +29,7 @@ type api struct {
 
 	userRepo repository.UserRepository
 	gameRepo repository.GameRepository
+	teamRepo repository.TeamRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -41,6 +42,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	atr := repository.MakeJWTAccessTokenRepository()
 	rtr := repository.MakeRedisRefreshTokenRepository(rdc)
 	gr := repository.MakePostgresGameRepository(db)
+	tr := repository.MakePostgresTeamRepository(db)
 
 	return &api{
 		db:     db,
@@ -53,6 +55,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		accessTokenRepo:  atr,
 		refreshTokenRepo: rtr,
 		gameRepo:         gr,
+		teamRepo:         tr,
 	}
 }
 
@@ -77,7 +80,9 @@ func (a *api) makeRouter() *chi.Mux {
 								Handler:     a.healthHandler,
 								Responses: chioas.Responses{
 									http.StatusOK: chioas.Response{
-										SchemaRef: "health",
+										Schema: &map[string]string{
+											"status": "ok",
+										},
 									},
 								},
 							},
@@ -131,6 +136,18 @@ func (a *api) makeRouter() *chi.Mux {
 											},
 										},
 									},
+									http.MethodPost: chioas.Method{
+										Description: "Create a new game",
+										Handler:     a.createGameHandler,
+										Responses: chioas.Responses{
+											http.StatusCreated: chioas.Response{
+												Schema: domain.Game{},
+											},
+										},
+										Request: &chioas.Request{
+											Schema: domain.GameCreate{},
+										},
+									},
 								},
 							},
 							"/@me": chioas.Path{
@@ -155,6 +172,56 @@ func (a *api) makeRouter() *chi.Mux {
 										Responses: chioas.Responses{
 											http.StatusOK: chioas.Response{
 												Schema: domain.Game{},
+											},
+										},
+									},
+								},
+							},
+							"/{id}/teams": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get teams in a game",
+										Handler:     a.teamsByGameIDHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:  domain.Team{},
+												IsArray: true,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"/teams": chioas.Path{
+						Tag:         "Teams",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Create a new team",
+										Handler:     a.createTeamHandler,
+										Responses: chioas.Responses{
+											http.StatusCreated: chioas.Response{
+												Schema: domain.Team{},
+											},
+										},
+										Request: &chioas.Request{
+											Schema: domain.TeamCreate{},
+										},
+									},
+								},
+							},
+							"/@me": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get your current user's teams",
+										Handler:     a.joinedTeamsHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:  domain.Team{},
+												IsArray: true,
 											},
 										},
 									},
