@@ -2,13 +2,20 @@ import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
-import { View, Text } from "react-native";
 import HomeDetails from "./homeDetails";
 
 const fakeData = {
   user: {
     username: "nattie",
-    profilePicture: require("./../../assets/nattie-pfp.png"),
+    profile_picture: require("./../../assets/nattie-pfp.png"),
+    role: "Admin",
+    statistics: {
+      rank: 3,
+      wins: 0,
+      draws: 1,
+      losses: 4,
+      xp_gained: 1800,
+    },
   },
   games: [
     { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
@@ -245,7 +252,7 @@ const Home: React.FC = () => {
             }}
           >
             <Username>{fakeData.user.username}</Username>
-            <UserProfilePicutre source={fakeData.user.profilePicture} />
+            <UserProfilePicutre source={fakeData.user.profile_picture} />
           </UserInfoButton>
         </UserInfoContainer>
       </TopBar>
@@ -276,12 +283,12 @@ const Home: React.FC = () => {
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={["50%"]}
+        snapPoints={["68%"]}
         onChange={handleSheetChanges}
         enablePanDownToClose={true}
         backgroundStyle={{ backgroundColor: "#252525" }}
       >
-        <HomeDetails />
+        <HomeDetails userData={fakeData.user} logoutFunction={() => {}} />
       </BottomSheet>
     </CenteredView>
   );

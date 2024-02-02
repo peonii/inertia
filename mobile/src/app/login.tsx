@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { useAuthRequest } from "expo-auth-session";
-import React = require("react");
+import React from "react";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -104,8 +104,8 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
-            promptAsync();
-            // router.replace("/home");
+            // promptAsync();
+            router.replace("/home");
           }}
         >
           <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
