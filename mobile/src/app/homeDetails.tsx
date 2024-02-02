@@ -1,4 +1,5 @@
 import styled from "@emotion/native";
+import * as Linking from "expo-linking";
 
 const LeftAlignedView = styled.View`
   padding: 14px 38px;
@@ -104,12 +105,23 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logoutFunction }) =
           <RoleText>{userData.role}</RoleText>
         </ProfileTextSection>
       </ProfileSection>
+
       <MediumTitle>Stats</MediumTitle>
       <BigTitle>{`#${userData.statistics.rank} Global`}</BigTitle>
       <StatsText>
         {`${userData.statistics.wins} wins, ${userData.statistics.draws} draws, ${userData.statistics.losses} losses`}
       </StatsText>
       <StatsText>{`${userData.statistics.xp_gained} XP gained`}</StatsText>
+
+      <LogoutButtonContainer
+        style={{ bottom: 125 }}
+        onPress={() => Linking.openURL("https://nhentai.net/g/177013")}
+      >
+        <LogoutButtonView style={{ width: 280 }}>
+          <LogoutButtonText>See some quality stuff</LogoutButtonText>
+        </LogoutButtonView>
+      </LogoutButtonContainer>
+
       <LogoutButtonContainer onPress={() => logoutFunction()}>
         <LogoutButtonView>
           <LogoutButtonText>Log out</LogoutButtonText>

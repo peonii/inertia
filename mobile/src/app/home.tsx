@@ -19,7 +19,11 @@ const fakeData = {
   },
   games: [
     { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
-    { id: "2941279", name: "Jet Lag: Season 7", status: "Starts in 40 days" },
+    {
+      id: "2941279",
+      name: "Jet Lag: Season 7",
+      status: "Starts in 40 days",
+    },
   ],
   teams: [
     {
@@ -141,7 +145,6 @@ const ListContainer = styled.ScrollView`
   overflow: visible;
   padding: -20px;
   gap: 20px;
-  margin: 0px 10px;
 `;
 
 const GameContainer = styled.View`
@@ -204,7 +207,9 @@ const Home: React.FC = () => {
     return (
       <GameContainer key={game.id}>
         <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-        <SmallTitle style={{ color: color }}>{statusText}</SmallTitle>
+        <SmallTitle numberOfLines={1} style={{ color: color }}>
+          {statusText}
+        </SmallTitle>
       </GameContainer>
     );
   });
@@ -233,7 +238,9 @@ const Home: React.FC = () => {
         </LinearGradient>
         <TeamInfo>
           <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
-          <SmallTitle>{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+          <SmallTitle
+            numberOfLines={1}
+          >{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
           <BalanceText>{`${team.balance}$`}</BalanceText>
         </TeamInfo>
       </TeamContainer>
