@@ -80,11 +80,19 @@ const Login: React.FC = () => {
     discovery
   );
 
+  async function login(code: string) {
+    const response = await fetch("https://inertia-devel.fly.dev/api/v5/oauth2/token", {
+      body: JSON.stringify({ grant_type: "authorization_code", code: code }),
+      method: "POST",
+    });
+    const data = await response.json();
+    console.log(data);
+  }
+
   React.useEffect(() => {
-    console.log(response);
     if (response?.type === "success") {
       const { code } = response.params;
-      console.log(code);
+      login(code);
     }
   }, [response]);
 
@@ -96,8 +104,8 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
-            // promptAsync();
-            router.replace("/home");
+            promptAsync();
+            // router.replace("/home");
           }}
         >
           <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>

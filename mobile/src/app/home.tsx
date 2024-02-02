@@ -1,9 +1,9 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { View, Text } from "react-native";
+import HomeDetails from "./homeDetails";
 
 const fakeData = {
   user: {
@@ -169,15 +169,19 @@ const BalanceText = styled.Text`
   letter-spacing: -1.3px;
 `;
 
-const DarkFilter = styled.View`
-  opacity: 0.4;
-  background-color: #000000;
+const DarkFilterContainer = styled.TouchableOpacity`
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+`;
+
+const DarkFilter = styled.View`
+  opacity: 0.4;
+  background-color: #000000;
   width: 100%;
   height: 100%;
-  pointer-events: none;
 `;
 
 const Home: React.FC = () => {
@@ -257,9 +261,16 @@ const Home: React.FC = () => {
           {teamList}
         </ListContainer>
       </Section>
-      <DarkFilter
+      <DarkFilterContainer
+        onPressOut={() => {
+          setIsBottomSheetVisible(false);
+          bottomSheetRef.current.close();
+        }}
         style={{ display: isBottomSheetVisible ? "flex" : "none" }}
-      ></DarkFilter>
+        activeOpacity={1}
+      >
+        <DarkFilter></DarkFilter>
+      </DarkFilterContainer>
 
       {/*/ Home Details List /*/}
       <BottomSheet
@@ -268,10 +279,9 @@ const Home: React.FC = () => {
         snapPoints={["50%"]}
         onChange={handleSheetChanges}
         enablePanDownToClose={true}
+        backgroundStyle={{ backgroundColor: "#252525" }}
       >
-        <View style={{ flex: 1, alignItems: "center", height: 120 }}>
-          <Text>Awesome 🎉</Text>
-        </View>
+        <HomeDetails />
       </BottomSheet>
     </CenteredView>
   );
