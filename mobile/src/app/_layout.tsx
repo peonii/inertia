@@ -1,5 +1,5 @@
 import { SplashScreen, Stack } from "expo-router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Inter_900Black,
   Inter_800ExtraBold,
@@ -12,6 +12,7 @@ import {
   Inter_100Thin,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,41 +39,43 @@ const Layout: React.FC = () => {
     return null;
   }
   return (
-    <Stack
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: "#181818",
-        },
-        headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontWeight: "bold",
-        },
-      }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          headerTitle: "NieIndex",
-          headerBackTitle: "NieIndex",
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: "#181818",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
         }}
-      />
-      <Stack.Screen
-        name="login"
-        options={{
-          headerTitle: "Login",
-          headerBackTitle: "Login",
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="home"
-        options={{
-          headerTitle: "Home",
-          headerBackTitle: "Home",
-          headerShown: false,
-        }}
-      />
-    </Stack>
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            headerTitle: "NieIndex",
+            headerBackTitle: "NieIndex",
+          }}
+        />
+        <Stack.Screen
+          name="login"
+          options={{
+            headerTitle: "Login",
+            headerBackTitle: "Login",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="home"
+          options={{
+            headerTitle: "Home",
+            headerBackTitle: "Home",
+            headerShown: false,
+          }}
+        />
+      </Stack>
+    </GestureHandlerRootView>
   );
 };
 

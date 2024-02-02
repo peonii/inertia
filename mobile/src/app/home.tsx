@@ -1,10 +1,15 @@
 import styled from "@emotion/native";
-import { ToastAndroid } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { View, Text } from "react-native";
 
 const fakeData = {
-  username: "nattie",
-  profilePicture: require("./../../assets/nattie-pfp.png"),
+  user: {
+    username: "nattie",
+    profilePicture: require("./../../assets/nattie-pfp.png"),
+  },
   games: [
     { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
     { id: "2941279", name: "Jet Lag: Season 7", status: "Starts in 40 days" },
@@ -14,8 +19,8 @@ const fakeData = {
       id: "1",
       name: "Penguincat Inc.",
       experience: 300,
-      role: "Hunter",
-      money: 2550,
+      is_runner: false,
+      balance: 2550,
       color: "#4E77A3",
       icon: "🐳",
     },
@@ -23,8 +28,8 @@ const fakeData = {
       id: "2",
       name: "Haste nad Taste",
       experience: 999,
-      role: "Runner",
-      money: 0,
+      is_runner: true,
+      balance: 0,
       color: "#990000",
       icon: "🎸",
     },
@@ -44,7 +49,6 @@ function makeGradientColorsFromColor(color: string) {
   const blue = parseInt(color.substring(5, 7), 16);
   const startColor = `rgb(${dimmColor(red)}, ${dimmColor(green)}, ${dimmColor(blue)})`;
   const endColor = `rgb(${brightenColor(red)}, ${brightenColor(green)}, ${brightenColor(blue)})`;
-  console.log(startColor, endColor);
   return [startColor, endColor];
 }
 
@@ -154,7 +158,27 @@ const TeamContainer = styled.View`
   overflow: hidden;
 `;
 
-const TeamInfo = styled.View``;
+const TeamInfo = styled.View`
+  padding: 12px 16px;
+`;
+const BalanceText = styled.Text`
+  padding-top: 12px;
+  font-size: 20px;
+  color: #ffffff;
+  font-family: Inter_600SemiBold;
+  letter-spacing: -1.3px;
+`;
+
+const DarkFilter = styled.View`
+  opacity: 0.4;
+  background-color: #000000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+`;
 
 const Home: React.FC = () => {
   //Turning games's data into a list of views
@@ -168,11 +192,21 @@ const Home: React.FC = () => {
 
     return (
       <GameContainer key={game.id}>
-        <MediumTitle>{game.name}</MediumTitle>
+        <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
         <SmallTitle style={{ color: color }}>{statusText}</SmallTitle>
       </GameContainer>
     );
   });
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+
+  // variables
+
+  // callbacks
+  const handleSheetChanges = useCallback((index: number) => {
+    index === -1 && setIsBottomSheetVisible(false);
+  }, []);
 
   //Turning teams's data into a list of views
   const teamList = fakeData.teams.map((team) => {
@@ -180,11 +214,17 @@ const Home: React.FC = () => {
       <TeamContainer key={team.id}>
         <LinearGradient
           colors={makeGradientColorsFromColor(team.color)}
-          style={{ height: 175 }}
+          style={{ height: 175, alignItems: "center", justifyContent: "center" }}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-        />
-        <TeamInfo></TeamInfo>
+        >
+          <BigTitle style={{ fontSize: 64 }}>{team.icon}</BigTitle>
+        </LinearGradient>
+        <TeamInfo>
+          <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
+          <SmallTitle>{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+          <BalanceText>{`${team.balance}$`}</BalanceText>
+        </TeamInfo>
       </TeamContainer>
     );
   });
@@ -196,11 +236,12 @@ const Home: React.FC = () => {
         <UserInfoContainer>
           <UserInfoButton
             onPress={() => {
-              ToastAndroid.show("It will popup here i promise", 1500);
+              bottomSheetRef.current.expand();
+              setIsBottomSheetVisible(true);
             }}
           >
-            <Username>{fakeData.username}</Username>
-            <UserProfilePicutre source={fakeData.profilePicture} />
+            <Username>{fakeData.user.username}</Username>
+            <UserProfilePicutre source={fakeData.user.profilePicture} />
           </UserInfoButton>
         </UserInfoContainer>
       </TopBar>
@@ -216,6 +257,22 @@ const Home: React.FC = () => {
           {teamList}
         </ListContainer>
       </Section>
+      <DarkFilter
+        style={{ display: isBottomSheetVisible ? "flex" : "none" }}
+      ></DarkFilter>
+
+      {/*/ Home Details List /*/}
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={-1}
+        snapPoints={["50%"]}
+        onChange={handleSheetChanges}
+        enablePanDownToClose={true}
+      >
+        <View style={{ flex: 1, alignItems: "center", height: 120 }}>
+          <Text>Awesome 🎉</Text>
+        </View>
+      </BottomSheet>
     </CenteredView>
   );
 };

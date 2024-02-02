@@ -1,5 +1,9 @@
 import styled from "@emotion/native";
 import { router } from "expo-router";
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import { useAuthRequest } from "expo-auth-session";
+import React = require("react");
 
 const CenteredView = styled.View`
   flex: 1;
@@ -38,7 +42,7 @@ const LoginButtonContainer = styled.View`
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 453px;
+  top: 540px;
 `;
 
 const LoginButton = styled.Pressable`
@@ -57,7 +61,33 @@ const LoginButtonText = styled.Text`
   letter-spacing: -1.6px;
 `;
 
+WebBrowser.maybeCompleteAuthSession();
+
+const discovery = {
+  authorizationEndpoint: "https://inertia-devel.fly.dev/oauth2/authorize",
+  tokenEndpoint: "https://inertia-devel.fly.dev/oauth2/token",
+};
+
 const Login: React.FC = () => {
+  const [request, response, promptAsync] = useAuthRequest(
+    {
+      clientId: "Inertia_mobile_app",
+      usePKCE: false,
+      redirectUri: AuthSession.makeRedirectUri({
+        scheme: "inertia",
+      }),
+    },
+    discovery
+  );
+
+  React.useEffect(() => {
+    console.log(response);
+    if (response?.type === "success") {
+      const { code } = response.params;
+      console.log(code);
+    }
+  }, [response]);
+
   return (
     <CenteredView>
       <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
@@ -66,11 +96,11 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
-            // TODO add discord authorization
+            // promptAsync();
             router.replace("/home");
           }}
         >
-          <LoginButtonText>Log in with Discord</LoginButtonText>
+          <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
         </LoginButton>
       </LoginButtonContainer>
     </CenteredView>
