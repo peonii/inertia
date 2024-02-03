@@ -8,5 +8,5 @@ create table locations(
 
     user_id varchar(63) not null references users(id),
 
-    created_at timestamp not null default now(),
+    created_at timestamp not null default now()
 );

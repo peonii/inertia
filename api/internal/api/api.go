@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/domain"
 	"github.com/peonii/inertia/internal/repository"
+	"github.com/pkgz/websocket"
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
@@ -27,13 +29,17 @@ type api struct {
 	logger *zap.Logger
 	config *APIConfig
 
-	userRepo repository.UserRepository
-	gameRepo repository.GameRepository
-	teamRepo repository.TeamRepository
+	userRepo     repository.UserRepository
+	gameRepo     repository.GameRepository
+	teamRepo     repository.TeamRepository
+	locationRepo repository.LocationRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
 	refreshTokenRepo repository.RefreshTokenRepository
+
+	wsServer *websocket.Server
+	wsHub    *wsHub
 }
 
 func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger) *api {
@@ -43,6 +49,9 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	rtr := repository.MakeRedisRefreshTokenRepository(rdc)
 	gr := repository.MakePostgresGameRepository(db)
 	tr := repository.MakePostgresTeamRepository(db)
+	lr := repository.MakePostgresLocationRepository(db, rdc)
+
+	wsServer := websocket.Start(ctx)
 
 	return &api{
 		db:     db,
@@ -56,10 +65,14 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		refreshTokenRepo: rtr,
 		gameRepo:         gr,
 		teamRepo:         tr,
+		locationRepo:     lr,
+
+		wsServer: wsServer,
+		wsHub:    NewWsHub(),
 	}
 }
 
-func (a *api) makeRouter() *chi.Mux {
+func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 	r := chi.NewRouter()
 
 	apiSpec := chioas.Definition{
@@ -229,6 +242,28 @@ func (a *api) makeRouter() *chi.Mux {
 							},
 						},
 					},
+					"/locations": chioas.Path{
+						Tag:         "Locations",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Post a new location",
+										Handler:     a.updateLocationHandler,
+										Responses: chioas.Responses{
+											http.StatusCreated: chioas.Response{
+												Schema: domain.LocationCreate{},
+											},
+										},
+										Request: &chioas.Request{
+											Schema: LocationPayload{},
+										},
+									},
+								},
+							},
+						},
+					},
 					"/oauth2": chioas.Path{
 						Tag: "OAuth2",
 						Paths: chioas.Paths{
@@ -265,6 +300,35 @@ func (a *api) makeRouter() *chi.Mux {
 		r.Get("/callback", a.authorizeCallbackHandler)
 	})
 
+	r.HandleFunc("/ws", a.wsServer.Handler)
+
+	a.wsServer.On("join", func(c *websocket.Conn, msg *websocket.Message) {
+		p := &wsAuthPayload{}
+		json.Unmarshal(msg.Data, p)
+
+		u, err := a.getUserFromPayload(ctx, p)
+		if err != nil {
+			c.Send("invalid")
+			return
+		}
+
+		isRunner := false
+		team, err := a.teamRepo.FindByGameUser(ctx, p.GameID, u.ID)
+		if err != nil {
+			// This means the user is a spectator
+			// and not a runner
+		} else {
+			isRunner = team.IsRunner
+		}
+
+		a.wsHub.Register <- &wsClient{
+			conn:     c,
+			user:     u,
+			gameID:   p.GameID,
+			isRunner: isRunner,
+		}
+	})
+
 	if err := apiSpec.SetupRoutes(r, apiSpec); err != nil {
 		panic(err)
 	}
@@ -272,8 +336,8 @@ func (a *api) makeRouter() *chi.Mux {
 	return r
 }
 
-func (a *api) MakeServer(port int) *http.Server {
-	root := a.makeRouter()
+func (a *api) MakeServer(ctx context.Context, port int) *http.Server {
+	root := a.makeRouter(ctx)
 
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

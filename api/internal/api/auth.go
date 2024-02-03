@@ -1,17 +1,48 @@
 package api
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/peonii/inertia/internal/domain"
 )
+
+type wsAuthPayload struct {
+	Token  string `json:"t"`
+	GameID string `json:"g"`
+}
+
+func (a *api) getUserFromPayload(ctx context.Context, payload *wsAuthPayload) (*domain.User, error) {
+	token := payload.Token
+
+	jt, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !jt.Valid {
+		return nil, fmt.Errorf("invalid jwt")
+	}
+
+	uid, err := jt.Claims.GetSubject()
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := a.userRepo.FindOne(ctx, uid)
+	return user, err
+}
 
 func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
@@ -31,6 +62,19 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 		a.sendError(w, r, http.StatusBadRequest, nil, "invalid redirect uri")
 		return
 	}
+
+	csrfState := queryParams.Get("state")
+	if csrfState == "" {
+		a.sendError(w, r, http.StatusBadRequest, nil, "must provide state")
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "csrf_state",
+		Value:    csrfState,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(5 * time.Minute),
+	})
 
 	// We need to set a cookie for redirect_uri
 	// since we're redirecting to Discord for
@@ -72,6 +116,12 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
+
+	csrfState, err := r.Cookie("csrf_state")
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to get csrf state")
+		return
+	}
 
 	state := queryParams.Get("state")
 	if state == "" {
@@ -206,7 +256,7 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Redirect to redirect_uri with code
-	http.Redirect(w, r, fmt.Sprintf("%s?code=%s", redirectUri, oauthCode.Code), http.StatusFound)
+	http.Redirect(w, r, fmt.Sprintf("%s?code=%s&state=%s", redirectUri, oauthCode.Code, csrfState.Value), http.StatusFound)
 }
 
 const (

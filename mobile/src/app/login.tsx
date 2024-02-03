@@ -1,9 +1,11 @@
 import styled from "@emotion/native";
-import { router } from "expo-router";
 import * as AuthSession from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
 import { useAuthRequest } from "expo-auth-session";
+import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
+import { useAuth } from "../context/AuthContext";
 import React = require("react");
+import * as SecureStore from "expo-secure-store";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -65,10 +67,11 @@ WebBrowser.maybeCompleteAuthSession();
 
 const discovery = {
   authorizationEndpoint: "https://inertia-devel.fly.dev/oauth2/authorize",
-  tokenEndpoint: "https://inertia-devel.fly.dev/oauth2/token",
+  tokenEndpoint: "https://inertia-devel.fly.dev/api/v5/oauth2/token",
 };
 
 const Login: React.FC = () => {
+  const authContext = useAuth();
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: "Inertia_mobile_app",
@@ -77,16 +80,23 @@ const Login: React.FC = () => {
         scheme: "inertia",
       }),
     },
-    discovery
+    discovery,
   );
 
   async function login(code: string) {
-    const response = await fetch("https://inertia-devel.fly.dev/api/v5/oauth2/token", {
+    const response = await fetch(discovery.tokenEndpoint, {
       body: JSON.stringify({ grant_type: "authorization_code", code: code }),
       method: "POST",
     });
-    const data = await response.json();
-    console.log(data);
+    const data = (await response.json()) as {
+      access_token: string;
+      token_type: string;
+      expires_in: number;
+      refresh_token: string;
+    };
+
+    authContext.setAccessToken(data.access_token);
+    await SecureStore.setItemAsync("refresh_token", data.refresh_token);
   }
 
   React.useEffect(() => {
@@ -108,7 +118,9 @@ const Login: React.FC = () => {
             // router.replace("/home");
           }}
         >
-          <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
+          <LoginButtonText disabled={!request}>
+            Log in with Discord
+          </LoginButtonText>
         </LoginButton>
       </LoginButtonContainer>
     </CenteredView>

@@ -1,5 +1,5 @@
 import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Inter_900Black,
   Inter_800ExtraBold,
@@ -13,10 +13,13 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { AuthContext } from "../context/AuthContext";
 
 SplashScreen.preventAutoHideAsync();
 
 const Layout: React.FC = () => {
+  const [accessToken, setAccessToken] = useState("");
+
   const [fontsLoaded, fontError] = useFonts({
     Inter_900Black,
     Inter_800ExtraBold,
@@ -40,41 +43,43 @@ const Layout: React.FC = () => {
   }
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#181818",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{
-            headerTitle: "NieIndex",
-            headerBackTitle: "NieIndex",
+      <AuthContext.Provider value={{ accessToken, setAccessToken }}>
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: "#181818",
+            },
+            headerTintColor: "#fff",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
           }}
-        />
-        <Stack.Screen
-          name="login"
-          options={{
-            headerTitle: "Login",
-            headerBackTitle: "Login",
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="home"
-          options={{
-            headerTitle: "Home",
-            headerBackTitle: "Home",
-            headerShown: false,
-          }}
-        />
-      </Stack>
+        >
+          <Stack.Screen
+            name="index"
+            options={{
+              headerTitle: "NieIndex",
+              headerBackTitle: "NieIndex",
+            }}
+          />
+          <Stack.Screen
+            name="login"
+            options={{
+              headerTitle: "Login",
+              headerBackTitle: "Login",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="home"
+            options={{
+              headerTitle: "Home",
+              headerBackTitle: "Home",
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </AuthContext.Provider>
     </GestureHandlerRootView>
   );
 };

@@ -11,7 +11,7 @@ import (
 )
 
 type LocationRepository interface {
-	Store(ctx context.Context, location *domain.Location) error
+	Store(ctx context.Context, location *domain.LocationCreate) error
 	GetUserLatest(ctx context.Context, userID string) (*domain.Location, error)
 }
 
@@ -29,16 +29,23 @@ func MakePostgresLocationRepository(db *pgxpool.Pool, rdc *redis.Client) *Postgr
 	}
 }
 
-func (r *PostgresLocationRepository) Store(ctx context.Context, location *domain.Location) error {
+func (r *PostgresLocationRepository) Store(ctx context.Context, location *domain.LocationCreate) error {
 	node, err := snowflake.NewNode(domain.LocationSnowflakeNode)
 	if err != nil {
 		return err
 	}
 
-	location.ID = node.Generate().String()
+	nloc := &domain.Location{
+		ID:        node.Generate().String(),
+		Lat:       location.Lat,
+		Lng:       location.Lng,
+		Alt:       location.Alt,
+		Precision: location.Precision,
+		UserID:    location.UserID,
+	}
 
 	key := "loc." + location.UserID
-	enc, err := msgpack.Marshal(location)
+	enc, err := msgpack.Marshal(nloc)
 	if err != nil {
 		return nil
 	}
@@ -50,18 +57,17 @@ func (r *PostgresLocationRepository) Store(ctx context.Context, location *domain
 	// Also save the location in Postgres
 	go func() {
 		query := `
-			INSERT INTO locations (id, lat, lng, alt, precision, user_id, created_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			INSERT INTO locations (id, lat, lng, alt, precision, user_id)
+			VALUES ($1, $2, $3, $4, $5, $6)
 		`
 
 		_, err := r.db.Exec(ctx, query,
-			location.ID,
+			nloc.ID,
 			location.Lat,
 			location.Lng,
 			location.Alt,
 			location.Precision,
 			location.UserID,
-			location.CreatedAt,
 		)
 		if err != nil {
 			// We can fail silently here, since all this does is impact the

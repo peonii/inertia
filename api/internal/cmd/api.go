@@ -52,7 +52,7 @@ func APICmd(ctx context.Context) *cobra.Command {
 			}
 
 			a := api.MakeAPI(ctx, cfg, db, rdc, logger)
-			srv := a.MakeServer(3001)
+			srv := a.MakeServer(ctx, 3001)
 
 			go func() { _ = srv.ListenAndServe() }()
 

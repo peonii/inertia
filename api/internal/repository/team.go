@@ -13,6 +13,8 @@ type TeamRepository interface {
 	FindByGameID(ctx context.Context, gameID string) ([]*domain.Team, error)
 	FindByUserID(ctx context.Context, userID string) ([]*domain.Team, error)
 
+	FindByGameUser(ctx context.Context, gameID, userID string) (*domain.Team, error)
+
 	Create(ctx context.Context, team *domain.TeamCreate) (*domain.Team, error)
 }
 
@@ -146,4 +148,32 @@ func (r *PostgresTeamRepository) Create(ctx context.Context, team *domain.TeamCr
 	}
 
 	return &t, nil
+}
+
+func (r *PostgresTeamRepository) FindByGameUser(ctx context.Context, gameID, userID string) (*domain.Team, error) {
+	query := `
+		SELECT
+			t.id, t.name, t.xp, t.balance, t.emoji, t.color, t.is_runner, t.veto_period_end, t.game_id, t.created_at
+		FROM teams t
+		INNER JOIN teams_users tm ON tm.team_id = t.id
+		WHERE t.game_id = $1 AND tm.user_id = $2
+	`
+
+	var team domain.Team
+	if err := r.db.QueryRow(ctx, query, gameID, userID).Scan(
+		&team.ID,
+		&team.Name,
+		&team.XP,
+		&team.Balance,
+		&team.Emoji,
+		&team.Color,
+		&team.IsRunner,
+		&team.VetoPeriodEnd,
+		&team.GameID,
+		&team.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &team, nil
 }
