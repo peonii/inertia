@@ -189,14 +189,14 @@ const DarkFilter = styled.View`
 const Home: React.FC = () => {
   const authContext = useAuth();
 
-  const gamesDataRequest = useQuery({
-    queryKey: ["gamesData"],
-    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.all, authContext),
-  });
-
   const userDataRequest = useQuery({
     queryKey: ["userData"],
     queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
+  });
+
+  const gamesDataRequest = useQuery({
+    queryKey: ["gamesData"],
+    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.all, authContext),
   });
 
   const teamsDataRequest = useQuery({
