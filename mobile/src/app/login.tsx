@@ -7,6 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
 import React from "react";
 import { Alert } from "react-native";
+import { ENDPOINTS } from "../api/constants";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -67,8 +68,8 @@ const LoginButtonText = styled.Text`
 WebBrowser.maybeCompleteAuthSession();
 
 const discovery = {
-  authorizationEndpoint: "https://inertia-devel.fly.dev/oauth2/authorize",
-  tokenEndpoint: "https://inertia-devel.fly.dev/api/v5/oauth2/token",
+  authorizationEndpoint: ENDPOINTS.oauth2.authorize,
+  tokenEndpoint: ENDPOINTS.oauth2.token,
 };
 
 const Login: React.FC = () => {

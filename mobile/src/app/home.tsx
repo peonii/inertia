@@ -3,6 +3,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
 import HomeDetails from "./homeDetails";
+import * as Haptics from "expo-haptics";
 
 const fakeData = {
   user: {
@@ -18,7 +19,12 @@ const fakeData = {
     },
   },
   games: [
-    { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
+    {
+      id: "1912313",
+      name: "Jet Lag: Season 6",
+      status: "Playing",
+      timeLeft: 372,
+    },
     {
       id: "2941279",
       name: "Jet Lag: Season 7",
@@ -230,7 +236,11 @@ const Home: React.FC = () => {
       <TeamContainer key={team.id}>
         <LinearGradient
           colors={makeGradientColorsFromColor(team.color)}
-          style={{ height: 175, alignItems: "center", justifyContent: "center" }}
+          style={{
+            height: 175,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
@@ -256,6 +266,7 @@ const Home: React.FC = () => {
             onPress={() => {
               bottomSheetRef.current.expand();
               setIsBottomSheetVisible(true);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
           >
             <Username>{fakeData.user.username}</Username>
