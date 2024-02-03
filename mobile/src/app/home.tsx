@@ -1,21 +1,19 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import HomeDetails from "./homeDetails";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { fetchTypeSafe } from "../api/fetch";
 import { ENDPOINTS } from "../api/constants";
-import { User } from "../types";
+import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
+import { useQuery } from "@tanstack/react-query";
 
-const data = {
+const fakeData = {
   user: {
-    username: "nattie",
-    profile_picture: require("./../../assets/nattie-pfp.png"),
-    role: "Admin",
     statistics: {
       rank: 3,
       wins: 0,
@@ -207,16 +205,51 @@ const DarkFilter = styled.View`
 `;
 
 const Home: React.FC = () => {
-  useEffect(() => {}, []);
+  const authContext = useAuth();
+
+  const gamesDataRequest = useQuery({
+    queryKey: ["gamesData"],
+    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.all, authContext),
+  });
+
+  const userDataRequest = useQuery({
+    queryKey: ["userData"],
+    queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
+  });
+
+  const teamsDataRequest = useQuery({
+    queryKey: ["teamsData"],
+    queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.current, authContext),
+  });
+
+  if (
+    userDataRequest.isPending ||
+    gamesDataRequest.isPending ||
+    teamsDataRequest.isPending
+  ) {
+    return (
+      <CenteredView>
+        <MediumTitle>Loading...</MediumTitle>
+      </CenteredView>
+    );
+  }
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+    return (
+      <CenteredView>
+        <MediumTitle>Oops! Something went wrong</MediumTitle>
+      </CenteredView>
+    );
+  }
+
+  const userData = userDataRequest.data;
+  const gamesData = gamesDataRequest.data || ([] as Game[]);
+  const teamsData = teamsDataRequest.data || ([] as Team[]);
 
   //Turning games's data into a list of views
-  const gamesList = data.games.map((game) => {
-    const statusText =
-      game.status === "Playing"
-        ? `Playing  •  ${Math.floor(game.timeLeft / 60)}h${game.timeLeft % 60}min`
-        : game.status;
-
-    const color = game.status === "Playing" ? "#439255" : "#7c7c7c";
+  const gamesList = gamesData.map((game) => {
+    // const color = game.status === "Playing" ? "#439255" : "#7c7c7c";
+    const color = "#439255";
+    const statusText = "essa";
 
     return (
       <GameContainer key={game.id}>
@@ -227,17 +260,12 @@ const Home: React.FC = () => {
       </GameContainer>
     );
   });
-
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
-
-  // callbacks
-  const handleSheetChanges = useCallback((index: number) => {
-    index === -1 && setIsBottomSheetVisible(false);
-  }, []);
+  if (gamesList.length === 0) {
+    gamesList.push(<GameContainer key="0" />);
+  }
 
   //Turning teams's data into a list of views
-  const teamList = data.teams.map((team) => {
+  const teamList = teamsData.map((team) => {
     return (
       <TeamContainer key={team.id}>
         <LinearGradient
@@ -250,18 +278,30 @@ const Home: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <BigTitle style={{ fontSize: 64 }}>{team.icon}</BigTitle>
+          <BigTitle style={{ fontSize: 64 }}>{team.emoji}</BigTitle>
         </LinearGradient>
         <TeamInfo>
           <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
           <SmallTitle
             numberOfLines={1}
-          >{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+          >{`${team.xp} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
           <BalanceText>{`${team.balance}$`}</BalanceText>
         </TeamInfo>
       </TeamContainer>
     );
   });
+
+  if (teamList.length === 0) {
+    teamList.push(<TeamContainer key="0" />);
+  }
+
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+
+  // callbacks
+  const handleSheetChanges = useCallback((index: number) => {
+    index === -1 && setIsBottomSheetVisible(false);
+  }, []);
 
   function logOut() {
     SecureStore.setItemAsync("refreshToken", "null");
@@ -280,8 +320,12 @@ const Home: React.FC = () => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
           >
-            <Username>{data.user.username}</Username>
-            <UserProfilePicutre source={data.user.profile_picture} />
+            <Username>{userData.name}</Username>
+            <UserProfilePicutre
+              source={{
+                uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=39px`,
+              }}
+            />
           </UserInfoButton>
         </UserInfoContainer>
       </TopBar>
@@ -335,7 +379,7 @@ const Home: React.FC = () => {
         enablePanDownToClose={true}
         backgroundStyle={{ backgroundColor: "#252525" }}
       >
-        <HomeDetails userData={data.user} logOutFunction={logOut} />
+        <HomeDetails userData={userData} logOutFunction={logOut} />
       </BottomSheet>
     </CenteredView>
   );

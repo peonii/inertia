@@ -1,5 +1,6 @@
 import styled from "@emotion/native";
 import * as Linking from "expo-linking";
+import { User } from "../types";
 
 const LeftAlignedView = styled.View`
   padding: 14px 38px;
@@ -80,18 +81,7 @@ const LogoutButtonText = styled.Text`
   letter-spacing: -1.2px;
 `;
 type HomeDetailsProps = {
-  userData: {
-    username: string;
-    profile_picture: unknown;
-    role: string;
-    statistics: {
-      rank: number;
-      wins: number;
-      draws: number;
-      losses: number;
-      xp_gained: number;
-    };
-  };
+  userData: User;
   logOutFunction: () => void;
 };
 
@@ -99,20 +89,21 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) =
   return (
     <LeftAlignedView>
       <ProfileSection>
-        <BigProfilePicture source={userData.profile_picture} />
+        <BigProfilePicture
+          source={{
+            uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=80px`,
+          }}
+        />
         <ProfileTextSection>
-          <BigTitle>{userData.username}</BigTitle>
-          <RoleText>{userData.role}</RoleText>
+          <BigTitle>{userData.name}</BigTitle>
+          <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
         </ProfileTextSection>
       </ProfileSection>
-
       <MediumTitle>Stats</MediumTitle>
-      <BigTitle>{`#${userData.statistics.rank} Global`}</BigTitle>
-      <StatsText>
-        {`${userData.statistics.wins} wins, ${userData.statistics.draws} draws, ${userData.statistics.losses} losses`}
-      </StatsText>
-      <StatsText>{`${userData.statistics.xp_gained} XP gained`}</StatsText>
-
+      {/*/ Todo change when api is ready /*/}
+      <BigTitle>{`#${3} Global`}</BigTitle>
+      <StatsText>{`${0} wins, ${1} draw, ${2} losses`}</StatsText>
+      <StatsText>{`${1000} XP gained`}</StatsText>
       <LogoutButtonContainer
         style={{ bottom: 125 }}
         onPress={() => Linking.openURL("https://nhentai.net/g/177013")}
@@ -121,7 +112,6 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) =
           <LogoutButtonText>See some quality stuff</LogoutButtonText>
         </LogoutButtonView>
       </LogoutButtonContainer>
-
       <LogoutButtonContainer onPress={() => logOutFunction()}>
         <LogoutButtonView>
           <LogoutButtonText>Log out</LogoutButtonText>

@@ -8,5 +8,11 @@ export const ENDPOINTS = {
   users: {
     me: `${BASE_URL}/api/v5/users/@me`,
     id: (id: string) => `${BASE_URL}/api/v5/users/${id}`
+  },
+  games: {
+    all: `${BASE_URL}/api/v5/games`,
+  },
+  teams: {
+    current: `${BASE_URL}/api/v5/teams/@me`
   }
 };
