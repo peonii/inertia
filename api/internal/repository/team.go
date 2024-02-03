@@ -16,6 +16,7 @@ type TeamRepository interface {
 	FindByGameUser(ctx context.Context, gameID, userID string) (*domain.Team, error)
 
 	Create(ctx context.Context, team *domain.TeamCreate) (*domain.Team, error)
+	AddTeamMember(ctx context.Context, teamID, userID string) error
 }
 
 type PostgresTeamRepository struct {
@@ -176,4 +177,17 @@ func (r *PostgresTeamRepository) FindByGameUser(ctx context.Context, gameID, use
 	}
 
 	return &team, nil
+}
+
+func (r *PostgresTeamRepository) AddTeamMember(ctx context.Context, teamID, userID string) error {
+	query := `
+		INSERT INTO teams_users (team_id, user_id) VALUES ($1, $2)
+	`
+
+	_, err := r.db.Exec(ctx, query, teamID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

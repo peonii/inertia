@@ -195,10 +195,11 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", tokenResp.AccessToken))
 	var userResp struct {
-		ID       string `json:"id"`
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Image    string `json:"avatar"`
+		ID          string `json:"id"`
+		Username    string `json:"username"`
+		DisplayName string `json:"global_name"`
+		Email       string `json:"email"`
+		Image       string `json:"avatar"`
 	}
 
 	resp, err = http.DefaultClient.Do(req)
@@ -217,11 +218,17 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// User doesn't exist, create a new one
 
+		dn := userResp.DisplayName
+		if dn == "" {
+			dn = userResp.Username
+		}
+
 		userCreate := &domain.UserCreate{
-			DiscordID: userResp.ID,
-			Name:      userResp.Username,
-			Email:     userResp.Email,
-			Image:     userResp.Image,
+			DiscordID:   userResp.ID,
+			Name:        userResp.Username,
+			DisplayName: dn,
+			Email:       userResp.Email,
+			Image:       userResp.Image,
 
 			AccessToken:  tokenResp.AccessToken,
 			RefreshToken: tokenResp.RefreshToken,
