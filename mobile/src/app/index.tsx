@@ -22,7 +22,7 @@ const CenteredView = styled.View`
 const IndexScreen: React.FC = () => {
   const authContext = useAuth();
 
-  const attemptLogIn = useCallback(async () => {
+  const attemptLogIn = async () => {
     if (authContext.accessToken) {
       // We can assume that the token is valid
       // because it'll be refreshed if it's not
@@ -35,7 +35,7 @@ const IndexScreen: React.FC = () => {
     } catch {
       return router.replace("/login");
     }
-  }, [authContext]);
+  };
 
   useFocusEffect(() => {
     attemptLogIn();
