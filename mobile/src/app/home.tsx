@@ -1,10 +1,16 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import HomeDetails from "./homeDetails";
+import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
+import { fetchTypeSafe } from "../api/fetch";
+import { ENDPOINTS } from "../api/constants";
+import { User } from "../types";
+import { useAuth } from "../context/AuthContext";
 
-const fakeData = {
+const data = {
   user: {
     username: "nattie",
     profile_picture: require("./../../assets/nattie-pfp.png"),
@@ -152,7 +158,7 @@ const GameContainer = styled.View`
   padding-left: 20px;
   justify-content: center;
   background-color: #1e1e1e;
-  width: 221px;
+  width: 220px;
   height: 86px;
   border-radius: 10px;
   margin: 0px 10px;
@@ -195,8 +201,10 @@ const DarkFilter = styled.View`
 `;
 
 const Home: React.FC = () => {
+  useEffect(() => {}, []);
+
   //Turning games's data into a list of views
-  const gamesList = fakeData.games.map((game) => {
+  const gamesList = data.games.map((game) => {
     const statusText =
       game.status === "Playing"
         ? `Playing  •  ${Math.floor(game.timeLeft / 60)}h${game.timeLeft % 60}min`
@@ -217,15 +225,13 @@ const Home: React.FC = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
-  // variables
-
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
     index === -1 && setIsBottomSheetVisible(false);
   }, []);
 
   //Turning teams's data into a list of views
-  const teamList = fakeData.teams.map((team) => {
+  const teamList = data.teams.map((team) => {
     return (
       <TeamContainer key={team.id}>
         <LinearGradient
@@ -247,6 +253,11 @@ const Home: React.FC = () => {
     );
   });
 
+  function logOut() {
+    SecureStore.setItemAsync("refreshToken", "null");
+    router.replace("/login");
+  }
+
   return (
     <CenteredView>
       <TopBar>
@@ -258,20 +269,38 @@ const Home: React.FC = () => {
               setIsBottomSheetVisible(true);
             }}
           >
-            <Username>{fakeData.user.username}</Username>
-            <UserProfilePicutre source={fakeData.user.profile_picture} />
+            <Username>{data.user.username}</Username>
+            <UserProfilePicutre source={data.user.profile_picture} />
           </UserInfoButton>
         </UserInfoContainer>
       </TopBar>
       <Section>
         <BigTitle>Your games</BigTitle>
-        <ListContainer horizontal showsHorizontalScrollIndicator={false}>
+        <ListContainer
+          horizontal
+          snapToInterval={240}
+          snapToAlignment="start"
+          contentContainerStyle={{
+            paddingRight: 10,
+            paddingLeft: 10,
+          }}
+          showsHorizontalScrollIndicator={false}
+        >
           {gamesList}
         </ListContainer>
       </Section>
       <Section>
         <BigTitle>Your teams</BigTitle>
-        <ListContainer horizontal showsHorizontalScrollIndicator={false}>
+        <ListContainer
+          horizontal
+          snapToInterval={220}
+          snapToAlignment="start"
+          contentContainerStyle={{
+            paddingRight: 10,
+            paddingLeft: 10,
+          }}
+          showsHorizontalScrollIndicator={false}
+        >
           {teamList}
         </ListContainer>
       </Section>
@@ -295,7 +324,7 @@ const Home: React.FC = () => {
         enablePanDownToClose={true}
         backgroundStyle={{ backgroundColor: "#252525" }}
       >
-        <HomeDetails userData={fakeData.user} logoutFunction={() => {}} />
+        <HomeDetails userData={data.user} logOutFunction={logOut} />
       </BottomSheet>
     </CenteredView>
   );

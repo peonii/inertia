@@ -2,14 +2,7 @@ import styled from "@emotion/native";
 import { router, useFocusEffect } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import { refreshToken } from "../api/fetch";
-import { useCallback } from "react";
-
-const MassiveText = styled.Text`
-  font-size: 100px;
-  font-weight: bold;
-  text-align: center;
-  color: #eee;
-`;
+import { ActivityIndicator } from "react-native";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -17,6 +10,13 @@ const CenteredView = styled.View`
   justify-content: center;
   height: 100%;
   background-color: #252525;
+`;
+
+const MyzImage = styled.Image`
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  height: 100%;
 `;
 
 const IndexScreen: React.FC = () => {
@@ -44,7 +44,8 @@ const IndexScreen: React.FC = () => {
   // TODO: Add a splash screen here with a loading spinner
   return (
     <CenteredView>
-      <MassiveText>Chuj</MassiveText>
+      <MyzImage source={require("./../../assets/myz.png")} />
+      <ActivityIndicator animating size="large" color="#ffffff" />
     </CenteredView>
   );
 };

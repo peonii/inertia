@@ -92,10 +92,10 @@ type HomeDetailsProps = {
       xp_gained: number;
     };
   };
-  logoutFunction: () => void;
+  logOutFunction: () => void;
 };
 
-const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logoutFunction }) => {
+const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) => {
   return (
     <LeftAlignedView>
       <ProfileSection>
@@ -122,7 +122,7 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logoutFunction }) =
         </LogoutButtonView>
       </LogoutButtonContainer>
 
-      <LogoutButtonContainer onPress={() => logoutFunction()}>
+      <LogoutButtonContainer onPress={() => logOutFunction()}>
         <LogoutButtonView>
           <LogoutButtonText>Log out</LogoutButtonText>
         </LogoutButtonView>
