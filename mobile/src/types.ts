@@ -7,7 +7,7 @@ export type User = {
     access_token: string,
     refresh_token: string,
     auth_level: number,
-    created_at: object
+    created_at: string
 }
 
 export type Team = {
@@ -17,8 +17,8 @@ export type Team = {
     balance: number,
     emoji: string,
     color: string,
-    is_runner: false,
-    veto_period_end: object,
+    is_runner: boolean,
+    veto_period_end: string,
     game_id: string,
     created_at: string,
 }
@@ -26,10 +26,10 @@ export type Team = {
 export type Game = {
     id: string,
     name: string,
-    official: false,
+    official: boolean,
     host_id: string,
-    time_start: object,
-    time_end: object,
+    time_start: string,
+    time_end: string,
     loc_lat: number,
     loc_lng: number,
     created_at: string

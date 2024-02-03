@@ -12,50 +12,32 @@ import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
 
-const fakeData = {
-  user: {
-    statistics: {
-      rank: 3,
-      wins: 0,
-      draws: 1,
-      losses: 4,
-      xp_gained: 1800,
-    },
+const fakeTeams: Team[] = [
+  {
+    id: "1",
+    name: "Penguincat Inc",
+    color: "#4B6FA1",
+    emoji: "🐳",
+    xp: 1800,
+    balance: 900,
+    created_at: "2020-01-01T00:00:00.",
+    is_runner: true,
+    veto_period_end: "2021-01-01T00:00:00",
+    game_id: "1",
   },
-  games: [
-    {
-      id: "1912313",
-      name: "Jet Lag: Season 6",
-      status: "Playing",
-      timeLeft: 372,
-    },
-    {
-      id: "2941279",
-      name: "Jet Lag: Season 7",
-      status: "Starts in 40 days",
-    },
-  ],
-  teams: [
-    {
-      id: "1",
-      name: "Penguincat Inc.",
-      experience: 300,
-      is_runner: false,
-      balance: 2550,
-      color: "#4E77A3",
-      icon: "🐳",
-    },
-    {
-      id: "2",
-      name: "Haste nad Taste",
-      experience: 999,
-      is_runner: true,
-      balance: 0,
-      color: "#990000",
-      icon: "🎸",
-    },
-  ],
-};
+  {
+    id: "2",
+    name: "Haste and Taste",
+    color: "#99000",
+    emoji: "🎸",
+    xp: 3600,
+    balance: 100,
+    created_at: "2020-01-01T00:00:00.",
+    is_runner: false,
+    veto_period_end: "2021-01-01T00:00:00",
+    game_id: "2",
+  },
+];
 
 function dimmColor(color: number) {
   return color - 20 < 0 ? 0 : color - 20;
@@ -243,7 +225,7 @@ const Home: React.FC = () => {
 
   const userData = userDataRequest.data;
   const gamesData = gamesDataRequest.data || ([] as Game[]);
-  const teamsData = teamsDataRequest.data || ([] as Team[]);
+  const teamsData = teamsDataRequest.data || fakeTeams;
 
   //Turning games's data into a list of views
   const gamesList = gamesData.map((game) => {
