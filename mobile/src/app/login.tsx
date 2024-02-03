@@ -97,10 +97,9 @@ const Login: React.FC = () => {
     };
 
     authContext.setAccessToken(data.access_token);
-    await SecureStore.setItemAsync("refresh_token", data.refresh_token);
+    await SecureStore.setItemAsync("refreshToken", data.refresh_token);
 
-    Alert.alert("Success", "You have successfully logged in.");
-    console.log("access_token", data.access_token);
+    router.replace("/home");
   }
 
   React.useEffect(() => {
@@ -114,6 +113,8 @@ const Login: React.FC = () => {
           Alert.alert("Error", "An error occurred while logging in.");
         }
       })();
+    } else if (response?.type === "error") {
+      Alert.alert("Error", "An error occurred while logging in.");
     }
   }, [response]);
 

@@ -1,5 +1,8 @@
 import styled from "@emotion/native";
 import { router, useFocusEffect } from "expo-router";
+import { useAuth } from "../context/AuthContext";
+import { refreshToken } from "../api/fetch";
+import { useCallback } from "react";
 
 const MassiveText = styled.Text`
   font-size: 100px;
@@ -17,9 +20,28 @@ const CenteredView = styled.View`
 `;
 
 const IndexScreen: React.FC = () => {
+  const authContext = useAuth();
+
+  const attemptLogIn = useCallback(async () => {
+    if (authContext.accessToken) {
+      // We can assume that the token is valid
+      // because it'll be refreshed if it's not
+      return router.replace("/home");
+    }
+
+    try {
+      await refreshToken(authContext);
+      return router.replace("/home");
+    } catch {
+      return router.replace("/login");
+    }
+  }, [authContext]);
+
   useFocusEffect(() => {
-    return router.replace("/login");
+    attemptLogIn();
   });
+
+  // TODO: Add a splash screen here with a loading spinner
   return (
     <CenteredView>
       <MassiveText>Chuj</MassiveText>
