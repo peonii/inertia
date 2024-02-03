@@ -6,6 +6,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
 import React from "react";
+import { Alert } from "react-native";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -97,12 +98,22 @@ const Login: React.FC = () => {
 
     authContext.setAccessToken(data.access_token);
     await SecureStore.setItemAsync("refresh_token", data.refresh_token);
+
+    Alert.alert("Success", "You have successfully logged in.");
+    console.log("access_token", data.access_token);
   }
 
   React.useEffect(() => {
     if (response?.type === "success") {
       const { code } = response.params;
-      login(code);
+      (async () => {
+        try {
+          await login(code);
+        } catch (error) {
+          console.error(error);
+          Alert.alert("Error", "An error occurred while logging in.");
+        }
+      })();
     }
   }, [response]);
 
@@ -114,8 +125,8 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
-            // promptAsync();
-            router.replace("/home");
+            promptAsync();
+            //router.replace("/home");
           }}
         >
           <LoginButtonText disabled={!request}>
