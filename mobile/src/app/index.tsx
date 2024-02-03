@@ -4,6 +4,13 @@ import { useAuth } from "../context/AuthContext";
 import { refreshToken } from "../api/fetch";
 import { ActivityIndicator } from "react-native";
 
+const MassiveText = styled.Text`
+  font-size: 100px;
+  font-weight: bold;
+  text-align: center;
+  color: #eee;
+`;
+
 const CenteredView = styled.View`
   flex: 1;
   align-items: center;

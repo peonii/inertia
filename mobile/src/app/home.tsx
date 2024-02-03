@@ -9,6 +9,7 @@ import { fetchTypeSafe } from "../api/fetch";
 import { ENDPOINTS } from "../api/constants";
 import { User } from "../types";
 import { useAuth } from "../context/AuthContext";
+import * as Haptics from "expo-haptics";
 
 const data = {
   user: {
@@ -24,7 +25,12 @@ const data = {
     },
   },
   games: [
-    { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
+    {
+      id: "1912313",
+      name: "Jet Lag: Season 6",
+      status: "Playing",
+      timeLeft: 372,
+    },
     {
       id: "2941279",
       name: "Jet Lag: Season 7",
@@ -236,7 +242,11 @@ const Home: React.FC = () => {
       <TeamContainer key={team.id}>
         <LinearGradient
           colors={makeGradientColorsFromColor(team.color)}
-          style={{ height: 175, alignItems: "center", justifyContent: "center" }}
+          style={{
+            height: 175,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
@@ -267,6 +277,7 @@ const Home: React.FC = () => {
             onPress={() => {
               bottomSheetRef.current.expand();
               setIsBottomSheetVisible(true);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
           >
             <Username>{data.user.username}</Username>
