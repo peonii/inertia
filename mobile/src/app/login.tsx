@@ -4,8 +4,8 @@ import { useAuthRequest } from "expo-auth-session";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../context/AuthContext";
-import React = require("react");
 import * as SecureStore from "expo-secure-store";
+import React from "react";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -114,8 +114,8 @@ const Login: React.FC = () => {
       <LoginButtonContainer>
         <LoginButton
           onPress={() => {
-            promptAsync();
-            // router.replace("/home");
+            // promptAsync();
+            router.replace("/home");
           }}
         >
           <LoginButtonText disabled={!request}>

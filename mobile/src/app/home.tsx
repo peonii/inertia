@@ -2,17 +2,28 @@ import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
-import { View, Text } from "react-native";
 import HomeDetails from "./homeDetails";
 
 const fakeData = {
   user: {
     username: "nattie",
-    profilePicture: require("./../../assets/nattie-pfp.png"),
+    profile_picture: require("./../../assets/nattie-pfp.png"),
+    role: "Admin",
+    statistics: {
+      rank: 3,
+      wins: 0,
+      draws: 1,
+      losses: 4,
+      xp_gained: 1800,
+    },
   },
   games: [
     { id: "1912313", name: "Jet Lag: Season 6", status: "Playing", timeLeft: 372 },
-    { id: "2941279", name: "Jet Lag: Season 7", status: "Starts in 40 days" },
+    {
+      id: "2941279",
+      name: "Jet Lag: Season 7",
+      status: "Starts in 40 days",
+    },
   ],
   teams: [
     {
@@ -134,7 +145,6 @@ const ListContainer = styled.ScrollView`
   overflow: visible;
   padding: -20px;
   gap: 20px;
-  margin: 0px 10px;
 `;
 
 const GameContainer = styled.View`
@@ -197,7 +207,9 @@ const Home: React.FC = () => {
     return (
       <GameContainer key={game.id}>
         <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-        <SmallTitle style={{ color: color }}>{statusText}</SmallTitle>
+        <SmallTitle numberOfLines={1} style={{ color: color }}>
+          {statusText}
+        </SmallTitle>
       </GameContainer>
     );
   });
@@ -226,7 +238,9 @@ const Home: React.FC = () => {
         </LinearGradient>
         <TeamInfo>
           <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
-          <SmallTitle>{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+          <SmallTitle
+            numberOfLines={1}
+          >{`${team.experience} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
           <BalanceText>{`${team.balance}$`}</BalanceText>
         </TeamInfo>
       </TeamContainer>
@@ -245,7 +259,7 @@ const Home: React.FC = () => {
             }}
           >
             <Username>{fakeData.user.username}</Username>
-            <UserProfilePicutre source={fakeData.user.profilePicture} />
+            <UserProfilePicutre source={fakeData.user.profile_picture} />
           </UserInfoButton>
         </UserInfoContainer>
       </TopBar>
@@ -276,12 +290,12 @@ const Home: React.FC = () => {
       <BottomSheet
         ref={bottomSheetRef}
         index={-1}
-        snapPoints={["50%"]}
+        snapPoints={["68%"]}
         onChange={handleSheetChanges}
         enablePanDownToClose={true}
         backgroundStyle={{ backgroundColor: "#252525" }}
       >
-        <HomeDetails />
+        <HomeDetails userData={fakeData.user} logoutFunction={() => {}} />
       </BottomSheet>
     </CenteredView>
   );
