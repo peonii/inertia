@@ -2,7 +2,6 @@ import styled from "@emotion/native";
 import { router, useFocusEffect } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 import { refreshToken } from "../api/fetch";
-import { useCallback } from "react";
 
 const MassiveText = styled.Text`
   font-size: 100px;

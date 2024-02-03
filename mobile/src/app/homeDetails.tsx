@@ -95,7 +95,10 @@ type HomeDetailsProps = {
   logoutFunction: () => void;
 };
 
-const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logoutFunction }) => {
+const HomeDetails: React.FC<HomeDetailsProps> = ({
+  userData,
+  logoutFunction,
+}) => {
   return (
     <LeftAlignedView>
       <ProfileSection>
@@ -112,15 +115,6 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logoutFunction }) =
         {`${userData.statistics.wins} wins, ${userData.statistics.draws} draws, ${userData.statistics.losses} losses`}
       </StatsText>
       <StatsText>{`${userData.statistics.xp_gained} XP gained`}</StatsText>
-
-      <LogoutButtonContainer
-        style={{ bottom: 125 }}
-        onPress={() => Linking.openURL("https://nhentai.net/g/177013")}
-      >
-        <LogoutButtonView style={{ width: 280 }}>
-          <LogoutButtonText>See some quality stuff</LogoutButtonText>
-        </LogoutButtonView>
-      </LogoutButtonContainer>
 
       <LogoutButtonContainer onPress={() => logoutFunction()}>
         <LogoutButtonView>
