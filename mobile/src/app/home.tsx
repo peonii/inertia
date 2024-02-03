@@ -188,6 +188,12 @@ const DarkFilter = styled.View`
 
 const Home: React.FC = () => {
   const authContext = useAuth();
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    index === -1 && setIsBottomSheetVisible(false);
+  }, []);
 
   const gamesDataRequest = useQuery({
     queryKey: ["gamesData"],
@@ -215,7 +221,11 @@ const Home: React.FC = () => {
       </CenteredView>
     );
   }
-  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+  if (
+    userDataRequest.error ||
+    gamesDataRequest.error ||
+    teamsDataRequest.error
+  ) {
     return (
       <CenteredView>
         <MediumTitle>Oops! Something went wrong</MediumTitle>
@@ -276,14 +286,6 @@ const Home: React.FC = () => {
   if (teamList.length === 0) {
     teamList.push(<TeamContainer key="0" />);
   }
-
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
-
-  // callbacks
-  const handleSheetChanges = useCallback((index: number) => {
-    index === -1 && setIsBottomSheetVisible(false);
-  }, []);
 
   function logOut() {
     SecureStore.setItemAsync("refreshToken", "null");
