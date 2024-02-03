@@ -74,5 +74,9 @@ export async function fetchTypeSafe<T>(
     throw new Error("Failed to fetch data");
   }
 
-  return response.json() as Promise<T>;
+  const resp = (await response.json()) as Promise<T>;
+
+  if (__DEV__) console.log(JSON.stringify(resp, null, 2));
+
+  return resp;
 }
