@@ -44,7 +44,7 @@ func (r *PostgresTeamRepository) FindAll(ctx context.Context) ([]*domain.Team, e
 		return nil, err
 	}
 
-	var teams []*domain.Team
+  teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(
@@ -108,7 +108,7 @@ func (r *PostgresTeamRepository) FindByGameID(ctx context.Context, gameID string
 		return nil, err
 	}
 
-	var teams []*domain.Team
+  teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(
@@ -146,7 +146,7 @@ func (r *PostgresTeamRepository) FindByUserID(ctx context.Context, userID string
 		return nil, err
 	}
 
-	var teams []*domain.Team
+  teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(

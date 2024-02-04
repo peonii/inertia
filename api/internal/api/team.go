@@ -17,11 +17,6 @@ func (a *api) teamsByGameIDHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if len(teams) == 0 {
-    a.sendJson(w, http.StatusOK, []domain.Team{})
-    return
-  }
-
 	a.sendJson(w, http.StatusOK, teams)
 }
 

@@ -42,7 +42,7 @@ func (r *PostgresGameRepository) FindAll(ctx context.Context) ([]*domain.Game, e
 		return nil, err
 	}
 
-	var games []*domain.Game
+  games := []*domain.Game{}
 	for rows.Next() {
 		var game domain.Game
 		if err := rows.Scan(
@@ -104,7 +104,7 @@ func (r *PostgresGameRepository) FindAllByHostID(ctx context.Context, hostID str
 		return nil, err
 	}
 
-	var games []*domain.Game
+  games := []*domain.Game{}
 	for rows.Next() {
 		var game domain.Game
 		if err := rows.Scan(
