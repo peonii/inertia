@@ -34,7 +34,7 @@ func MakePostgresUserRepository(db *pgxpool.Pool) *PostgresUserRepository {
 func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, error) {
 	query := `
 		SELECT
-			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+			id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 		FROM users
 	`
 
@@ -51,6 +51,7 @@ func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, e
 			&user.ID,
 			&user.DiscordID,
 			&user.Name,
+			&user.DisplayName,
 			&user.Email,
 			&user.Image,
 			&user.AccessToken,
@@ -70,7 +71,7 @@ func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, e
 func (r *PostgresUserRepository) FindOne(ctx context.Context, id string) (*domain.User, error) {
 	query := `
 		SELECT
-			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+			id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 		FROM users
 		WHERE id = $1
 	`
@@ -80,6 +81,7 @@ func (r *PostgresUserRepository) FindOne(ctx context.Context, id string) (*domai
 		&user.ID,
 		&user.DiscordID,
 		&user.Name,
+		&user.DisplayName,
 		&user.Email,
 		&user.Image,
 		&user.AccessToken,
@@ -96,7 +98,7 @@ func (r *PostgresUserRepository) FindOne(ctx context.Context, id string) (*domai
 func (r *PostgresUserRepository) FindByDiscordID(ctx context.Context, discordID string) (*domain.User, error) {
 	query := `
 		SELECT
-			id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+			id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 		FROM users
 		WHERE discord_id = $1
 		`
@@ -106,6 +108,7 @@ func (r *PostgresUserRepository) FindByDiscordID(ctx context.Context, discordID 
 		&user.ID,
 		&user.DiscordID,
 		&user.Name,
+		&user.DisplayName,
 		&user.Email,
 		&user.Image,
 		&user.AccessToken,
@@ -121,9 +124,9 @@ func (r *PostgresUserRepository) FindByDiscordID(ctx context.Context, discordID 
 
 func (r *PostgresUserRepository) Create(ctx context.Context, user *domain.UserCreate) (*domain.User, error) {
 	query := `
-		INSERT INTO users (id, discord_id, name, email, image, access_token, refresh_token, auth_level)
+		INSERT INTO users (id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-		RETURNING id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+		RETURNING id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 	`
 
 	node, err := snowflake.NewNode(domain.UserSnowflakeNode)
@@ -138,6 +141,7 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *domain.UserCr
 		id,
 		user.DiscordID,
 		user.Name,
+		user.DisplayName,
 		user.Email,
 		user.Image,
 		user.AccessToken,
@@ -163,15 +167,16 @@ func (r *PostgresUserRepository) Create(ctx context.Context, user *domain.UserCr
 func (r *PostgresUserRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
 	query := `
 		UPDATE users
-		SET discord_id = $1, name = $2, email = $3, image = $4, access_token = $5, refresh_token = $6, auth_level = $7
+		SET discord_id = $1, name = $2, display_name = $3, email = $4, image = $5, access_token = $6, refresh_token = $7, auth_level = $8
 		WHERE id = $8
-		RETURNING id, discord_id, name, email, image, access_token, refresh_token, auth_level, created_at
+		RETURNING id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 	`
 
 	var u domain.User
 	if err := r.db.QueryRow(ctx, query,
 		user.DiscordID,
 		user.Name,
+		user.DisplayName,
 		user.Email,
 		user.Image,
 		user.AccessToken,
@@ -182,6 +187,7 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *domain.User) 
 		&u.ID,
 		&u.DiscordID,
 		&u.Name,
+		&u.DisplayName,
 		&u.Email,
 		&u.Image,
 		&u.AccessToken,

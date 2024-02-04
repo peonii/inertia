@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	UserAuthLevelBasic = 0
@@ -10,10 +12,11 @@ const (
 type User struct {
 	ID string `json:"id"`
 
-	DiscordID string `json:"discord_id"`
-	Name      string `json:"name"`
-	Image     string `json:"image"`
-	Email     string `json:"email"`
+	DiscordID   string `json:"discord_id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Image       string `json:"image"`
+	Email       string `json:"email"`
 
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -23,10 +26,11 @@ type User struct {
 }
 
 type UserCreate struct {
-	DiscordID string `json:"discord_id"`
-	Name      string `json:"name"`
-	Image     string `json:"image"`
-	Email     string `json:"email"`
+	DiscordID   string `json:"discord_id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Image       string `json:"image"`
+	Email       string `json:"email"`
 
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
@@ -37,9 +41,10 @@ type UserCreate struct {
 type UserPublic struct {
 	ID string `json:"id"`
 
-	DiscordID string `json:"discord_id"`
-	Name      string `json:"name"`
-	Image     string `json:"image"`
+	DiscordID   string `json:"discord_id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Image       string `json:"image"`
 
 	AuthLevel int64     `json:"auth_level"`
 	CreatedAt time.Time `json:"created_at"`
@@ -47,11 +52,12 @@ type UserPublic struct {
 
 func (u *User) ToPublic() *UserPublic {
 	return &UserPublic{
-		ID:        u.ID,
-		DiscordID: u.DiscordID,
-		Name:      u.Name,
-		Image:     u.Image,
-		AuthLevel: u.AuthLevel,
-		CreatedAt: u.CreatedAt,
+		ID:          u.ID,
+		DiscordID:   u.DiscordID,
+		Name:        u.Name,
+		DisplayName: u.DisplayName,
+		Image:       u.Image,
+		AuthLevel:   u.AuthLevel,
+		CreatedAt:   u.CreatedAt,
 	}
 }

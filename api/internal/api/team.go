@@ -32,6 +32,20 @@ func (a *api) joinedTeamsHandler(w http.ResponseWriter, r *http.Request) {
 	a.sendJson(w, http.StatusOK, teams)
 }
 
+func (a *api) joinTeamHandler(w http.ResponseWriter, r *http.Request) {
+	uid := a.session(r)
+
+	tid := chi.URLParam(r, "id")
+
+	err := a.teamRepo.AddTeamMember(r.Context(), tid, uid)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to join team")
+		return
+	}
+
+	a.sendJson(w, http.StatusOK, nil)
+}
+
 func (a *api) createTeamHandler(w http.ResponseWriter, r *http.Request) {
 	var teamc domain.TeamCreate
 	if err := json.NewDecoder(r.Body).Decode(&teamc); err != nil {

@@ -20,6 +20,11 @@ type Team struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type TeamMember struct {
+	TeamID string `json:"team_id"`
+	UserID string `json:"user_id"`
+}
+
 func (t *Team) IsVeto() bool {
 	return time.Now().Before(t.VetoPeriodEnd)
 }
