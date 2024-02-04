@@ -61,8 +61,8 @@ const Layout: React.FC = () => {
             <Stack.Screen
               name="index"
               options={{
-                headerTitle: "NieIndex",
-                headerBackTitle: "NieIndex",
+                headerTitle: "Index",
+                headerBackTitle: "Index",
                 headerShown: false,
               }}
             />

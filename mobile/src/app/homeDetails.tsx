@@ -95,7 +95,7 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) =
           }}
         />
         <ProfileTextSection>
-          <BigTitle>{userData.name}</BigTitle>
+          <BigTitle>{userData.display_name}</BigTitle>
           <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
         </ProfileTextSection>
       </ProfileSection>

@@ -11,8 +11,9 @@ export const ENDPOINTS = {
   },
   games: {
     all: `${BASE_URL}/api/v5/games`,
+    me: `${BASE_URL}/api/v5/games/@me`
   },
   teams: {
-    current: `${BASE_URL}/api/v5/teams/@me`
+    me: `${BASE_URL}/api/v5/teams/@me`
   }
 };

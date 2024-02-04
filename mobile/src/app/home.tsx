@@ -11,6 +11,7 @@ import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
+import { ActivityIndicator, View } from "react-native";
 
 const fakeTeams: Team[] = [
   {
@@ -63,6 +64,12 @@ const CenteredView = styled.View`
   height: 100%;
 `;
 
+const LoadingGlyph = styled.View`
+  background-color: #474747;
+  height: 100%;
+  width: 100%;
+`;
+
 const TopBar = styled.View`
   position: absolute;
   width: 100%;
@@ -82,6 +89,8 @@ const UserInfoContainer = styled.View`
   justify-content: center;
   position: absolute;
   right: 27px;
+  overflow: hidden;
+  border-radius: 10px;
 `;
 const UserInfoButton = styled.Pressable`
   align-items: center;
@@ -101,6 +110,12 @@ const UserProfilePicutre = styled.Image`
   width: 39px;
   height: 39px;
   border-radius: 26px;
+`;
+
+const TitleWithIndicatiorView = styled.View`
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
 `;
 
 const BigTitle = styled.Text`
@@ -148,6 +163,7 @@ const GameContainer = styled.View`
   height: 86px;
   border-radius: 10px;
   margin: 0px 10px;
+  overflow: hidden;
 `;
 
 const TeamContainer = styled.View`
@@ -186,6 +202,16 @@ const DarkFilter = styled.View`
   height: 100%;
 `;
 
+const RetryButton = styled.Pressable`
+  padding-top: 15px;
+`;
+const RetryButtonText = styled.Text`
+  color: #ffffff;
+  text-decoration: underline;
+  font-family: Inter_400Regular;
+  font-size: 14px;
+`;
+
 const Home: React.FC = () => {
   const authContext = useAuth();
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -202,89 +228,117 @@ const Home: React.FC = () => {
 
   const gamesDataRequest = useQuery({
     queryKey: ["gamesData"],
-    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.all, authContext),
+    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.me, authContext),
   });
 
   const teamsDataRequest = useQuery({
     queryKey: ["teamsData"],
-    queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.current, authContext),
+    queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
   });
 
-  if (
-    userDataRequest.isPending ||
-    gamesDataRequest.isPending ||
-    teamsDataRequest.isPending
-  ) {
-    return (
-      <CenteredView>
-        <MediumTitle>Loading...</MediumTitle>
-      </CenteredView>
-    );
-  }
-  if (
-    userDataRequest.error ||
-    gamesDataRequest.error ||
-    teamsDataRequest.error
-  ) {
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+    userDataRequest.error && console.log(userDataRequest.error.message);
+    gamesDataRequest.error && console.log(gamesDataRequest.error.message);
+    teamsDataRequest.error && console.log(teamsDataRequest.error.message);
     return (
       <CenteredView>
         <MediumTitle>Oops! Something went wrong</MediumTitle>
+        <RetryButton
+          onPress={() => {
+            router.replace("/");
+          }}
+        >
+          <RetryButtonText>Retry</RetryButtonText>
+        </RetryButton>
       </CenteredView>
     );
   }
 
-  const userData = userDataRequest.data;
-  const gamesData = gamesDataRequest.data || ([] as Game[]);
-  const teamsData = teamsDataRequest.data || fakeTeams;
+  const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
+  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
+
+  // const userData = "loading";
+  // const gamesData = "loading";
+  // const teamsData = "loading";
+
+  console.log(userData, gamesData, teamsData);
 
   //Turning games's data into a list of views
-  const gamesList = gamesData.map((game) => {
-    // const color = game.status === "Playing" ? "#439255" : "#7c7c7c";
-    const color = "#439255";
-    const statusText = "essa";
+  const gamesList =
+    gamesData === "loading"
+      ? [
+          <GameContainer key="0" style={{ paddingLeft: 0 }}>
+            <LoadingGlyph></LoadingGlyph>
+          </GameContainer>,
+        ]
+      : gamesData.map((game) => {
+          const color = "#439255";
+          const statusText = "essa";
 
-    return (
-      <GameContainer key={game.id}>
-        <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-        <SmallTitle numberOfLines={1} style={{ color: color }}>
-          {statusText}
-        </SmallTitle>
+          return (
+            <GameContainer key={game.id}>
+              <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
+              <SmallTitle numberOfLines={1} style={{ color: color }}>
+                {statusText}
+              </SmallTitle>
+            </GameContainer>
+          );
+        });
+
+  console.log("here", gamesData);
+  // If no games
+  if (gamesData.length == 0) {
+    console.log("also here");
+    gamesList.push(
+      <GameContainer key="0">
+        <MediumTitle>No text</MediumTitle>
       </GameContainer>
     );
-  });
-  if (gamesList.length === 0) {
-    gamesList.push(<GameContainer key="0" />);
   }
 
   //Turning teams's data into a list of views
-  const teamList = teamsData.map((team) => {
-    return (
-      <TeamContainer key={team.id}>
-        <LinearGradient
-          colors={makeGradientColorsFromColor(team.color)}
-          style={{
-            height: 175,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <BigTitle style={{ fontSize: 64 }}>{team.emoji}</BigTitle>
-        </LinearGradient>
-        <TeamInfo>
-          <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
-          <SmallTitle
-            numberOfLines={1}
-          >{`${team.xp} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
-          <BalanceText>{`${team.balance}$`}</BalanceText>
-        </TeamInfo>
+  const teamList =
+    teamsData === "loading"
+      ? // Is loading
+        [
+          <TeamContainer key={"0"}>
+            <LoadingGlyph></LoadingGlyph>
+          </TeamContainer>,
+        ]
+      : // Loaded
+        teamsData.map((team) => {
+          return (
+            <TeamContainer key={team.id}>
+              <LinearGradient
+                colors={makeGradientColorsFromColor(team.color)}
+                style={{
+                  height: 175,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <BigTitle style={{ fontSize: 64 }}>{team.emoji}</BigTitle>
+              </LinearGradient>
+              <TeamInfo>
+                <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
+                <SmallTitle
+                  numberOfLines={1}
+                >{`${team.xp} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+                <BalanceText>{`${team.balance}$`}</BalanceText>
+              </TeamInfo>
+            </TeamContainer>
+          );
+        });
+
+  if (teamsData.length == 0) {
+    teamList.push(
+      <TeamContainer key="0">
+        <MediumTitle>no teams</MediumTitle>
       </TeamContainer>
     );
-  });
-
-  if (teamList.length === 0) {
-    teamList.push(<TeamContainer key="0" />);
   }
 
   function logOut() {
@@ -297,24 +351,33 @@ const Home: React.FC = () => {
       <TopBar>
         <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
         <UserInfoContainer>
-          <UserInfoButton
-            onPress={() => {
-              bottomSheetRef.current.expand();
-              setIsBottomSheetVisible(true);
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }}
-          >
-            <Username>{userData.name}</Username>
-            <UserProfilePicutre
-              source={{
-                uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=39px`,
+          {userData == "loading" ? (
+            <LoadingGlyph style={{ height: 50, width: 150 }}></LoadingGlyph>
+          ) : (
+            <UserInfoButton
+              onPress={() => {
+                bottomSheetRef.current.expand();
+                setIsBottomSheetVisible(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
-            />
-          </UserInfoButton>
+            >
+              <Username>{userData.display_name}</Username>
+              <UserProfilePicutre
+                source={{
+                  uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=39px`,
+                }}
+              />
+            </UserInfoButton>
+          )}
         </UserInfoContainer>
       </TopBar>
       <Section>
-        <BigTitle>Your games</BigTitle>
+        <TitleWithIndicatiorView>
+          <BigTitle>Your games</BigTitle>
+          {gamesData === "loading" ? (
+            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+          ) : null}
+        </TitleWithIndicatiorView>
         <ListContainer
           horizontal
           snapToInterval={240}
@@ -329,7 +392,12 @@ const Home: React.FC = () => {
         </ListContainer>
       </Section>
       <Section>
-        <BigTitle>Your teams</BigTitle>
+        <TitleWithIndicatiorView>
+          <BigTitle>Your teams</BigTitle>
+          {teamsData === "loading" ? (
+            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+          ) : null}
+        </TitleWithIndicatiorView>
         <ListContainer
           horizontal
           snapToInterval={220}
@@ -355,16 +423,19 @@ const Home: React.FC = () => {
       </DarkFilterContainer>
 
       {/*/ Home Details List /*/}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={["68%"]}
-        onChange={handleSheetChanges}
-        enablePanDownToClose={true}
-        backgroundStyle={{ backgroundColor: "#252525" }}
-      >
-        <HomeDetails userData={userData} logOutFunction={logOut} />
-      </BottomSheet>
+
+      {userData == "loading" ? null : (
+        <BottomSheet
+          ref={bottomSheetRef}
+          index={-1}
+          snapPoints={["68%"]}
+          onChange={handleSheetChanges}
+          enablePanDownToClose={true}
+          backgroundStyle={{ backgroundColor: "#252525" }}
+        >
+          <HomeDetails userData={userData} logOutFunction={logOut} />
+        </BottomSheet>
+      )}
     </CenteredView>
   );
 };
