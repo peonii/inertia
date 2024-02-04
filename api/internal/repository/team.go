@@ -10,6 +10,8 @@ import (
 )
 
 type TeamRepository interface {
+	FindAll(ctx context.Context) ([]*domain.Team, error)
+	FindOne(ctx context.Context, teamID string) (*domain.Team, error)
 	FindByGameID(ctx context.Context, gameID string) ([]*domain.Team, error)
 	FindByUserID(ctx context.Context, userID string) ([]*domain.Team, error)
 
@@ -28,6 +30,69 @@ func MakePostgresTeamRepository(db *pgxpool.Pool) *PostgresTeamRepository {
 	return &PostgresTeamRepository{
 		db: db,
 	}
+}
+
+func (r *PostgresTeamRepository) FindAll(ctx context.Context) ([]*domain.Team, error) {
+	query := `
+		SELECT
+			id, name, xp, balance, emoji, color, is_runner, veto_period_end, game_id, created_at
+		FROM teams
+	`
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var teams []*domain.Team
+	for rows.Next() {
+		var team domain.Team
+		if err := rows.Scan(
+			&team.ID,
+			&team.Name,
+			&team.XP,
+			&team.Balance,
+			&team.Emoji,
+			&team.Color,
+			&team.IsRunner,
+			&team.VetoPeriodEnd,
+			&team.GameID,
+			&team.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		teams = append(teams, &team)
+	}
+
+	return teams, nil
+}
+
+func (r *PostgresTeamRepository) FindOne(ctx context.Context, teamID string) (*domain.Team, error) {
+	query := `
+		SELECT
+			id, name, xp, balance, emoji, color, is_runner, veto_period_end, game_id, created_at
+		FROM teams
+		WHERE id = $1
+		`
+
+	var team domain.Team
+	if err := r.db.QueryRow(ctx, query, teamID).Scan(
+		&team.ID,
+		&team.Name,
+		&team.XP,
+		&team.Balance,
+		&team.Emoji,
+		&team.Color,
+		&team.IsRunner,
+		&team.VetoPeriodEnd,
+		&team.GameID,
+		&team.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &team, nil
 }
 
 func (r *PostgresTeamRepository) FindByGameID(ctx context.Context, gameID string) ([]*domain.Team, error) {

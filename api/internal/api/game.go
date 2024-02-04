@@ -15,6 +15,11 @@ func (a *api) allGamesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  if len(games) == 0 {
+    a.sendJson(w, http.StatusOK, []domain.Game{})
+    return
+  }
+
 	a.sendJson(w, http.StatusOK, games)
 }
 

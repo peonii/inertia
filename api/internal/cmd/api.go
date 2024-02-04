@@ -47,6 +47,9 @@ func APICmd(ctx context.Context) *cobra.Command {
 
 			if err := m.Up(); err != nil {
 				logger.Info("No migrations to run")
+        logger.Info("Fail reason",
+          zap.Error(err),
+        )
 			} else {
 				logger.Info("Migrations ran successfully")
 			}
