@@ -29,10 +29,11 @@ type api struct {
 	logger *zap.Logger
 	config *APIConfig
 
-	userRepo     repository.UserRepository
-	gameRepo     repository.GameRepository
-	teamRepo     repository.TeamRepository
-	locationRepo repository.LocationRepository
+	userRepo       repository.UserRepository
+	gameRepo       repository.GameRepository
+	teamRepo       repository.TeamRepository
+	locationRepo   repository.LocationRepository
+	gameInviteRepo repository.GameInviteRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -50,6 +51,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	gr := repository.MakePostgresGameRepository(db)
 	tr := repository.MakePostgresTeamRepository(db)
 	lr := repository.MakePostgresLocationRepository(db, rdc)
+	gir := repository.MakePostgresGameInviteRepository(db)
 
 	wsServer := websocket.Start(ctx)
 
@@ -66,6 +68,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		gameRepo:         gr,
 		teamRepo:         tr,
 		locationRepo:     lr,
+		gameInviteRepo:   gir,
 
 		wsServer: wsServer,
 		wsHub:    NewWsHub(),

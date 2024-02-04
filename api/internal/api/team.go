@@ -29,6 +29,11 @@ func (a *api) joinedTeamsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+  if len(teams) == 0 {
+    a.sendJson(w, http.StatusOK, []domain.Team{})
+    return
+  }
+
 	a.sendJson(w, http.StatusOK, teams)
 }
 
@@ -37,7 +42,27 @@ func (a *api) joinTeamHandler(w http.ResponseWriter, r *http.Request) {
 
 	tid := chi.URLParam(r, "id")
 
-	err := a.teamRepo.AddTeamMember(r.Context(), tid, uid)
+	var body struct {
+		GameInviteCode string `json:"invite"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode body")
+		return
+	}
+
+	invite, err := a.gameInviteRepo.FindBySlug(r.Context(), body.GameInviteCode)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find invite")
+		return
+	}
+
+	team, err := a.teamRepo.FindOne(r.Context(), tid)
+  if team.GameID != invite.GameID {
+    a.sendError(w, r, http.StatusUnauthorized, err, "failed to verify invite")
+    return
+  }
+
+	err = a.teamRepo.AddTeamMember(r.Context(), tid, uid)
 	if err != nil {
 		a.sendError(w, r, http.StatusInternalServerError, err, "failed to join team")
 		return

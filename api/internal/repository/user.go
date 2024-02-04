@@ -44,7 +44,7 @@ func (r *PostgresUserRepository) FindAll(ctx context.Context) ([]*domain.User, e
 	}
 	defer rows.Close()
 
-	var users []*domain.User
+  users := []*domain.User{}
 	for rows.Next() {
 		var user domain.User
 		if err := rows.Scan(

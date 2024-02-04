@@ -5,4 +5,5 @@ const (
 	GameSnowflakeNode
 	TeamSnowflakeNode
 	LocationSnowflakeNode
+	GameInviteSnowflakeNode
 )
