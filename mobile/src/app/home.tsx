@@ -2,7 +2,7 @@ import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
-import HomeDetails from "./homeDetails";
+import HomeDetails from "../components/homeDetails";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { fetchTypeSafe } from "../api/fetch";
@@ -11,7 +11,8 @@ import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator } from "react-native";
+import LoadingGlyph from "../components/loadingGlyph";
 
 const fakeTeams: Team[] = [
   {
@@ -62,12 +63,6 @@ const CenteredView = styled.View`
   justify-content: center;
   background-color: #252525;
   height: 100%;
-`;
-
-const LoadingGlyph = styled.View`
-  background-color: #474747;
-  height: 100%;
-  width: 100%;
 `;
 
 const TopBar = styled.View`
@@ -286,10 +281,8 @@ const Home: React.FC = () => {
           );
         });
 
-  console.log("here", gamesData);
   // If no games
   if (gamesData.length == 0) {
-    console.log("also here");
     gamesList.push(
       <GameContainer key="0">
         <MediumTitle>No text</MediumTitle>
@@ -352,7 +345,7 @@ const Home: React.FC = () => {
         <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
         <UserInfoContainer>
           {userData == "loading" ? (
-            <LoadingGlyph style={{ height: 50, width: 150 }}></LoadingGlyph>
+            <LoadingGlyph width={170} height={50}></LoadingGlyph>
           ) : (
             <UserInfoButton
               onPress={() => {
