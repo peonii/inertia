@@ -268,8 +268,6 @@ const Home: React.FC = () => {
   // const gamesData = "loading";
   // const teamsData = "loading";
 
-  console.log(userData, gamesData, teamsData);
-
   //Turning games's data into a list of views
   const gamesList =
     gamesData === "loading"
