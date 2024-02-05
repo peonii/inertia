@@ -244,10 +244,16 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// User exists, update their tokens, image and name
 
+		dn := userResp.DisplayName
+		if dn == "" {
+			dn = userResp.Username
+		}
+
 		user.AccessToken = tokenResp.AccessToken
 		user.RefreshToken = tokenResp.RefreshToken
 		user.Image = userResp.Image
 		user.Name = userResp.Username
+    user.DisplayName = dn
 
 		user, err = a.userRepo.Update(r.Context(), user)
 		if err != nil {

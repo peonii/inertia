@@ -219,19 +219,26 @@ const Home: React.FC = () => {
   const userDataRequest = useQuery({
     queryKey: ["userData"],
     queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
+    staleTime: 1000 * 60 * 3,
   });
 
   const gamesDataRequest = useQuery({
     queryKey: ["gamesData"],
     queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.me, authContext),
+    staleTime: 1000 * 60,
   });
 
   const teamsDataRequest = useQuery({
     queryKey: ["teamsData"],
     queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
+    staleTime: 1000 * 60,
   });
 
-  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+  if (
+    userDataRequest.error ||
+    gamesDataRequest.error ||
+    teamsDataRequest.error
+  ) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -250,8 +257,12 @@ const Home: React.FC = () => {
   }
 
   const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
+  const gamesData = gamesDataRequest.isPending
+    ? "loading"
+    : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending
+    ? "loading"
+    : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -284,7 +295,7 @@ const Home: React.FC = () => {
     gamesList.push(
       <GameContainer key="0">
         <MediumTitle>No text</MediumTitle>
-      </GameContainer>
+      </GameContainer>,
     );
   }
 
@@ -328,7 +339,7 @@ const Home: React.FC = () => {
     teamList.push(
       <TeamContainer key="0">
         <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>
+      </TeamContainer>,
     );
   }
 
