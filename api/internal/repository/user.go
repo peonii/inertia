@@ -168,7 +168,7 @@ func (r *PostgresUserRepository) Update(ctx context.Context, user *domain.User) 
 	query := `
 		UPDATE users
 		SET discord_id = $1, name = $2, display_name = $3, email = $4, image = $5, access_token = $6, refresh_token = $7, auth_level = $8
-		WHERE id = $8
+		WHERE id = $9
 		RETURNING id, discord_id, name, display_name, email, image, access_token, refresh_token, auth_level, created_at
 	`
 
