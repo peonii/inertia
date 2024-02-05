@@ -6,4 +6,7 @@ const (
 	TeamSnowflakeNode
 	LocationSnowflakeNode
 	GameInviteSnowflakeNode
+	QuestGroupSnowflakeNode
+	QuestSnowflakeNode
+	ActiveQuestSnowflakeNode
 )
