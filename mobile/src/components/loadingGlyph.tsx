@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
-import { Animated, DimensionValue, Easing } from "react-native";
+import { Animated, DimensionValue } from "react-native";
 
 type LoadingGlyphProps = {
   height?: DimensionValue;

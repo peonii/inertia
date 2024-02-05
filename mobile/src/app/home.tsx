@@ -11,8 +11,9 @@ import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, RefreshControl } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
+import GameStatus from "../components/gameStatus";
 
 const fakeTeams: Team[] = [
   {
@@ -57,6 +58,11 @@ function makeGradientColorsFromColor(color: string) {
   return [startColor, endColor];
 }
 
+const RefreshContainer = styled.ScrollView`
+  flex: 1;
+  width: 100%;
+`;
+
 const CenteredView = styled.View`
   flex: 1;
   align-items: center;
@@ -66,9 +72,8 @@ const CenteredView = styled.View`
 `;
 
 const TopBar = styled.View`
-  position: absolute;
+  margin-top: 63px;
   width: 100%;
-  top: 63px;
   align-items: center;
   flex-direction: row;
 `;
@@ -81,6 +86,7 @@ const InertiaLogo = styled.Image`
 
 const UserInfoContainer = styled.View`
   align-items: center;
+  height: 100%;
   justify-content: center;
   position: absolute;
   right: 27px;
@@ -136,7 +142,6 @@ const SmallTitle = styled.Text`
 `;
 
 const Section = styled.View`
-  width: 100%;
   align-items: left;
   overflow: visible;
   margin-top: 30px;
@@ -234,11 +239,13 @@ const Home: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  if (
-    userDataRequest.error ||
-    gamesDataRequest.error ||
-    teamsDataRequest.error
-  ) {
+  function silentRefresh() {
+    userDataRequest.refetch();
+    teamsDataRequest.refetch();
+    gamesDataRequest.refetch();
+  }
+
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -257,12 +264,8 @@ const Home: React.FC = () => {
   }
 
   const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending
-    ? "loading"
-    : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending
-    ? "loading"
-    : teamsDataRequest.data;
+  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -271,21 +274,23 @@ const Home: React.FC = () => {
   //Turning games's data into a list of views
   const gamesList =
     gamesData === "loading"
-      ? [
+      ? // Is loading
+        [
           <GameContainer key="0" style={{ paddingLeft: 0 }}>
             <LoadingGlyph></LoadingGlyph>
           </GameContainer>,
         ]
-      : gamesData.map((game) => {
-          const color = "#439255";
-          const statusText = "essa";
-
+      : // Loaded
+        gamesData.map((game) => {
           return (
             <GameContainer key={game.id}>
               <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-              <SmallTitle numberOfLines={1} style={{ color: color }}>
-                {statusText}
-              </SmallTitle>
+              <GameStatus
+                timeLine={{
+                  start: "2024-02-05T16:00:00Z",
+                  end: "2024-02-05T16:46:00Z",
+                }}
+              ></GameStatus>
             </GameContainer>
           );
         });
@@ -294,8 +299,8 @@ const Home: React.FC = () => {
   if (gamesData.length == 0) {
     gamesList.push(
       <GameContainer key="0">
-        <MediumTitle>No text</MediumTitle>
-      </GameContainer>,
+        <MediumTitle>No games</MediumTitle>
+      </GameContainer>
     );
   }
 
@@ -335,11 +340,12 @@ const Home: React.FC = () => {
           );
         });
 
+  // If no teams
   if (teamsData.length == 0) {
     teamList.push(
       <TeamContainer key="0">
         <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>,
+      </TeamContainer>
     );
   }
 
@@ -359,6 +365,7 @@ const Home: React.FC = () => {
             <UserInfoButton
               onPress={() => {
                 bottomSheetRef.current.expand();
+                silentRefresh();
                 setIsBottomSheetVisible(true);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
@@ -373,46 +380,53 @@ const Home: React.FC = () => {
           )}
         </UserInfoContainer>
       </TopBar>
-      <Section>
-        <TitleWithIndicatiorView>
-          <BigTitle>Your games</BigTitle>
-          {gamesData === "loading" ? (
-            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-          ) : null}
-        </TitleWithIndicatiorView>
-        <ListContainer
-          horizontal
-          snapToInterval={240}
-          snapToAlignment="start"
-          contentContainerStyle={{
-            paddingRight: 10,
-            paddingLeft: 10,
-          }}
-          showsHorizontalScrollIndicator={false}
-        >
-          {gamesList}
-        </ListContainer>
-      </Section>
-      <Section>
-        <TitleWithIndicatiorView>
-          <BigTitle>Your teams</BigTitle>
-          {teamsData === "loading" ? (
-            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-          ) : null}
-        </TitleWithIndicatiorView>
-        <ListContainer
-          horizontal
-          snapToInterval={220}
-          snapToAlignment="start"
-          contentContainerStyle={{
-            paddingRight: 10,
-            paddingLeft: 10,
-          }}
-          showsHorizontalScrollIndicator={false}
-        >
-          {teamList}
-        </ListContainer>
-      </Section>
+
+      <RefreshContainer
+        refreshControl={<RefreshControl refreshing={false} onRefresh={silentRefresh} />}
+      >
+        <Section>
+          <TitleWithIndicatiorView>
+            <BigTitle>Your games</BigTitle>
+            {gamesData === "loading" ? (
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+            ) : null}
+          </TitleWithIndicatiorView>
+          <ListContainer
+            horizontal
+            snapToInterval={240}
+            // snapToAlignment="start"
+            contentContainerStyle={{
+              paddingRight: 10,
+              paddingLeft: 10,
+            }}
+            showsHorizontalScrollIndicator={false}
+            style={gamesList.length === 1 ? { width: 260 } : {}}
+          >
+            {gamesList}
+          </ListContainer>
+        </Section>
+        <Section>
+          <TitleWithIndicatiorView>
+            <BigTitle>Your teams</BigTitle>
+            {teamsData === "loading" ? (
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+            ) : null}
+          </TitleWithIndicatiorView>
+          <ListContainer
+            horizontal
+            snapToInterval={220}
+            snapToAlignment="start"
+            contentContainerStyle={{
+              paddingRight: 10,
+              paddingLeft: 10,
+            }}
+            showsHorizontalScrollIndicator={false}
+            style={teamList.length === 1 ? { width: 240 } : {}}
+          >
+            {teamList}
+          </ListContainer>
+        </Section>
+      </RefreshContainer>
       <DarkFilterContainer
         onPressOut={() => {
           setIsBottomSheetVisible(false);
