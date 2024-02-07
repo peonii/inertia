@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, RefreshControl } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
+import GameCreationView from "../components/gameCreationView";
 
 const fakeTeams: Team[] = [
   {
@@ -66,7 +67,7 @@ const RefreshContainer = styled.ScrollView`
 const CenteredView = styled.View`
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background-color: #252525;
   height: 100%;
 `;
@@ -234,6 +235,7 @@ const Home: React.FC = () => {
   const authContext = useAuth();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
 
   const handleSheetChanges = useCallback((index: number) => {
     index === -1 && setIsBottomSheetVisible(false);
@@ -321,7 +323,12 @@ const Home: React.FC = () => {
   console.log(gamesData);
   if (gamesData !== "loading") {
     gamesList.push(
-      <PressableContainer key="1" onPress={() => {}}>
+      <PressableContainer
+        key="1"
+        onPress={() => {
+          setIsCreatingGame(true);
+        }}
+      >
         <GameContainer
           style={{ alignItems: "center", justifyContent: "center", paddingLeft: 0 }}
         >
@@ -409,61 +416,64 @@ const Home: React.FC = () => {
           )}
         </UserInfoContainer>
       </TopBar>
-
-      <RefreshContainer
-        refreshControl={
-          <RefreshControl
-            refreshing={false}
-            onRefresh={() => {
-              gamesDataRequest.refetch();
-              teamsDataRequest.refetch();
-            }}
-          />
-        }
-      >
-        <Section>
-          <TitleWithIndicatiorView>
-            <BigTitle>Your games</BigTitle>
-            {gamesData === "loading" ? (
-              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-            ) : null}
-          </TitleWithIndicatiorView>
-          <ListContainer
-            horizontal
-            snapToInterval={240}
-            // snapToAlignment="start"
-            contentContainerStyle={{
-              paddingRight: 10,
-              paddingLeft: 10,
-            }}
-            showsHorizontalScrollIndicator={false}
-            style={gamesList.length === 1 ? { width: 260 } : {}}
-          >
-            {gamesList}
-          </ListContainer>
-        </Section>
-        <Section>
-          <TitleWithIndicatiorView>
-            <BigTitle>Your teams</BigTitle>
-            {teamsData === "loading" ? (
-              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-            ) : null}
-          </TitleWithIndicatiorView>
-          <ListContainer
-            horizontal
-            snapToInterval={220}
-            snapToAlignment="start"
-            contentContainerStyle={{
-              paddingRight: 10,
-              paddingLeft: 10,
-            }}
-            showsHorizontalScrollIndicator={false}
-            style={teamList.length === 1 ? { width: 240 } : {}}
-          >
-            {teamList}
-          </ListContainer>
-        </Section>
-      </RefreshContainer>
+      {isCreatingGame ? (
+        <GameCreationView></GameCreationView>
+      ) : (
+        <RefreshContainer
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={() => {
+                gamesDataRequest.refetch();
+                teamsDataRequest.refetch();
+              }}
+            />
+          }
+        >
+          <Section>
+            <TitleWithIndicatiorView>
+              <BigTitle>Your games</BigTitle>
+              {gamesData === "loading" ? (
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+              ) : null}
+            </TitleWithIndicatiorView>
+            <ListContainer
+              horizontal
+              snapToInterval={240}
+              // snapToAlignment="start"
+              contentContainerStyle={{
+                paddingRight: 10,
+                paddingLeft: 10,
+              }}
+              showsHorizontalScrollIndicator={false}
+              style={gamesList.length === 1 ? { width: 260 } : {}}
+            >
+              {gamesList}
+            </ListContainer>
+          </Section>
+          <Section>
+            <TitleWithIndicatiorView>
+              <BigTitle>Your teams</BigTitle>
+              {teamsData === "loading" ? (
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+              ) : null}
+            </TitleWithIndicatiorView>
+            <ListContainer
+              horizontal
+              snapToInterval={220}
+              snapToAlignment="start"
+              contentContainerStyle={{
+                paddingRight: 10,
+                paddingLeft: 10,
+              }}
+              showsHorizontalScrollIndicator={false}
+              style={teamList.length === 1 ? { width: 240 } : {}}
+            >
+              {teamList}
+            </ListContainer>
+          </Section>
+        </RefreshContainer>
+      )}
       <DarkFilterContainer
         onPressOut={() => {
           setIsBottomSheetVisible(false);
