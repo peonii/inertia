@@ -486,7 +486,6 @@ const Home: React.FC = () => {
       </DarkFilterContainer>
 
       {/*/ Home Details List /*/}
-
       {userData == "loading" ? null : (
         <BottomSheet
           ref={bottomSheetRef}
