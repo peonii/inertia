@@ -82,6 +82,14 @@ const Layout: React.FC = () => {
                 headerShown: false,
               }}
             />
+            <Stack.Screen
+              name="game"
+              options={{
+                headerTitle: "Game",
+                headerBackTitle: "Game",
+                headerShown: false,
+              }}
+            />
           </Stack>
         </AuthContext.Provider>
       </GestureHandlerRootView>

@@ -48,6 +48,10 @@ function miliSecondsToTime(miliSeconds: number) {
   }
   return seconds > 1 ? `${seconds} seconds` : `${seconds} second`;
 }
+
+function twoDigits(value: number) {
+  return value < 10 ? `0${value}` : value;
+}
 function calculateStatus(startTime: Date, endTime: Date, dateNow: Date) {
   if (endTime.getTime() < dateNow.getTime()) {
     return `Ended ${miliSecondsToTime(dateNow.getTime() - endTime.getTime())} ago`;
@@ -55,7 +59,15 @@ function calculateStatus(startTime: Date, endTime: Date, dateNow: Date) {
   if (startTime.getTime() > dateNow.getTime()) {
     return `Starts in ${miliSecondsToTime(startTime.getTime() - dateNow.getTime())}`;
   }
-  return `Playing  •  ${endTime.getTime() - dateNow.getTime()}`;
+  const milis = dateNow.getTime() - startTime.getTime();
+  let seconds = Math.floor(milis / 1000);
+  let minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+  if (hours) return `Playing  •  ${hours}h${twoDigits(minutes)}m`;
+  if (minutes) return `Playing  •  ${minutes}m${twoDigits(seconds)}s`;
+  return `Playing  •  ${twoDigits(seconds)}s`;
 }
 
 const GameStatus: React.FC<GameStatusProps> = ({ timeLine }) => {

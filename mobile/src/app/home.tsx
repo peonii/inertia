@@ -71,6 +71,11 @@ const CenteredView = styled.View`
   height: 100%;
 `;
 
+const PressableContainer = styled.Pressable`
+  align-items: center;
+  justify-content: center;
+`;
+
 const TopBar = styled.View`
   margin-top: 63px;
   width: 100%;
@@ -211,6 +216,19 @@ const RetryButtonText = styled.Text`
   font-family: Inter_400Regular;
   font-size: 14px;
 `;
+const PlusIcon = styled.Text`
+  color: #ffffff;
+  font-size: 30px;
+  font-family: Inter_400Regular;
+  background-color: #4a4a4a;
+  width: 50px;
+  height: 50px;
+  include-font-padding: false;
+  padding-bottom: 4px;
+  border-radius: 30px;
+  text-align: center;
+  vertical-align: middle;
+`;
 
 const Home: React.FC = () => {
   const authContext = useAuth();
@@ -238,12 +256,6 @@ const Home: React.FC = () => {
     queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
     staleTime: 1000 * 60,
   });
-
-  function silentRefresh() {
-    userDataRequest.refetch();
-    teamsDataRequest.refetch();
-    gamesDataRequest.refetch();
-  }
 
   if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
     userDataRequest.error && console.log(userDataRequest.error.message);
@@ -283,24 +295,39 @@ const Home: React.FC = () => {
       : // Loaded
         gamesData.map((game) => {
           return (
-            <GameContainer key={game.id}>
-              <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-              <GameStatus
-                timeLine={{
-                  start: "2024-02-05T16:00:00Z",
-                  end: "2024-02-05T16:46:00Z",
-                }}
-              ></GameStatus>
-            </GameContainer>
+            <PressableContainer
+              key={game.id}
+              onPress={() => {
+                router.replace({
+                  pathname: "/game/[options]",
+                  params: { game: game },
+                });
+              }}
+            >
+              <GameContainer>
+                <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
+                <GameStatus
+                  timeLine={{
+                    start: "2024-02-06T11:12:00Z",
+                    end: "2024-02-06T11:30:00Z",
+                  }}
+                ></GameStatus>
+              </GameContainer>
+            </PressableContainer>
           );
         });
 
-  // If no games
-  if (gamesData.length == 0) {
+  // Push an additional item for adding games
+  console.log(gamesData);
+  if (gamesData !== "loading") {
     gamesList.push(
-      <GameContainer key="0">
-        <MediumTitle>No games</MediumTitle>
-      </GameContainer>
+      <PressableContainer key="1" onPress={() => {}}>
+        <GameContainer
+          style={{ alignItems: "center", justifyContent: "center", paddingLeft: 0 }}
+        >
+          <PlusIcon>+</PlusIcon>
+        </GameContainer>
+      </PressableContainer>
     );
   }
 
@@ -309,9 +336,11 @@ const Home: React.FC = () => {
     teamsData === "loading"
       ? // Is loading
         [
-          <TeamContainer key={"0"}>
-            <LoadingGlyph></LoadingGlyph>
-          </TeamContainer>,
+          <PressableContainer key={0} onPress={() => {}}>
+            <TeamContainer>
+              <LoadingGlyph></LoadingGlyph>
+            </TeamContainer>
+          </PressableContainer>,
         ]
       : // Loaded
         teamsData.map((team) => {
@@ -365,7 +394,7 @@ const Home: React.FC = () => {
             <UserInfoButton
               onPress={() => {
                 bottomSheetRef.current.expand();
-                silentRefresh();
+                userDataRequest.refetch();
                 setIsBottomSheetVisible(true);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
@@ -382,7 +411,15 @@ const Home: React.FC = () => {
       </TopBar>
 
       <RefreshContainer
-        refreshControl={<RefreshControl refreshing={false} onRefresh={silentRefresh} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              gamesDataRequest.refetch();
+              teamsDataRequest.refetch();
+            }}
+          />
+        }
       >
         <Section>
           <TitleWithIndicatiorView>
