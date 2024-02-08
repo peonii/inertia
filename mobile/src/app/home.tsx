@@ -11,8 +11,10 @@ import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, RefreshControl } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
+import GameStatus from "../components/gameStatus";
+import GameCreationView from "../components/gameCreationView";
 
 const fakeTeams: Team[] = [
   {
@@ -57,18 +59,27 @@ function makeGradientColorsFromColor(color: string) {
   return [startColor, endColor];
 }
 
+const RefreshContainer = styled.ScrollView`
+  flex: 1;
+  width: 100%;
+`;
+
 const CenteredView = styled.View`
   flex: 1;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   background-color: #252525;
   height: 100%;
 `;
 
+const PressableContainer = styled.Pressable`
+  align-items: center;
+  justify-content: center;
+`;
+
 const TopBar = styled.View`
-  position: absolute;
+  margin-top: 63px;
   width: 100%;
-  top: 63px;
   align-items: center;
   flex-direction: row;
 `;
@@ -81,6 +92,7 @@ const InertiaLogo = styled.Image`
 
 const UserInfoContainer = styled.View`
   align-items: center;
+  height: 100%;
   justify-content: center;
   position: absolute;
   right: 27px;
@@ -136,7 +148,6 @@ const SmallTitle = styled.Text`
 `;
 
 const Section = styled.View`
-  width: 100%;
   align-items: left;
   overflow: visible;
   margin-top: 30px;
@@ -206,11 +217,25 @@ const RetryButtonText = styled.Text`
   font-family: Inter_400Regular;
   font-size: 14px;
 `;
+const PlusIcon = styled.Text`
+  color: #ffffff;
+  font-size: 30px;
+  font-family: Inter_400Regular;
+  background-color: #4a4a4a;
+  width: 50px;
+  height: 50px;
+  include-font-padding: false;
+  padding-bottom: 4px;
+  border-radius: 30px;
+  text-align: center;
+  vertical-align: middle;
+`;
 
 const Home: React.FC = () => {
   const authContext = useAuth();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+  const [isCreatingGame, setIsCreatingGame] = useState(false);
 
   const handleSheetChanges = useCallback((index: number) => {
     index === -1 && setIsBottomSheetVisible(false);
@@ -234,11 +259,7 @@ const Home: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  if (
-    userDataRequest.error ||
-    gamesDataRequest.error ||
-    teamsDataRequest.error
-  ) {
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -257,12 +278,8 @@ const Home: React.FC = () => {
   }
 
   const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending
-    ? "loading"
-    : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending
-    ? "loading"
-    : teamsDataRequest.data;
+  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -271,31 +288,53 @@ const Home: React.FC = () => {
   //Turning games's data into a list of views
   const gamesList =
     gamesData === "loading"
-      ? [
+      ? // Is loading
+        [
           <GameContainer key="0" style={{ paddingLeft: 0 }}>
             <LoadingGlyph></LoadingGlyph>
           </GameContainer>,
         ]
-      : gamesData.map((game) => {
-          const color = "#439255";
-          const statusText = "essa";
-
+      : // Loaded
+        gamesData.map((game) => {
           return (
-            <GameContainer key={game.id}>
-              <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-              <SmallTitle numberOfLines={1} style={{ color: color }}>
-                {statusText}
-              </SmallTitle>
-            </GameContainer>
+            <PressableContainer
+              key={game.id}
+              onPress={() => {
+                router.replace({
+                  pathname: "/game/[options]",
+                  params: { game: game },
+                });
+              }}
+            >
+              <GameContainer>
+                <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
+                <GameStatus
+                  timeLine={{
+                    start: "2024-02-06T11:12:00Z",
+                    end: "2024-02-06T11:30:00Z",
+                  }}
+                ></GameStatus>
+              </GameContainer>
+            </PressableContainer>
           );
         });
 
-  // If no games
-  if (gamesData.length == 0) {
+  // Push an additional item for adding games
+  console.log(gamesData);
+  if (gamesData !== "loading") {
     gamesList.push(
-      <GameContainer key="0">
-        <MediumTitle>No text</MediumTitle>
-      </GameContainer>,
+      <PressableContainer
+        key="1"
+        onPress={() => {
+          setIsCreatingGame(true);
+        }}
+      >
+        <GameContainer
+          style={{ alignItems: "center", justifyContent: "center", paddingLeft: 0 }}
+        >
+          <PlusIcon>+</PlusIcon>
+        </GameContainer>
+      </PressableContainer>
     );
   }
 
@@ -304,9 +343,11 @@ const Home: React.FC = () => {
     teamsData === "loading"
       ? // Is loading
         [
-          <TeamContainer key={"0"}>
-            <LoadingGlyph></LoadingGlyph>
-          </TeamContainer>,
+          <PressableContainer key={0} onPress={() => {}}>
+            <TeamContainer>
+              <LoadingGlyph></LoadingGlyph>
+            </TeamContainer>
+          </PressableContainer>,
         ]
       : // Loaded
         teamsData.map((team) => {
@@ -335,11 +376,12 @@ const Home: React.FC = () => {
           );
         });
 
+  // If no teams
   if (teamsData.length == 0) {
     teamList.push(
       <TeamContainer key="0">
         <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>,
+      </TeamContainer>
     );
   }
 
@@ -359,6 +401,7 @@ const Home: React.FC = () => {
             <UserInfoButton
               onPress={() => {
                 bottomSheetRef.current.expand();
+                userDataRequest.refetch();
                 setIsBottomSheetVisible(true);
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               }}
@@ -373,46 +416,64 @@ const Home: React.FC = () => {
           )}
         </UserInfoContainer>
       </TopBar>
-      <Section>
-        <TitleWithIndicatiorView>
-          <BigTitle>Your games</BigTitle>
-          {gamesData === "loading" ? (
-            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-          ) : null}
-        </TitleWithIndicatiorView>
-        <ListContainer
-          horizontal
-          snapToInterval={240}
-          snapToAlignment="start"
-          contentContainerStyle={{
-            paddingRight: 10,
-            paddingLeft: 10,
-          }}
-          showsHorizontalScrollIndicator={false}
+      {isCreatingGame ? (
+        <GameCreationView></GameCreationView>
+      ) : (
+        <RefreshContainer
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={() => {
+                gamesDataRequest.refetch();
+                teamsDataRequest.refetch();
+              }}
+            />
+          }
         >
-          {gamesList}
-        </ListContainer>
-      </Section>
-      <Section>
-        <TitleWithIndicatiorView>
-          <BigTitle>Your teams</BigTitle>
-          {teamsData === "loading" ? (
-            <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-          ) : null}
-        </TitleWithIndicatiorView>
-        <ListContainer
-          horizontal
-          snapToInterval={220}
-          snapToAlignment="start"
-          contentContainerStyle={{
-            paddingRight: 10,
-            paddingLeft: 10,
-          }}
-          showsHorizontalScrollIndicator={false}
-        >
-          {teamList}
-        </ListContainer>
-      </Section>
+          <Section>
+            <TitleWithIndicatiorView>
+              <BigTitle>Your games</BigTitle>
+              {gamesData === "loading" ? (
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+              ) : null}
+            </TitleWithIndicatiorView>
+            <ListContainer
+              horizontal
+              snapToInterval={240}
+              // snapToAlignment="start"
+              contentContainerStyle={{
+                paddingRight: 10,
+                paddingLeft: 10,
+              }}
+              showsHorizontalScrollIndicator={false}
+              style={gamesList.length === 1 ? { width: 260 } : {}}
+            >
+              {gamesList}
+            </ListContainer>
+          </Section>
+          <Section>
+            <TitleWithIndicatiorView>
+              <BigTitle>Your teams</BigTitle>
+              {teamsData === "loading" ? (
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+              ) : null}
+            </TitleWithIndicatiorView>
+            <ListContainer
+              horizontal
+              snapToInterval={220}
+              snapToAlignment="start"
+              contentContainerStyle={{
+                paddingRight: 10,
+                paddingLeft: 10,
+              }}
+              showsHorizontalScrollIndicator={false}
+              style={teamList.length === 1 ? { width: 240 } : {}}
+            >
+              {teamList}
+            </ListContainer>
+          </Section>
+        </RefreshContainer>
+      )}
       <DarkFilterContainer
         onPressOut={() => {
           setIsBottomSheetVisible(false);
@@ -425,7 +486,6 @@ const Home: React.FC = () => {
       </DarkFilterContainer>
 
       {/*/ Home Details List /*/}
-
       {userData == "loading" ? null : (
         <BottomSheet
           ref={bottomSheetRef}

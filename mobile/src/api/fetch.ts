@@ -27,6 +27,7 @@ export async function refreshToken(authContext: AuthContextType) {
   }
 
   const tokenData = await tokenResponse.json();
+  console.log(tokenData.access_token)
   authContext.setAccessToken(tokenData.access_token);
 }
 
