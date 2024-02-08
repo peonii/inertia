@@ -1,6 +1,9 @@
 import styled from "@emotion/native";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing } from "react-native";
+import { useForm, Controller } from "react-hook-form";
+
+type formStatus = "active" | "done" | "undone";
 
 const Container = styled.View`
   width: 100%;
@@ -67,28 +70,27 @@ const FieldPage = styled.View`
 `;
 
 type StatusDotProps = {
-  status: "active" | "done" | "undone";
+  status: formStatus;
 };
 
 const StatusDot: React.FC<StatusDotProps> = ({ status }) => {
   const width = useRef(new Animated.Value(status == "active" ? 1 : 0)).current;
 
-  function expand() {
+  function changeWidth(value: number) {
     Animated.timing(width, {
-      toValue: 1,
+      toValue: value,
       useNativeDriver: false,
-      duration: 200,
-      easing: Easing.elastic(1),
+      duration: 350,
+      easing: Easing.out(Easing.cubic),
     }).start();
   }
 
+  function expand() {
+    changeWidth(1);
+  }
+
   function collapse() {
-    Animated.timing(width, {
-      toValue: 0,
-      useNativeDriver: false,
-      duration: 200,
-      easing: Easing.elastic(1),
-    }).start();
+    changeWidth(0);
   }
 
   useEffect(() => {
@@ -112,7 +114,7 @@ const StatusDot: React.FC<StatusDotProps> = ({ status }) => {
 };
 
 type ProgressTrackerProps = {
-  statusArray: ("active" | "done" | "undone")[];
+  statusArray: formStatus[];
 };
 
 const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
@@ -131,22 +133,26 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
   );
 };
 
-const GameCreationView: React.FC = () => {
+type GameCreationViewProps = {
+  closeView: () => void;
+};
+
+const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
   const currentScreen = useRef(new Animated.Value(0)).current;
   function scrollTo(index: number) {
     Animated.timing(currentScreen, {
       toValue: index,
       useNativeDriver: false,
-      duration: 200,
-      easing: Easing.elastic(0),
+      duration: 600,
+      easing: Easing.out(Easing.cubic),
     }).start();
   }
 
-  const [statusArray, setStatusArray] = useState(["active", "undone", "undone"] as (
-    | "active"
-    | "done"
-    | "undone"
-  )[]);
+  const [statusArray, setStatusArray] = useState([
+    "active",
+    "undone",
+    "undone",
+  ] as formStatus[]);
 
   useEffect(() => {
     if (statusArray.indexOf("active") >= 0) {
@@ -156,9 +162,21 @@ const GameCreationView: React.FC = () => {
     }
   }, [statusArray]);
 
+  function goPrevious() {
+    const lastActiveIndex = statusArray.indexOf("active");
+    if (lastActiveIndex < 0) {
+      setStatusArray(["done", "done", "active"]);
+      return;
+    }
+    if (lastActiveIndex == 0) {
+      closeView();
+    }
+  }
+
   function goNext() {
     if (statusArray[statusArray.length - 1] == "done") {
-      setStatusArray(["active", "undone", "undone"]);
+      // TODO send post request to database
+      closeView();
       return;
     }
 

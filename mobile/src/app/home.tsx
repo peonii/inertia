@@ -417,7 +417,11 @@ const Home: React.FC = () => {
         </UserInfoContainer>
       </TopBar>
       {isCreatingGame ? (
-        <GameCreationView></GameCreationView>
+        <GameCreationView
+          closeView={() => {
+            setIsCreatingGame(false);
+          }}
+        ></GameCreationView>
       ) : (
         <RefreshContainer
           refreshControl={
