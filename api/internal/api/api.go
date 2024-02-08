@@ -30,10 +30,12 @@ type api struct {
 	config *APIConfig
 
 	userRepo       repository.UserRepository
+	userStatsRepo  repository.UserStatsRepository
 	gameRepo       repository.GameRepository
 	teamRepo       repository.TeamRepository
 	locationRepo   repository.LocationRepository
 	gameInviteRepo repository.GameInviteRepository
+	questRepo      repository.QuestRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -52,6 +54,8 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	tr := repository.MakePostgresTeamRepository(db)
 	lr := repository.MakePostgresLocationRepository(db, rdc)
 	gir := repository.MakePostgresGameInviteRepository(db)
+	qr := repository.MakePostgresQuestRepository(db)
+	usr := repository.MakePostgresUserStatsRepository(db)
 
 	wsServer := websocket.Start(ctx)
 
@@ -62,6 +66,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		rdc:    rdc,
 
 		userRepo:         ur,
+		userStatsRepo:    usr,
 		oauthCodeRepo:    ocr,
 		accessTokenRepo:  atr,
 		refreshTokenRepo: rtr,
@@ -69,6 +74,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		teamRepo:         tr,
 		locationRepo:     lr,
 		gameInviteRepo:   gir,
+		questRepo:        qr,
 
 		wsServer: wsServer,
 		wsHub:    NewWsHub(),
@@ -131,6 +137,50 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 												Schema: domain.UserPublic{},
 											},
 										},
+									},
+								},
+								Paths: chioas.Paths{
+									"/stats": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodGet: chioas.Method{
+												Description: "Get a user's stats",
+												Handler:     a.userStatsHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{
+														Schema: domain.UserStats{},
+													},
+												},
+											},
+										},
+									},
+									"/placement": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodGet: chioas.Method{
+												Description: "Get a user's placement",
+												Handler:     a.leaderboardPlacementHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{
+														Schema: placementResponse{},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"/leaderboard": chioas.Path{
+						Tag:         "Leaderboard",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Methods: chioas.Methods{
+							http.MethodGet: chioas.Method{
+								Description: "Get the leaderboard",
+								Handler:     a.leaderboardHandler,
+								Responses: chioas.Responses{
+									http.StatusOK: chioas.Response{
+										Schema:  domain.UserStats{},
+										IsArray: true,
 									},
 								},
 							},
@@ -243,6 +293,24 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 									},
 								},
 							},
+							"/{id}": chioas.Path{
+								Paths: chioas.Paths{
+									"/quests": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodGet: chioas.Method{
+												Description: "Get quests in a team",
+												Handler:     a.teamQuestsHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{
+														Schema:  domain.Quest{},
+														IsArray: true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 					"/locations": chioas.Path{
@@ -261,6 +329,56 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 										},
 										Request: &chioas.Request{
 											Schema: LocationPayload{},
+										},
+									},
+								},
+							},
+						},
+					},
+					"/quest": chioas.Path{
+						Tag:         "Quests",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Create a new quest",
+										Handler:     a.createQuestHandler,
+										Responses: chioas.Responses{
+											http.StatusCreated: chioas.Response{
+												Schema: domain.QuestCreate{},
+											},
+										},
+										Request: &chioas.Request{
+											Schema: domain.QuestCreate{},
+										},
+									},
+								},
+							},
+							"/{id}": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get quest by ID",
+										Handler:     a.questByIdHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema: domain.Quest{},
+											},
+										},
+									},
+								},
+								Paths: chioas.Paths{
+									"/complete": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodPost: chioas.Method{
+												Description: "Complete a quest (provide active quest ID)",
+												Handler:     a.completeQuestHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{
+														Schema: domain.Quest{},
+													},
+												},
+											},
 										},
 									},
 								},

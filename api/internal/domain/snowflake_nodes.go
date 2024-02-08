@@ -9,4 +9,5 @@ const (
 	QuestGroupSnowflakeNode
 	QuestSnowflakeNode
 	ActiveQuestSnowflakeNode
+	StatsSnowflakeNode
 )

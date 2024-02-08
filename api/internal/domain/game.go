@@ -26,3 +26,11 @@ type GameCreate struct {
 	LocLat    float64   `json:"loc_lat"`
 	LocLng    float64   `json:"loc_lng"`
 }
+
+func (g *Game) CanEdit(u *User) bool {
+	if u.AuthLevel == UserAuthLevelAdmin {
+		return true
+	}
+
+	return g.HostID == u.ID
+}

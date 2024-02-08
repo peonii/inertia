@@ -26,6 +26,7 @@ type QuestRepository interface {
 
 	FindActive(ctx context.Context, id string) (*domain.ActiveQuestFull, error)
 	FindActiveByTeamID(ctx context.Context, teamID string) ([]*domain.ActiveQuestFull, error)
+	TeamHasActiveSide(ctx context.Context, teamID string) (bool, error)
 	CreateActive(ctx context.Context, quest *domain.ActiveQuestCreate) (*domain.ActiveQuest, error)
 	Complete(ctx context.Context, id string) error
 	DeleteActive(ctx context.Context, id string) error
@@ -198,14 +199,14 @@ func (r *PostgresQuestRepository) DeleteGroup(ctx context.Context, id string) er
 
 func (r *PostgresQuestRepository) FindActive(ctx context.Context, id string) (*domain.ActiveQuestFull, error) {
 	query := `
-	SELECT q.id, q.title, q.description, q.money, q.xp, q.quest_type, q.group_id, q.lat, q.lng, q.game_id, q.created_at, aq.complete, aq.created_at
+	SELECT q.id, q.title, q.description, q.money, q.xp, q.quest_type, q.group_id, q.lat, q.lng, q.game_id, q.created_at, aq.team_id, aq.complete, aq.created_at
 	FROM quests q
 	JOIN active_quests aq ON q.id = aq.quest_id
 	WHERE aq.id = $1
 	`
 
 	activeQuest := &domain.ActiveQuestFull{}
-	err := r.db.QueryRow(ctx, query, id).Scan(&activeQuest.ID, &activeQuest.Title, &activeQuest.Description, &activeQuest.Money, &activeQuest.XP, &activeQuest.QuestType, &activeQuest.GroupID, &activeQuest.Lat, &activeQuest.Lng, &activeQuest.GameID, &activeQuest.CreatedAt, &activeQuest.Complete, &activeQuest.StartedAt)
+	err := r.db.QueryRow(ctx, query, id).Scan(&activeQuest.ID, &activeQuest.Title, &activeQuest.Description, &activeQuest.Money, &activeQuest.XP, &activeQuest.QuestType, &activeQuest.GroupID, &activeQuest.Lat, &activeQuest.Lng, &activeQuest.GameID, &activeQuest.CreatedAt, &activeQuest.TeamID, &activeQuest.Complete, &activeQuest.StartedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -434,4 +435,17 @@ func (r *PostgresQuestRepository) GenerateSideQuest(ctx context.Context, teamID 
 		TeamID:   teamID,
 		Complete: false,
 	})
+
+	return nil
+}
+
+func (r *PostgresQuestRepository) TeamHasActiveSide(ctx context.Context, teamID string) (bool, error) {
+	query := `SELECT COUNT(*) FROM active_quests WHERE team_id = $1 AND complete = false AND quest_id IN (SELECT id FROM quests WHERE quest_type = 'side')`
+	var count int
+	err := r.db.QueryRow(ctx, query, teamID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

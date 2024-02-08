@@ -253,11 +253,19 @@ func (a *api) authorizeCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		user.RefreshToken = tokenResp.RefreshToken
 		user.Image = userResp.Image
 		user.Name = userResp.Username
-    user.DisplayName = dn
+		user.DisplayName = dn
 
 		user, err = a.userRepo.Update(r.Context(), user)
 		if err != nil {
 			a.sendError(w, r, http.StatusInternalServerError, err, "failed to update user")
+			return
+		}
+	}
+
+	_, err = a.userStatsRepo.Get(r.Context(), user.ID)
+	if err != nil {
+		if err := a.userStatsRepo.Init(r.Context(), user.ID); err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to init stats")
 			return
 		}
 	}

@@ -74,6 +74,7 @@ type ActiveQuestFull struct {
 	Complete bool `json:"complete"`
 
 	GameID string `json:"game_id"`
+	TeamID string `json:"team_id"`
 
 	CreatedAt time.Time `json:"created_at"`
 	StartedAt time.Time `json:"started_at"`

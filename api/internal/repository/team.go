@@ -16,9 +16,11 @@ type TeamRepository interface {
 	FindByUserID(ctx context.Context, userID string) ([]*domain.Team, error)
 
 	FindByGameUser(ctx context.Context, gameID, userID string) (*domain.Team, error)
+	FindMembers(ctx context.Context, teamID string) ([]*domain.User, error)
 
 	Create(ctx context.Context, team *domain.TeamCreate) (*domain.Team, error)
 	AddTeamMember(ctx context.Context, teamID, userID string) error
+	IsTeamMember(ctx context.Context, t *domain.Team, u *domain.User) (bool, error)
 }
 
 type PostgresTeamRepository struct {
@@ -44,7 +46,7 @@ func (r *PostgresTeamRepository) FindAll(ctx context.Context) ([]*domain.Team, e
 		return nil, err
 	}
 
-  teams := []*domain.Team{}
+	teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(
@@ -108,7 +110,7 @@ func (r *PostgresTeamRepository) FindByGameID(ctx context.Context, gameID string
 		return nil, err
 	}
 
-  teams := []*domain.Team{}
+	teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(
@@ -146,7 +148,7 @@ func (r *PostgresTeamRepository) FindByUserID(ctx context.Context, userID string
 		return nil, err
 	}
 
-  teams := []*domain.Team{}
+	teams := []*domain.Team{}
 	for rows.Next() {
 		var team domain.Team
 		if err := rows.Scan(
@@ -255,4 +257,53 @@ func (r *PostgresTeamRepository) AddTeamMember(ctx context.Context, teamID, user
 	}
 
 	return nil
+}
+
+func (r *PostgresTeamRepository) IsTeamMember(ctx context.Context, t *domain.Team, u *domain.User) (bool, error) {
+	users, err := r.FindMembers(ctx, t.ID)
+	if err != nil {
+		return false, err
+	}
+	for _, user := range users {
+		if user.ID == u.ID {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (r *PostgresTeamRepository) FindMembers(ctx context.Context, teamID string) ([]*domain.User, error) {
+	query := `
+		SELECT
+			u.id, u.discord_id, u.name, u.display_name, u.image, u.auth_level, u.created_at
+		FROM users u
+		INNER JOIN teams_users tm ON tm.user_id = u.id
+		WHERE tm.team_id = $1
+	`
+
+	rows, err := r.db.Query(ctx, query, teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*domain.User{}
+	for rows.Next() {
+		var user domain.User
+		if err := rows.Scan(
+			&user.ID,
+			&user.DiscordID,
+			&user.Name,
+			&user.DisplayName,
+			&user.Image,
+			&user.AuthLevel,
+			&user.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		users = append(users, &user)
+	}
+
+	return users, nil
 }
