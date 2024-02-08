@@ -77,7 +77,7 @@ const StatusDot: React.FC<StatusDotProps> = ({ status }) => {
     Animated.timing(width, {
       toValue: 1,
       useNativeDriver: false,
-      duration: 500,
+      duration: 200,
       easing: Easing.elastic(1),
     }).start();
   }
@@ -86,7 +86,7 @@ const StatusDot: React.FC<StatusDotProps> = ({ status }) => {
     Animated.timing(width, {
       toValue: 0,
       useNativeDriver: false,
-      duration: 500,
+      duration: 200,
       easing: Easing.elastic(1),
     }).start();
   }
@@ -134,12 +134,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
 const GameCreationView: React.FC = () => {
   const currentScreen = useRef(new Animated.Value(0)).current;
   function scrollTo(index: number) {
-    console.log(index);
     Animated.timing(currentScreen, {
       toValue: index,
       useNativeDriver: false,
-      duration: 500,
-      easing: Easing.elastic(1),
+      duration: 200,
+      easing: Easing.elastic(0),
     }).start();
   }
 
@@ -150,7 +149,6 @@ const GameCreationView: React.FC = () => {
   )[]);
 
   useEffect(() => {
-    console.log(statusArray);
     if (statusArray.indexOf("active") >= 0) {
       scrollTo(statusArray.indexOf("active"));
     } else {
@@ -182,18 +180,6 @@ const GameCreationView: React.FC = () => {
       <BigTitle>Host your game</BigTitle>
       <ProgressTracker statusArray={statusArray}></ProgressTracker>
 
-      {
-        // align-items: left;
-        // justify-content: flex-start;
-        // flex-direction: row;
-        // height: 320px;
-        // width: 400%;
-        // background-color: #fee;
-        // position: absolute;
-        // top: 23%;
-        // left: -300%;
-      }
-
       <Animated.View
         style={{
           flexDirection: "row",
@@ -207,16 +193,23 @@ const GameCreationView: React.FC = () => {
           }),
         }}
       >
-        <FieldPage style={{ backgroundColor: "#f00" }}>
+        {/* Page 1 */}
+        <FieldPage>
           <BigTitle>1</BigTitle>
         </FieldPage>
-        <FieldPage style={{ backgroundColor: "#0f0" }}>
+
+        {/* Page 2 */}
+        <FieldPage>
           <BigTitle>2</BigTitle>
         </FieldPage>
-        <FieldPage style={{ backgroundColor: "#00f" }}>
+
+        {/* Page 3 */}
+        <FieldPage>
           <BigTitle>3</BigTitle>
         </FieldPage>
-        <FieldPage style={{ backgroundColor: "#000" }}>
+
+        {/* Page 4 */}
+        <FieldPage>
           <BigTitle>4</BigTitle>
         </FieldPage>
       </Animated.View>
