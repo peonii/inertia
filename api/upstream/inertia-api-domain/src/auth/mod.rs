@@ -2,7 +2,11 @@ use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
 pub mod repository;
+pub mod request;
 pub mod service;
+
+pub static ACCESS_TOKEN_EXPIRATION: u128 = 1000 * 60 * 60 * 24; // 24 hours
+pub static REFRESH_TOKEN_EXPIRATION: u128 = 1000 * 60 * 60 * 24 * 365; // 1 year
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessToken {
@@ -11,9 +15,9 @@ pub struct AccessToken {
     #[serde(rename = "sub")]
     pub subject: String, // user id
     #[serde(rename = "exp")]
-    pub expiration: i64,
+    pub expiration: u128,
     #[serde(rename = "iat")]
-    pub issued_at: i64,
+    pub issued_at: u128,
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
@@ -25,9 +29,9 @@ pub struct RefreshToken {
 }
 
 pub enum TokenVerifyResult {
-    Valid,
-    Invalid,
+    Valid(String),
     Expired,
+    // No invalid case because it'll be an error
 }
 
 pub struct TokenPair {

@@ -7,9 +7,9 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(db: &PgPool) -> Self {
+    pub fn new(db: &PgPool, redis: redis::Client) -> Self {
         Self {
-            service: ServiceManager::new(db.clone()),
+            service: ServiceManager::new(db.clone(), redis),
         }
     }
 }
