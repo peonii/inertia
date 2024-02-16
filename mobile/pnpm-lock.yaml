@@ -17,6 +17,9 @@ dependencies:
   '@gorhom/bottom-sheet':
     specifier: '4'
     version: 4.6.0(@types/react@18.2.48)(react-native-gesture-handler@2.14.1)(react-native-reanimated@3.6.2)(react-native@0.73.2)(react@18.2.0)
+  '@react-native-community/datetimepicker':
+    specifier: 7.6.1
+    version: 7.6.1
   '@tanstack/react-query':
     specifier: ^5.18.1
     version: 5.18.1(react@18.2.0)
@@ -65,6 +68,9 @@ dependencies:
   react-native:
     specifier: 0.73.2
     version: 0.73.2(@babel/core@7.23.9)(@babel/preset-env@7.23.9)(react@18.2.0)
+  react-native-date-picker:
+    specifier: ^4.3.5
+    version: 4.3.5(react-native@0.73.2)(react@18.2.0)
   react-native-gesture-handler:
     specifier: ~2.14.1
     version: 2.14.1(react-native@0.73.2)(react@18.2.0)
@@ -2532,6 +2538,12 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
+    dev: false
+
+  /@react-native-community/datetimepicker@7.6.1:
+    resolution: {integrity: sha512-g66Q2Kd9Uw3eRL7kkrTsGhi+eXxNoPDRFYH6z78sZQuYjPkUQgJDDMUYgBmaBsQx/fKMtemPrCj1ulGmyi0OSw==}
+    dependencies:
+      invariant: 2.2.4
     dev: false
 
   /@react-native/assets-registry@0.73.1:
@@ -7026,6 +7038,16 @@ packages:
 
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
+    dev: false
+
+  /react-native-date-picker@4.3.5(react-native@0.73.2)(react@18.2.0):
+    resolution: {integrity: sha512-jKOGCM2AUkRJb+tXYiwFHLfbB1Jh7OWXH4TxhLsuh7DWMXpWgUN3cGlFr3vl7G4wy45raAyPqmsZNSqmMr/98g==}
+    peerDependencies:
+      react: '>= 17.0.1'
+      react-native: '>= 0.64.3'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.73.2(@babel/core@7.23.9)(@babel/preset-env@7.23.9)(react@18.2.0)
     dev: false
 
   /react-native-gesture-handler@2.14.1(react-native@0.73.2)(react@18.2.0):
