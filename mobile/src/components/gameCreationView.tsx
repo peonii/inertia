@@ -1,8 +1,10 @@
 import styled from "@emotion/native";
-import { useEffect, useRef, useState } from "react";
-import { Animated, Easing } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Animated, Easing, useWindowDimensions } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import BottomSheet from "@gorhom/bottom-sheet";
+import MapView, { Region } from "react-native-maps";
 
 const months = [
   "January",
@@ -72,6 +74,7 @@ type formStatus = "active" | "done" | "undone";
 const Container = styled.View`
   width: 100%;
   height: 100%;
+  background-color: #252525;
 `;
 
 const BigTitle = styled.Text`
@@ -95,6 +98,13 @@ const MediumGrayTitle = styled.Text`
   color: #a5a5a5;
   font-family: Inter_500Medium;
   letter-spacing: -1.6px;
+`;
+
+const SmallTitle = styled.Text`
+  font-size: 20px;
+  color: #ffffff;
+  font-family: Inter_600SemiBold;
+  letter-spacing: -1.3px;
 `;
 
 const SmallGrayTitle = styled.Text`
@@ -175,6 +185,55 @@ const CurrentDetails = styled.View`
   position: absolute;
 `;
 
+const ErrorMessage = styled.Text`
+  font-size: 18px;
+  font-family: Inter_600SemiBold;
+  color: #dd3333;
+  letter-spacing: -1.2px;
+`;
+
+const ExitButton = styled.View`
+  background-color: #434343;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ExitButtonText = styled.Text`
+  font-size: 19px;
+  font-family: Inter_600SemiBold;
+  include-font-padding: false;
+  vertical-align: middle;
+  color: #929292;
+  padding-bottom: 2px;
+`;
+
+const DarkFilter = styled.View`
+  opacity: 0.4;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+`;
+
+const MapContainer = styled.View`
+  height: 100%;
+  width: 91%;
+  margin: 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Crosshair = styled.Image`
+  position: absolute;
+  width: 100px;
+  height: 35px;
+`;
+
 type StatusDotProps = {
   status: formStatus;
 };
@@ -253,7 +312,10 @@ type DateFormData = {
 };
 
 type LocationFormData = {
-  location: string;
+  location: {
+    lat: number;
+    lng: number;
+  };
 };
 
 const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
@@ -282,7 +344,10 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
 
   const locationForm = useForm<LocationFormData>({
     defaultValues: {
-      location: "",
+      location: {
+        lat: 52.22884197323852,
+        lng: 21.003216436837576,
+      },
     },
   });
 
@@ -331,12 +396,12 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
 
   function goPrevious() {
     const lastActiveIndex = statusArray.indexOf("active");
-    if (lastActiveIndex == 1) {
+    if (lastActiveIndex === 1) {
       dateForm.reset();
       slide(0, "out");
     }
 
-    if (lastActiveIndex == 2) {
+    if (lastActiveIndex === 2) {
       locationForm.reset();
       slide(1, "out");
     }
@@ -387,6 +452,34 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
     color: "#a5a5a5",
     letterSpacing: -1.3,
   };
+
+  const [isLocationPickerVisible, setIsLocationPickerVisible] = useState(false);
+
+  const locationPickerRef = useRef<BottomSheet>(null);
+
+  const handleSheetChanges = useCallback((index: number) => {
+    index === -1 && setIsLocationPickerVisible(false);
+  }, []);
+
+  const currentMapPosition = useRef(locationForm.getValues("location"));
+
+  function updatePosition(region: Region) {
+    currentMapPosition.current = { lat: region.latitude, lng: region.longitude };
+  }
+
+  const mapRef = useRef<MapView>(null);
+  const [addressText, setAdressText] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const adress = await mapRef.current.addressForCoordinate({
+        latitude: currentMapPosition.current.lat,
+        longitude: currentMapPosition.current.lng,
+      });
+      setAdressText(`${adress.subLocality}, ${adress.locality}`);
+    })();
+  }, [locationForm.getValues("location")]);
+
   return (
     <Container>
       <BigTitle>Host your game</BigTitle>
@@ -401,7 +494,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
         <Animated.Text
           style={[[animTextStyle], { opacity: slideInValues[1], marginTop: scale(1) }]}
         >
-          Stats @ {formatDateShort(dateForm.getValues("startDate"))}
+          Starts @ {formatDateShort(dateForm.getValues("startDate"))}
         </Animated.Text>
         <Animated.Text
           style={[[animTextStyle], { opacity: slideInValues[2], marginTop: scale(2) }]}
@@ -428,7 +521,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
           <Controller
             control={nameForm.control}
             rules={{
-              required: true,
+              required: "Name is required",
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <GameNameInput
@@ -437,10 +530,14 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                onSubmitEditing={nameForm.handleSubmit(goNext)}
               />
             )}
             name="name"
           ></Controller>
+          <ErrorMessage>
+            {nameForm.formState.errors.name && nameForm.formState.errors.name.message}
+          </ErrorMessage>
         </FieldPage>
 
         {/* Page 2 */}
@@ -519,7 +616,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
                     mode={isPickingTime ? "time" : "date"}
                     value={new Date(value)}
                     onChange={(event) => {
-                      if (event.type == "dismissed") {
+                      if (event.type === "dismissed") {
                         console.log("dismissed");
                         setEndDatePickerVisible(false);
                         return;
@@ -552,6 +649,17 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
         {/* Page 3 */}
         <FieldPage>
           <SmallGrayTitle>Where is it starting?</SmallGrayTitle>
+          <PressableContainer
+            style={{ alignItems: "flex-start", width: "100%" }}
+            onPress={() => {
+              locationPickerRef.current.expand();
+              setIsLocationPickerVisible(true);
+            }}
+          >
+            <MediumGrayTitle>Location</MediumGrayTitle>
+            <MediumTitle>{addressText}</MediumTitle>
+            <MediumGrayTitle style={{ paddingTop: 10 }}>Edit</MediumGrayTitle>
+          </PressableContainer>
         </FieldPage>
 
         {/* Page 4 */}
@@ -567,7 +675,18 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
           paddingLeft: 5,
           alignSelf: "center",
         }}
-        onPress={goNext}
+        onPress={(() => {
+          switch (statusArray.indexOf("active")) {
+            case 0:
+              return nameForm.handleSubmit(goNext);
+            case 1:
+              return dateForm.handleSubmit(goNext);
+            case 2:
+              return locationForm.handleSubmit(goNext);
+            case 3:
+              return goNext;
+          }
+        })()}
       >
         <NextButtonView>
           <MediumTitle>
@@ -586,6 +705,83 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView }) => {
           </SmallGrayTitle>
         </NextButtonView>
       </PressableContainer>
+      <PressableContainer
+        style={
+          isLocationPickerVisible
+            ? {
+                display: "flex",
+                height: 3000,
+                width: 3000,
+                position: "absolute",
+                bottom: 0,
+              }
+            : { display: "none" }
+        }
+        onPressOut={() => {
+          locationPickerRef.current.close();
+          setIsLocationPickerVisible(false);
+        }}
+      >
+        <DarkFilter></DarkFilter>
+      </PressableContainer>
+      <BottomSheet
+        snapPoints={["100%"]}
+        ref={locationPickerRef}
+        onChange={handleSheetChanges}
+        enablePanDownToClose={true}
+        index={-1}
+        backgroundStyle={{ backgroundColor: "#252525" }}
+      >
+        <Container
+          style={{
+            alignItems: "center",
+            height: Math.round(useWindowDimensions().height * 0.66),
+          }}
+        >
+          <SmallTitle style={{ alignSelf: "flex-start", left: 16 }}>
+            Select location
+          </SmallTitle>
+          <PressableContainer
+            style={{ position: "absolute", right: 16 }}
+            onPress={() => {
+              locationPickerRef.current.close();
+              setIsLocationPickerVisible(false);
+            }}
+          >
+            <ExitButton>
+              <ExitButtonText>x</ExitButtonText>
+            </ExitButton>
+          </PressableContainer>
+          <MapContainer>
+            <MapView
+              initialRegion={{
+                latitude: locationForm.getValues("location").lat,
+                longitude: locationForm.getValues("location").lng,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+              onRegionChange={updatePosition}
+              ref={mapRef}
+            ></MapView>
+            <Crosshair source={require("../../assets/map-crosshair.png")}></Crosshair>
+          </MapContainer>
+          <PressableContainer
+            onPress={() => {
+              locationPickerRef.current.forceClose();
+              locationForm.setValue("location", currentMapPosition.current);
+              setIsLocationPickerVisible(false);
+            }}
+          >
+            <NextButtonView>
+              <MediumTitle>Done</MediumTitle>
+            </NextButtonView>
+          </PressableContainer>
+        </Container>
+      </BottomSheet>
     </Container>
   );
 };
