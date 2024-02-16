@@ -11,7 +11,7 @@ import { Game, Team, User } from "../types";
 import { useAuth } from "../context/AuthContext";
 import * as Haptics from "expo-haptics";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, RefreshControl } from "react-native";
+import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
 import GameCreationView from "../components/gameCreationView";
@@ -238,6 +238,7 @@ const Home: React.FC = () => {
   const [isCreatingGame, setIsCreatingGame] = useState(false);
 
   const handleSheetChanges = useCallback((index: number) => {
+    console.log("index: ", index);
     index === -1 && setIsBottomSheetVisible(false);
   }, []);
 
@@ -408,7 +409,11 @@ const Home: React.FC = () => {
   }
 
   return (
-    <CenteredView>
+    <CenteredView
+      style={{
+        minHeight: Math.round(useWindowDimensions().height),
+      }}
+    >
       <TopBar>
         <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
         <UserInfoContainer>
