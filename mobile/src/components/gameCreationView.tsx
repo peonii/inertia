@@ -127,7 +127,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
     <ProgressTrackerContainer>
       <StatusDotsContainer>{statusList}</StatusDotsContainer>
       <StatusProgressText>
-        {done > statusList.length ? "All done!" : `${done}/${statusArray.length}`}
+        {done > statusList.length
+          ? "All done!"
+          : `${done}/${statusArray.length}`}
       </StatusProgressText>
     </ProgressTrackerContainer>
   );
