@@ -310,6 +310,17 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 										},
 									},
 								},
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get team by ID",
+										Handler:     a.teamByIDHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema: domain.Team{},
+											},
+										},
+									},
+								},
 							},
 						},
 					},

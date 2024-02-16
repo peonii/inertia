@@ -260,7 +260,11 @@ const Home: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+  if (
+    userDataRequest.error ||
+    gamesDataRequest.error ||
+    teamsDataRequest.error
+  ) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -279,8 +283,12 @@ const Home: React.FC = () => {
   }
 
   const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
+  const gamesData = gamesDataRequest.isPending
+    ? "loading"
+    : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending
+    ? "loading"
+    : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -331,11 +339,15 @@ const Home: React.FC = () => {
         }}
       >
         <GameContainer
-          style={{ alignItems: "center", justifyContent: "center", paddingLeft: 0 }}
+          style={{
+            alignItems: "center",
+            justifyContent: "center",
+            paddingLeft: 0,
+          }}
         >
           <PlusIcon>+</PlusIcon>
         </GameContainer>
-      </PressableContainer>
+      </PressableContainer>,
     );
   }
 
@@ -353,27 +365,32 @@ const Home: React.FC = () => {
       : // Loaded
         teamsData.map((team) => {
           return (
-            <TeamContainer key={team.id}>
-              <LinearGradient
-                colors={makeGradientColorsFromColor(team.color)}
-                style={{
-                  height: 175,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <BigTitle style={{ fontSize: 64 }}>{team.emoji}</BigTitle>
-              </LinearGradient>
-              <TeamInfo>
-                <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
-                <SmallTitle
-                  numberOfLines={1}
-                >{`${team.xp} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
-                <BalanceText>{`${team.balance}$`}</BalanceText>
-              </TeamInfo>
-            </TeamContainer>
+            <PressableContainer
+              key={team.id}
+              onPress={() => router.push(`/team/${team.id}`)}
+            >
+              <TeamContainer>
+                <LinearGradient
+                  colors={makeGradientColorsFromColor(team.color)}
+                  style={{
+                    height: 175,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <BigTitle style={{ fontSize: 64 }}>{team.emoji}</BigTitle>
+                </LinearGradient>
+                <TeamInfo>
+                  <MediumTitle numberOfLines={1}>{team.name}</MediumTitle>
+                  <SmallTitle
+                    numberOfLines={1}
+                  >{`${team.xp} XP  •  ${team.is_runner ? "Runner" : "Hunter"}`}</SmallTitle>
+                  <BalanceText>{`${team.balance}$`}</BalanceText>
+                </TeamInfo>
+              </TeamContainer>
+            </PressableContainer>
           );
         });
 
@@ -382,7 +399,7 @@ const Home: React.FC = () => {
     teamList.push(
       <TeamContainer key="0">
         <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>
+      </TeamContainer>,
     );
   }
 
@@ -443,7 +460,10 @@ const Home: React.FC = () => {
             <TitleWithIndicatiorView>
               <BigTitle>Your games</BigTitle>
               {gamesData === "loading" ? (
-                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+                <ActivityIndicator
+                  color="#ffffff"
+                  size="small"
+                ></ActivityIndicator>
               ) : null}
             </TitleWithIndicatiorView>
             <ListContainer
@@ -464,7 +484,10 @@ const Home: React.FC = () => {
             <TitleWithIndicatiorView>
               <BigTitle>Your teams</BigTitle>
               {teamsData === "loading" ? (
-                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+                <ActivityIndicator
+                  color="#ffffff"
+                  size="small"
+                ></ActivityIndicator>
               ) : null}
             </TitleWithIndicatiorView>
             <ListContainer

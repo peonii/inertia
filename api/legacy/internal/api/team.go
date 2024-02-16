@@ -20,6 +20,18 @@ func (a *api) teamsByGameIDHandler(w http.ResponseWriter, r *http.Request) {
 	a.sendJson(w, http.StatusOK, teams)
 }
 
+func (a *api) teamByIDHandler(w http.ResponseWriter, r *http.Request) {
+	tid := chi.URLParam(r, "id")
+
+	team, err := a.teamRepo.FindOne(r.Context(), tid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
+		return
+	}
+
+	a.sendJson(w, http.StatusOK, team)
+}
+
 func (a *api) joinedTeamsHandler(w http.ResponseWriter, r *http.Request) {
 	uid := a.session(r)
 
@@ -29,10 +41,10 @@ func (a *api) joinedTeamsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  if len(teams) == 0 {
-    a.sendJson(w, http.StatusOK, []domain.Team{})
-    return
-  }
+	if len(teams) == 0 {
+		a.sendJson(w, http.StatusOK, []domain.Team{})
+		return
+	}
 
 	a.sendJson(w, http.StatusOK, teams)
 }
@@ -57,10 +69,10 @@ func (a *api) joinTeamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	team, err := a.teamRepo.FindOne(r.Context(), tid)
-  if team.GameID != invite.GameID {
-    a.sendError(w, r, http.StatusUnauthorized, err, "failed to verify invite")
-    return
-  }
+	if team.GameID != invite.GameID {
+		a.sendError(w, r, http.StatusUnauthorized, err, "failed to verify invite")
+		return
+	}
 
 	err = a.teamRepo.AddTeamMember(r.Context(), tid, uid)
 	if err != nil {

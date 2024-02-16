@@ -1,0 +1,19 @@
+[package]
+name = "inertia-api"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["inertia-api-core", "inertia-api-domain", "inertia-api-service"]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "forbid"
+pedantic = "deny"
+nursery = "deny"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

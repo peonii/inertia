@@ -54,7 +54,10 @@ const Layout: React.FC = () => {
               },
               headerTintColor: "#fff",
               headerTitleStyle: {
-                fontWeight: "bold",
+                fontFamily: "Inter_700Bold",
+              },
+              headerBackTitleStyle: {
+                fontFamily: "Inter_500Medium",
               },
             }}
           >
@@ -80,6 +83,17 @@ const Layout: React.FC = () => {
                 headerTitle: "Home",
                 headerBackTitle: "Home",
                 headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="team/[id]"
+              options={{
+                headerTitle: "Team",
+                headerBackTitle: "Home",
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: "transparent",
+                },
               }}
             />
           </Stack>

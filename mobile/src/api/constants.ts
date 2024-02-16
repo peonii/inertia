@@ -7,13 +7,14 @@ export const ENDPOINTS = {
   },
   users: {
     me: `${BASE_URL}/api/v5/users/@me`,
-    id: (id: string) => `${BASE_URL}/api/v5/users/${id}`
+    id: (id: string) => `${BASE_URL}/api/v5/users/${id}`,
   },
   games: {
     all: `${BASE_URL}/api/v5/games`,
-    me: `${BASE_URL}/api/v5/games/@me`
+    me: `${BASE_URL}/api/v5/games/@me`,
   },
   teams: {
-    me: `${BASE_URL}/api/v5/teams/@me`
-  }
+    me: `${BASE_URL}/api/v5/teams/@me`,
+    id: (id: string) => `${BASE_URL}/api/v5/teams/${id}`,
+  },
 };
