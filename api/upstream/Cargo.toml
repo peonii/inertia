@@ -17,3 +17,7 @@ nursery = "deny"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tokio = { version = "1.36.0", features = ["full"] }
+inertia-api-core = { path = "inertia-api-core" }
+anyhow = "1.0.79"
+dotenvy = "0.15.7"
