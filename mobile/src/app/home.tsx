@@ -260,11 +260,7 @@ const Home: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  if (
-    userDataRequest.error ||
-    gamesDataRequest.error ||
-    teamsDataRequest.error
-  ) {
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -283,12 +279,8 @@ const Home: React.FC = () => {
   }
 
   const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending
-    ? "loading"
-    : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending
-    ? "loading"
-    : teamsDataRequest.data;
+  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
+  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -319,8 +311,8 @@ const Home: React.FC = () => {
                 <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
                 <GameStatus
                   timeLine={{
-                    start: "2024-02-06T11:12:00Z",
-                    end: "2024-02-06T11:30:00Z",
+                    start: game.time_start,
+                    end: game.time_end,
                   }}
                 ></GameStatus>
               </GameContainer>
@@ -347,7 +339,7 @@ const Home: React.FC = () => {
         >
           <PlusIcon>+</PlusIcon>
         </GameContainer>
-      </PressableContainer>,
+      </PressableContainer>
     );
   }
 
@@ -399,7 +391,7 @@ const Home: React.FC = () => {
     teamList.push(
       <TeamContainer key="0">
         <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>,
+      </TeamContainer>
     );
   }
 
@@ -442,7 +434,10 @@ const Home: React.FC = () => {
         <GameCreationView
           closeView={() => {
             setIsCreatingGame(false);
+            gamesDataRequest.refetch();
           }}
+          userId={userData != "loading" ? userData.id : ""}
+          authContext={authContext}
         ></GameCreationView>
       ) : (
         <RefreshContainer
@@ -460,10 +455,7 @@ const Home: React.FC = () => {
             <TitleWithIndicatiorView>
               <BigTitle>Your games</BigTitle>
               {gamesData === "loading" ? (
-                <ActivityIndicator
-                  color="#ffffff"
-                  size="small"
-                ></ActivityIndicator>
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
               ) : null}
             </TitleWithIndicatiorView>
             <ListContainer
@@ -484,10 +476,7 @@ const Home: React.FC = () => {
             <TitleWithIndicatiorView>
               <BigTitle>Your teams</BigTitle>
               {teamsData === "loading" ? (
-                <ActivityIndicator
-                  color="#ffffff"
-                  size="small"
-                ></ActivityIndicator>
+                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
               ) : null}
             </TitleWithIndicatiorView>
             <ListContainer
@@ -506,16 +495,17 @@ const Home: React.FC = () => {
           </Section>
         </RefreshContainer>
       )}
-      <DarkFilterContainer
-        onPressOut={() => {
-          setIsBottomSheetVisible(false);
-          bottomSheetRef.current.close();
-        }}
-        style={{ display: isBottomSheetVisible ? "flex" : "none" }}
-        activeOpacity={1}
-      >
-        <DarkFilter></DarkFilter>
-      </DarkFilterContainer>
+      {isBottomSheetVisible && (
+        <DarkFilterContainer
+          onPressOut={() => {
+            setIsBottomSheetVisible(false);
+            bottomSheetRef.current.close();
+          }}
+          activeOpacity={1}
+        >
+          <DarkFilter></DarkFilter>
+        </DarkFilterContainer>
+      )}
 
       {/*/ Home Details List /*/}
       {userData == "loading" ? null : (
