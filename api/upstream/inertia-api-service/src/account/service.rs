@@ -18,4 +18,8 @@ impl AccountService for InertiaAccountService {
     async fn create_account(&self, account: &CreateAccount) -> anyhow::Result<Account> {
         self.repository.create_account(account).await
     }
+
+    async fn get_by_account_id(&self, id: &str) -> anyhow::Result<Account> {
+        self.repository.get_account(id).await
+    }
 }

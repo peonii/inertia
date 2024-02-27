@@ -3,6 +3,7 @@ use sqlx::prelude::FromRow;
 
 pub mod repository;
 pub mod request;
+pub mod response;
 pub mod service;
 
 pub static ACCESS_TOKEN_EXPIRATION: u128 = 1000 * 60 * 60 * 24; // 24 hours
@@ -45,4 +46,12 @@ pub struct RefreshTokenResponse {
     pub access_token: String,
     pub expires_in: i64,
     pub token_type: String, // "Bearer"
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AuthCode {
+    pub user_id: String,
+    pub code: String,
+    #[serde(with = "time::serde::rfc3339")]
+    pub expires_at: time::OffsetDateTime,
 }

@@ -11,6 +11,9 @@ pub enum InertiaError {
 
     #[error("Error while processing request: {0}")]
     AnyhowError(#[from] anyhow::Error),
+
+    #[error("Error while processing request: {0}")]
+    ReqwestError(#[from] reqwest::Error),
 }
 
 pub type InertiaResult<T> = Result<T, InertiaError>;
@@ -21,6 +24,7 @@ impl InertiaError {
             InertiaError::PayloadError(_) => StatusCode::BAD_REQUEST,
             InertiaError::Unauthorized => StatusCode::UNAUTHORIZED,
             InertiaError::AnyhowError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            InertiaError::ReqwestError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

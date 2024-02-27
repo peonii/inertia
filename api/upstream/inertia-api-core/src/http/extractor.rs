@@ -12,7 +12,7 @@ use crate::state::AppState;
 
 use super::error::{InertiaError, InertiaResult};
 
-pub struct Auth(String);
+pub struct Auth(pub String);
 
 static SCHEME_PREFIX: &'static str = "Bearer ";
 

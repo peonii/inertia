@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use axum::Extension;
 use sqlx::postgres::PgPoolOptions;
@@ -19,7 +21,7 @@ pub async fn run() -> Result<()> {
     let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set");
     let redis = redis::Client::open(redis_url)?;
 
-    let app_state = AppState::new(&db, redis);
+    let app_state = Arc::new(AppState::new(&db, redis));
 
     let app = routes::router().layer(
         ServiceBuilder::new()

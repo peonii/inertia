@@ -33,6 +33,22 @@ impl AccountRepository for InertiaAccountRepository {
         Ok(account)
     }
 
+    async fn get_by_account_id(&self, id: &str) -> anyhow::Result<Account> {
+        let account = sqlx::query_as!(
+            Account,
+            r#"
+            SELECT id, user_id, account_type, account_id, access_token, refresh_token, created_at
+            FROM accounts
+            WHERE account_id = $1
+            "#,
+            id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(account)
+    }
+
     async fn create_account(&self, account: &CreateAccount) -> anyhow::Result<Account> {
         let mut gen = SnowflakeIdGenerator::new(1, ACCOUNTS_NODE);
 

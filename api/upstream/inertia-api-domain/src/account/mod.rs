@@ -49,6 +49,7 @@ pub struct Account {
     pub access_token: String,
     pub refresh_token: String,
 
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: time::OffsetDateTime,
 }
 

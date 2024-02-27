@@ -4,7 +4,7 @@ use sqlx::FromRow;
 pub mod repository;
 pub mod service;
 
-#[derive(Serialize, Deserialize, sqlx::Type)]
+#[derive(Serialize, Deserialize, sqlx::Type, PartialEq)]
 #[sqlx(rename_all = "lowercase")]
 pub enum AuthRole {
     #[serde(rename = "user")]
@@ -43,6 +43,7 @@ pub struct User {
 
     pub auth_role: AuthRole,
 
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: time::OffsetDateTime,
 }
 

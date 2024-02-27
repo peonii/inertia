@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use inertia_api_domain::auth::{
-    repository::DynAuthRepository, service::AuthService, RefreshTokenResponse, TokenPair,
+    repository::DynAuthRepository, service::AuthService, AuthCode, RefreshTokenResponse, TokenPair,
     TokenVerifyResult, ACCESS_TOKEN_EXPIRATION,
 };
 
@@ -16,6 +16,18 @@ impl InertiaAuthService {
 
 #[async_trait]
 impl AuthService for InertiaAuthService {
+    async fn create_auth_code(&self, user_id: &str) -> anyhow::Result<String> {
+        self.repository.create_auth_code(user_id).await
+    }
+
+    async fn verify_auth_code(&self, code: &str) -> anyhow::Result<AuthCode> {
+        self.repository.verify_auth_code(code).await
+    }
+
+    async fn delete_auth_code(&self, code: &str) -> anyhow::Result<()> {
+        self.repository.delete_auth_code(code).await
+    }
+
     async fn create_token_pair(&self, user_id: &str) -> anyhow::Result<TokenPair> {
         let repo = self.repository.clone();
 

@@ -10,11 +10,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use time::OffsetDateTime;
 
 use inertia_api_domain::auth::{
-    repository::AuthRepository, AccessToken, RefreshToken, TokenVerifyResult,
+    repository::AuthRepository, AccessToken, AuthCode, RefreshToken, TokenVerifyResult,
     ACCESS_TOKEN_EXPIRATION, REFRESH_TOKEN_EXPIRATION,
 };
 
-use crate::snowflake::REFRESH_TOKEN_NODE;
+use crate::snowflake::{AUTH_CODE_NODE, REFRESH_TOKEN_NODE};
 
 pub struct InertiaAuthRepository {
     pub redis: redis::Client,
@@ -28,6 +28,47 @@ impl InertiaAuthRepository {
 
 #[async_trait]
 impl AuthRepository for InertiaAuthRepository {
+    async fn create_auth_code(&self, user_id: &str) -> anyhow::Result<String> {
+        let mut gen = SnowflakeIdGenerator::new(1, AUTH_CODE_NODE);
+        let id = gen.generate().to_string();
+
+        let mut rng = rand::thread_rng();
+        let code = Alphanumeric.sample_string(&mut rng, 64);
+
+        let code = format!("c.{}", code);
+
+        let mut conn = self.redis.get_connection()?;
+
+        conn.set_ex(&code, user_id, 300)?;
+
+        Ok(code)
+    }
+
+    async fn verify_auth_code(&self, code: &str) -> anyhow::Result<AuthCode> {
+        let mut conn = self.redis.get_connection()?;
+
+        let user_id: String = conn.get(code)?;
+        let expiry: i64 = conn.ttl(code)?;
+
+        if user_id.is_empty() {
+            return Err(anyhow!("Invalid code"));
+        }
+
+        Ok(AuthCode {
+            code: code.to_owned(),
+            user_id,
+            expires_at: OffsetDateTime::now_utc() + time::Duration::seconds(expiry),
+        })
+    }
+
+    async fn delete_auth_code(&self, code: &str) -> anyhow::Result<()> {
+        let mut conn = self.redis.get_connection()?;
+
+        conn.del(code)?;
+
+        Ok(())
+    }
+
     fn create_access_token(&self, user_id: &str) -> anyhow::Result<String> {
         let token = AccessToken {
             issuer: "https://inertia.wtf/".to_owned(),
