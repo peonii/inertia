@@ -29,9 +29,6 @@ impl InertiaAuthRepository {
 #[async_trait]
 impl AuthRepository for InertiaAuthRepository {
     async fn create_auth_code(&self, user_id: &str) -> anyhow::Result<String> {
-        let mut gen = SnowflakeIdGenerator::new(1, AUTH_CODE_NODE);
-        let id = gen.generate().to_string();
-
         let mut rng = rand::thread_rng();
         let code = Alphanumeric.sample_string(&mut rng, 64);
 

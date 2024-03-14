@@ -3,4 +3,5 @@ pub mod auth;
 pub mod game;
 pub mod manager;
 mod snowflake;
+pub mod team;
 pub mod user;

@@ -59,7 +59,7 @@ impl GameRepository for InertiaGameRepository {
             "#,
             id,
             game.name,
-            game.official,
+            game.official.unwrap_or(false),
             game.time_start,
             game.time_end,
             game.loc_lat,

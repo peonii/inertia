@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::Path,
-    routing::{get, post},
+    routing::{delete, get, post},
     Extension, Json, Router,
 };
 use inertia_api_domain::{
@@ -20,8 +20,9 @@ use crate::{
 
 pub fn router() -> Router {
     Router::new()
-        .route("/:id", get(get_game_by_id))
         .route("/", post(create_game))
+        .route("/:id", get(get_game_by_id))
+        .route("/:id", delete(delete_game))
 }
 
 pub async fn get_game_by_id(
@@ -53,4 +54,20 @@ pub async fn create_game(
     let game = state.service.game_service.create_game(&cg).await?;
 
     Ok(Json(game))
+}
+
+pub async fn delete_game(
+    Extension(state): Extension<Arc<AppState>>,
+    Auth(user_id): Auth,
+    Path(id): Path<String>,
+) -> InertiaResult<Json<()>> {
+    let game = state.service.game_service.get_game(&id).await?;
+
+    if game.host_id != user_id {
+        return Err(InertiaError::Unauthorized);
+    }
+
+    state.service.game_service.delete_game(&id).await?;
+
+    Ok(Json(()))
 }
