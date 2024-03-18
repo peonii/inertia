@@ -30,7 +30,7 @@ pub async fn get_team_by_id(
 
 pub async fn create_team(
     Extension(state): Extension<Arc<AppState>>,
-    Auth(user_id): Auth,
+    Auth(_): Auth,
     Json(payload): Json<CreateTeam>,
 ) -> InertiaResult<Json<Team>> {
     let team = state.service.team_service.create_team(&payload).await?;
