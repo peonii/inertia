@@ -15,6 +15,8 @@ import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-na
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
 import GameCreationView from "../components/gameCreationView";
+import GameDetails from "../components/gameDetails";
+import { dimmColor, brightenColor, makeGradientColorsFromColor } from "../utilis";
 
 const fakeTeams: Team[] = [
   {
@@ -42,22 +44,6 @@ const fakeTeams: Team[] = [
     game_id: "2",
   },
 ];
-
-function dimmColor(color: number) {
-  return color - 20 < 0 ? 0 : color - 20;
-}
-function brightenColor(color: number) {
-  return color + 20 > 255 ? 255 : color + 20;
-}
-
-function makeGradientColorsFromColor(color: string) {
-  const red = parseInt(color.substring(1, 3), 16);
-  const green = parseInt(color.substring(3, 5), 16);
-  const blue = parseInt(color.substring(5, 7), 16);
-  const startColor = `rgb(${dimmColor(red)}, ${dimmColor(green)}, ${dimmColor(blue)})`;
-  const endColor = `rgb(${brightenColor(red)}, ${brightenColor(green)}, ${brightenColor(blue)})`;
-  return [startColor, endColor];
-}
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -236,6 +222,7 @@ const Home: React.FC = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [isCreatingGame, setIsCreatingGame] = useState(false);
+  const [visibleGameDetailsId, setVisibleDetailsId] = useState("");
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log("index: ", index);
@@ -301,10 +288,7 @@ const Home: React.FC = () => {
             <PressableContainer
               key={game.id}
               onPress={() => {
-                router.replace({
-                  pathname: "/game/[options]",
-                  params: { game: game },
-                });
+                setVisibleDetailsId(game.id);
               }}
             >
               <GameContainer>
@@ -430,14 +414,15 @@ const Home: React.FC = () => {
           )}
         </UserInfoContainer>
       </TopBar>
-      {isCreatingGame ? (
+      {visibleGameDetailsId ? (
+        <GameDetails id={visibleGameDetailsId}></GameDetails>
+      ) : isCreatingGame ? (
         <GameCreationView
           closeView={() => {
             setIsCreatingGame(false);
             gamesDataRequest.refetch();
           }}
           userId={userData != "loading" ? userData.id : ""}
-          authContext={authContext}
         ></GameCreationView>
       ) : (
         <RefreshContainer

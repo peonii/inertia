@@ -1,103 +1,15 @@
 import styled from "@emotion/native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, Easing, useWindowDimensions } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import BottomSheet from "@gorhom/bottom-sheet";
-import MapView, { Region } from "react-native-maps";
-import { AuthContextType } from "../context/AuthContext";
+import MapView from "react-native-maps";
+import { useAuth } from "../context/AuthContext";
 import { fetchTypeSafe } from "../api/fetch";
 import { ENDPOINTS } from "../api/constants";
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  let day: string = date.getDate().toString();
-  switch (day) {
-    case "1":
-      day += "st";
-      break;
-    case "2":
-      day += "nd";
-      break;
-    case "3":
-      day += "rd";
-      break;
-    default:
-      day += "th";
-      break;
-  }
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  let hour: string | number =
-    date.getHours() < 12 ? date.getHours() : date.getHours() - 12;
-  hour = hour.toString().length === 1 ? "0" + hour : hour;
-  const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
-  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
-  return `${day} ${month}, ${year}, ${hour}:${minutes} ${idkHowToNameThis}`;
-}
-
-function formatDateShort(dateString: string) {
-  const date = new Date(dateString);
-  let day: string = date.getDate().toString();
-  switch (day) {
-    case "1":
-      day += "st";
-      break;
-    case "2":
-      day += "nd";
-      break;
-    case "3":
-      day += "rd";
-      break;
-    default:
-      day += "th";
-      break;
-  }
-  const month = months[date.getMonth()].substring(0, 3);
-  return `${day} ${month}`;
-}
-
-function formatDateLong(dateString: string) {
-  const date = new Date(dateString);
-  let day: string = date.getDate().toString();
-  switch (day) {
-    case "1":
-      day += "st";
-      break;
-    case "2":
-      day += "nd";
-      break;
-    case "3":
-      day += "rd";
-      break;
-    default:
-      day += "th";
-      break;
-  }
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  let hour: string | number =
-    date.getHours() < 12 ? date.getHours() : date.getHours() - 12;
-  hour = hour.toString().length === 1 ? "0" + hour : hour;
-  const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
-  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
-  return `${day} ${month.substring(0, 3)}, ${year}, ${hour}:${minutes} ${idkHowToNameThis}`;
-}
+import { formatDate, formatDateLong, formatDateShort } from "../utilis";
+import LocationPickerSheet from "./locationPickerSheet";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Easing } from "react-native";
 
 type formStatus = "active" | "done" | "undone";
 
@@ -105,6 +17,8 @@ const Container = styled.View`
   width: 100%;
   height: 100%;
   background-color: #252525;
+  position: absolute;
+  bottom: 0;
 `;
 
 const BigTitle = styled.Text`
@@ -128,13 +42,6 @@ const MediumGrayTitle = styled.Text`
   color: #a5a5a5;
   font-family: Inter_500Medium;
   letter-spacing: -1.6px;
-`;
-
-const SmallTitle = styled.Text`
-  font-size: 20px;
-  color: #ffffff;
-  font-family: Inter_600SemiBold;
-  letter-spacing: -1.3px;
 `;
 
 const SmallGrayTitle = styled.Text`
@@ -222,48 +129,6 @@ const ErrorMessage = styled.Text`
   letter-spacing: -1.2px;
 `;
 
-const ExitButton = styled.View`
-  background-color: #434343;
-  width: 30px;
-  height: 30px;
-  border-radius: 15px;
-  align-items: center;
-  justify-content: center;
-`;
-
-const ExitButtonText = styled.Text`
-  font-size: 19px;
-  font-family: Inter_600SemiBold;
-  include-font-padding: false;
-  vertical-align: middle;
-  color: #929292;
-  padding-bottom: 2px;
-`;
-
-const DarkFilter = styled.View`
-  opacity: 0.4;
-  background-color: #000000;
-  width: 100%;
-  height: 100%;
-`;
-
-const MapContainer = styled.View`
-  height: 100%;
-  width: 91%;
-  margin: 16px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-`;
-
-const Crosshair = styled.Image`
-  position: absolute;
-  width: 100px;
-  height: 35px;
-`;
-
 type StatusDotProps = {
   status: formStatus;
 };
@@ -331,7 +196,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
 type GameCreationViewProps = {
   closeView: () => void;
   userId: string;
-  authContext: AuthContextType;
 };
 
 type NameFormData = {
@@ -350,11 +214,8 @@ type LocationFormData = {
   };
 };
 
-const GameCreationView: React.FC<GameCreationViewProps> = ({
-  closeView,
-  userId,
-  authContext,
-}) => {
+const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }) => {
+  const authContext = useAuth();
   const [startDatePickerVisible, setStartDatePickerVisible] = useState(false);
   const [endDatePickerVisible, setEndDatePickerVisible] = useState(false);
   const [isPickingTime, setIsPickingTime] = useState(false);
@@ -470,7 +331,6 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({
   }
 
   async function createGame(gameData) {
-    console.log("mega wtf");
     await fetchTypeSafe(ENDPOINTS.games.create, authContext, {
       method: "POST",
       body: JSON.stringify(gameData),
@@ -490,7 +350,6 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({
         loc_lat: locationForm.getValues("location").lat,
         loc_lng: locationForm.getValues("location").lng,
       };
-      console.log("wtf");
       await createGame(data);
       closeView();
       return;
@@ -522,24 +381,10 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({
     letterSpacing: -1.3,
   };
 
-  const [isLocationPickerVisible, setIsLocationPickerVisible] = useState(false);
-
   const locationPickerRef = useRef<BottomSheet>(null);
-
-  const handleSheetChanges = useCallback((index: number) => {
-    index === -1 && setIsLocationPickerVisible(false);
-  }, []);
-
-  const currentMapPosition = useRef(locationForm.getValues("location"));
-
-  function updatePosition(region: Region) {
-    currentMapPosition.current = { lat: region.latitude, lng: region.longitude };
-  }
 
   const mapRef = useRef<MapView>(null);
   const [addressText, setAdressText] = useState("");
-
-  const [isMapActivity, setIsMapActivity] = useState(false);
 
   async function updateAdressText() {
     const adress = await mapRef.current.addressForCoordinate({
@@ -732,7 +577,6 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({
                 0
               );
               locationPickerRef.current.expand();
-              setIsLocationPickerVisible(true);
             }}
           >
             <MediumGrayTitle>Location</MediumGrayTitle>
@@ -798,95 +642,23 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({
           </SmallGrayTitle>
         </NextButtonView>
       </PressableContainer>
-      {isLocationPickerVisible && (
-        <PressableContainer
-          style={{
-            height: 3000,
-            width: 3000,
-            position: "absolute",
-            bottom: 0,
-          }}
-          onPressOut={() => {
-            locationPickerRef.current.close();
-            setIsLocationPickerVisible(false);
-          }}
-        >
-          <DarkFilter></DarkFilter>
-        </PressableContainer>
-      )}
-      {
-        <BottomSheet
-          snapPoints={["100%"]}
-          ref={locationPickerRef}
-          onChange={handleSheetChanges}
-          enablePanDownToClose={true}
-          index={-1}
-          backgroundStyle={{ backgroundColor: "#252525" }}
-        >
-          <Container
-            style={{
-              alignItems: "center",
-              height: Math.round(useWindowDimensions().height * 0.66),
-            }}
-          >
-            <SmallTitle style={{ alignSelf: "flex-start", left: 16 }}>
-              Select location
-            </SmallTitle>
-            <PressableContainer
-              style={{ position: "absolute", right: 16 }}
-              onPress={() => {
-                locationPickerRef.current.close();
-                setIsLocationPickerVisible(false);
-              }}
-            >
-              <ExitButton>
-                <ExitButtonText>x</ExitButtonText>
-              </ExitButton>
-            </PressableContainer>
-            <MapContainer>
-              <MapView
-                initialRegion={{
-                  latitude: locationForm.getValues("location").lat,
-                  longitude: locationForm.getValues("location").lng,
-                  latitudeDelta: 0.1383,
-                  longitudeDelta: 0.06315,
-                }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                }}
-                onRegionChange={updatePosition}
-                ref={mapRef}
-              ></MapView>
-              {isMapActivity && (
-                <DarkFilter style={{ position: "absolute" }}></DarkFilter>
-              )}
-              {isMapActivity ? (
-                <ActivityIndicator
-                  style={{ position: "absolute" }}
-                  size={"large"}
-                ></ActivityIndicator>
-              ) : (
-                <Crosshair source={require("../../assets/map-crosshair.png")}></Crosshair>
-              )}
-            </MapContainer>
-            <PressableContainer
-              onPress={async () => {
-                setIsMapActivity(true);
-                locationForm.setValue("location", currentMapPosition.current);
-                updateAdressText();
-                setIsLocationPickerVisible(false);
-                locationPickerRef.current.forceClose();
-                setIsMapActivity(false);
-              }}
-            >
-              <NextButtonView>
-                <MediumTitle>Done</MediumTitle>
-              </NextButtonView>
-            </PressableContainer>
-          </Container>
-        </BottomSheet>
-      }
+      <LocationPickerSheet
+        sheetRef={locationPickerRef}
+        onCancel={() => {
+          locationPickerRef.current.close();
+        }}
+        onAccept={async () => {
+          const camera = await mapRef.current.getCamera();
+          console.log(camera);
+          locationForm.setValue("location", {
+            lat: camera.center.latitude,
+            lng: camera.center.longitude,
+          });
+          updateAdressText();
+        }}
+        initialRegion={locationForm.getValues("location")}
+        mapRef={mapRef}
+      ></LocationPickerSheet>
     </Container>
   );
 };

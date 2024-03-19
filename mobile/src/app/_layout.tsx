@@ -45,7 +45,7 @@ const Layout: React.FC = () => {
   }
   return (
     <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1, height: "100%" }}>
         <AuthContext.Provider value={{ accessToken, setAccessToken }}>
           <Stack
             screenOptions={{
