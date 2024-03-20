@@ -203,18 +203,23 @@ const RetryButtonText = styled.Text`
   font-family: Inter_400Regular;
   font-size: 14px;
 `;
+
+const PlusIconHolder = styled.View`
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  background-color: #4a4a4a;
+  justify-content: center;
+`;
+
 const PlusIcon = styled.Text`
   color: #ffffff;
   font-size: 30px;
   font-family: Inter_400Regular;
-  background-color: #4a4a4a;
-  width: 50px;
-  height: 50px;
   include-font-padding: false;
-  padding-bottom: 4px;
-  border-radius: 30px;
-  text-align: center;
   vertical-align: middle;
+  text-align: center;
+  padding-bottom: 4px;
 `;
 
 const Home: React.FC = () => {
@@ -321,7 +326,9 @@ const Home: React.FC = () => {
             paddingLeft: 0,
           }}
         >
-          <PlusIcon>+</PlusIcon>
+          <PlusIconHolder>
+            <PlusIcon>+</PlusIcon>
+          </PlusIconHolder>
         </GameContainer>
       </PressableContainer>
     );
@@ -391,7 +398,14 @@ const Home: React.FC = () => {
       }}
     >
       <TopBar>
-        <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
+        <PressableContainer
+          onPress={() => {
+            setVisibleDetailsId("");
+            setIsCreatingGame(false);
+          }}
+        >
+          <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
+        </PressableContainer>
         <UserInfoContainer>
           {userData == "loading" ? (
             <LoadingGlyph width={170} height={50}></LoadingGlyph>

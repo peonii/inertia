@@ -25,7 +25,7 @@ const MediumTitle = styled.Text`
 const ProfileSection = styled.View`
   flex-direction: row;
   gap: 20px;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
   margin-bottom: 70px;
 `;
@@ -94,7 +94,9 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) =
           }}
         />
         <ProfileTextSection>
-          <BigTitle>{userData.display_name}</BigTitle>
+          <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
+            {userData.display_name}
+          </BigTitle>
           <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
         </ProfileTextSection>
       </ProfileSection>

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, DimensionValue } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { fetchTypeSafe } from "../api/fetch";
 import { ENDPOINTS } from "../api/constants";
@@ -6,11 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Game } from "../types";
 import styled from "@emotion/native";
 import LoadingGlyph from "./loadingGlyph";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VerticalSpacer, formatDateLong } from "../utilis";
 import LocationPickerSheet from "./locationPickerSheet";
 import MapView from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
+import { useForm } from "react-hook-form";
 
 type GameDetailsProps = { id: string };
 
@@ -43,11 +44,27 @@ const SmallTitle = styled.Text`
   letter-spacing: -1.2px;
 `;
 
-const ButtonContainer = styled.Button`
-  width: 124px;
-  height: 61px;
+const ButtonsContainer = styled.View`
+  flex-direction: row;
+  gap: 20px;
+  align-self: center;
 `;
 
+const ButtonView = styled.View`
+  width: 124px;
+  height: 61px;
+  align-items: center;
+  justify-content: center;
+  background-color: #3d3d3d;
+  border-radius: 10px;
+`;
+
+const ButtonText = styled.Text`
+  font-size: 24px;
+  font-family: Inter_700Bold;
+  color: #fff;
+  letter-spacing: -1.6px;
+`;
 const PressableContainer = styled.Pressable`
   align-items: flex-start;
   justify-content: flex-start;
@@ -61,7 +78,7 @@ const Divider = styled.View`
   margin: 20px 0;
 `;
 
-type LoadingProps = { width: number; height: number };
+type LoadingProps = { width: DimensionValue; height: DimensionValue };
 
 const Loading: React.FC<LoadingProps> = ({ width, height }) => {
   return (
@@ -79,14 +96,67 @@ const Loading: React.FC<LoadingProps> = ({ width, height }) => {
   );
 };
 
+type GameFormData = {
+  date: {
+    start: string;
+    end: string;
+  };
+  location: {
+    lat: number;
+    lng: number;
+  };
+};
+
 const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
-  const { data, isPending, error } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ["game"],
     queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `\\${id}`, authContext),
     staleTime: 1000 * 60,
   });
 
-  const [location, setLocation] = useState("Metro Bemowo, Warszawa");
+  const [location, setLocation] = useState("");
+
+  async function updateAdressText() {
+    const adress = await mapRef.current.addressForCoordinate({
+      latitude: gameForm.getValues("location").lat,
+      longitude: gameForm.getValues("location").lng,
+    });
+    if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
+    else setLocation(adress.locality);
+  }
+
+  function compareGameForms() {
+    if (!gameForm.getValues().location || !defaultValues.current) {
+      return false;
+    }
+    if (
+      gameForm.getValues().date.start === defaultValues.current.date.start &&
+      gameForm.getValues().date.end === defaultValues.current.date.end &&
+      gameForm.getValues().location.lat === defaultValues.current.location.lat &&
+      gameForm.getValues().location.lng === defaultValues.current.location.lng
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const defaultValues = useRef({
+    location: { lat: 0, lng: 0 },
+    date: { start: "", end: "" },
+  });
+  const gameForm = useForm<GameFormData>();
+  useEffect(() => {
+    if (data) {
+      gameForm.setValue("date", {
+        start: data.time_start,
+        end: data.time_end,
+      });
+      gameForm.setValue("location", { lat: data.loc_lat, lng: data.loc_lng });
+      updateAdressText();
+      defaultValues.current = gameForm.getValues();
+    }
+  }, [data]);
 
   const sheetRef = useRef<BottomSheet>(null);
   const mapRef = useRef<MapView>(null);
@@ -98,14 +168,14 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
       {data ? (
         <BigTitle numberOfLines={1}>{data.name}</BigTitle>
       ) : (
-        <Loading height={50} width={300}></Loading>
+        <Loading height={50} width={"90%"}></Loading>
       )}
       {data ? (
         <SmallTitle style={{ color: "#a5a5a5" }}>
           {data.official ? "Oficial " : "Not official "}game
         </SmallTitle>
       ) : (
-        <Loading height={30} width={300}></Loading>
+        <Loading height={30} width={"50%"}></Loading>
       )}
 
       <VerticalSpacer height={50}></VerticalSpacer>
@@ -120,7 +190,7 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
             <SmallTitle>Edit</SmallTitle>
           </View>
         ) : (
-          <Loading height={10} width={300}></Loading>
+          <Loading height={30} width={"90%"}></Loading>
         )}
       </PressableContainer>
 
@@ -135,14 +205,14 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
             <SmallTitle>Edit</SmallTitle>
           </View>
         ) : (
-          <Loading height={10} width={300}></Loading>
+          <Loading height={30} width={"90%"}></Loading>
         )}
       </PressableContainer>
       <Divider></Divider>
       <MediumTitle>Location</MediumTitle>
       <PressableContainer
         onPress={() => {
-          sheetRef.current.expand();
+          sheetRef.current.snapToIndex(0);
         }}
       >
         {location ? (
@@ -151,14 +221,29 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
             <SmallTitle>Edit</SmallTitle>
           </View>
         ) : (
-          <Loading height={50} width={300}></Loading>
+          <Loading height={30} width={"50%"}></Loading>
         )}
       </PressableContainer>
+      <ButtonsContainer>
+        <PressableContainer>
+          <ButtonView>
+            <ButtonText style={compareGameForms() ? { color: "#7c7c7c" } : {}}>
+              Save
+            </ButtonText>
+          </ButtonView>
+        </PressableContainer>
+      </ButtonsContainer>
       <LocationPickerSheet
         mapRef={mapRef}
         sheetRef={sheetRef}
-        onAccept={() => {
+        onAccept={async () => {
           sheetRef.current.forceClose();
+          const camera = await mapRef.current.getCamera();
+          gameForm.setValue("location", {
+            lat: camera.center.latitude,
+            lng: camera.center.longitude,
+          });
+          await updateAdressText();
         }}
         onCancel={() => {
           sheetRef.current.forceClose();

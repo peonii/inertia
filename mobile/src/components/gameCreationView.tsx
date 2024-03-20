@@ -654,7 +654,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
             lat: camera.center.latitude,
             lng: camera.center.longitude,
           });
-          updateAdressText();
+          await updateAdressText();
         }}
         initialRegion={locationForm.getValues("location")}
         mapRef={mapRef}
