@@ -14,4 +14,7 @@ pub trait UserService {
     /// # Errors
     /// - If the id is invalid
     async fn get_by_id(&self, id: &str) -> anyhow::Result<super::User>;
+
+    async fn get_stats(&self, id: &str) -> anyhow::Result<super::UserStats>;
+    async fn update_stats(&self, stats: &super::UserStats) -> anyhow::Result<super::UserStats>;
 }

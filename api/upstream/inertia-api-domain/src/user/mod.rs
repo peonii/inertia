@@ -65,3 +65,22 @@ pub struct CreateUser {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub image: Option<String>,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct UserStats {
+    pub id: String,
+    pub user_id: String,
+
+    pub xp: i32,
+    pub wins: i32,
+    pub losses: i32,
+    pub draws: i32,
+    pub games: i32,
+    pub quests: i32,
+    pub events: i32,
+    pub powerups: i32,
+    pub catches: i32,
+    pub times_caught: i32,
+
+    pub created_at: time::OffsetDateTime,
+}
