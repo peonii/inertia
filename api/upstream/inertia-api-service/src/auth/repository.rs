@@ -112,7 +112,11 @@ impl AuthRepository for InertiaAuthRepository {
 
         let payload = rmp_serde::to_vec(&token)?;
 
-        conn.set_ex(&token.token, payload, REFRESH_TOKEN_EXPIRATION as u64)?;
+        conn.set_ex(
+            &token.token,
+            payload,
+            (REFRESH_TOKEN_EXPIRATION / 1000) as u64,
+        )?;
 
         Ok(token)
     }

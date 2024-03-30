@@ -22,3 +22,4 @@ inertia-api-core = { path = "inertia-api-core" }
 anyhow = "1.0.79"
 dotenvy = "0.15.7"
 time = { version = "0.3.34", features = ["serde", "serde-human-readable"] }
+openssl = { version = "0.10", features = ["vendored"] }

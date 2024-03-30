@@ -21,7 +21,10 @@ pub async fn run() -> Result<()> {
     let redis_url = std::env::var("REDIS_URL").expect("REDIS_URL must be set");
     let redis = redis::Client::open(redis_url)?;
 
+    inertia_api_service::migrate(db.clone()).await?;
     let app_state = Arc::new(AppState::new(&db, redis));
+
+    tracing_subscriber::fmt::init();
 
     let app = routes::router().layer(
         ServiceBuilder::new()
@@ -30,6 +33,7 @@ pub async fn run() -> Result<()> {
     );
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await?;
+    println!("Starting server on port 3001");
     axum::serve(listener, app).await?;
 
     Ok(())
