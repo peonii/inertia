@@ -135,9 +135,20 @@ pub async fn authorize_callback_discord(
         .await;
 
     if let Err(_) = account {
+        let mut img: Option<String> = None;
+        if let Some(avatar) = discord_user.avatar {
+            img = Some(
+                "https://cdn.discordapp.com/avatars/".to_owned()
+                    + discord_user.id.as_str()
+                    + "/"
+                    + avatar.as_str()
+                    + ".png",
+            );
+        }
+
         let user = CreateUser {
             name: discord_user.username,
-            image: discord_user.avatar,
+            image: img,
         };
         let user = state.service.user_service.create_user(&user).await?;
 
@@ -154,6 +165,24 @@ pub async fn authorize_callback_discord(
             .create_account(&accountc)
             .await;
     }
+    // } else if let Ok(account) = account {
+    //     let mut user = state
+    //         .service
+    //         .user_service
+    //         .get_by_id(&account.user_id)
+    //         .await?;
+
+    //     user.image = match discord_user.avatar {
+    //         Some(avatar) => Some(
+    //             "https://cdn.discordapp.com/avatars/".to_owned()
+    //                 + discord_user.id.as_str()
+    //                 + "/"
+    //                 + avatar.as_str()
+    //                 + ".png",
+    //         ),
+    //         None => None,
+    //     };
+    // }
 
     // banger line
     let account = account?;

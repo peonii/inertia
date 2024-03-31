@@ -20,6 +20,6 @@ impl AccountService for InertiaAccountService {
     }
 
     async fn get_by_account_id(&self, id: &str) -> anyhow::Result<Account> {
-        self.repository.get_account(id).await
+        self.repository.get_by_account_id(id).await
     }
 }

@@ -1,0 +1,94 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, user_id, xp, wins, losses, draws, games, quests, events, powerups, catches, times_caught, created_at\n            FROM user_statistics\n            WHERE user_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "xp",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "wins",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "losses",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "draws",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 6,
+        "name": "games",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "quests",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 8,
+        "name": "events",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "powerups",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 10,
+        "name": "catches",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "times_caught",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5af61a688481d0ce4c60ee317af7bf12afba29108fad09585a2e56225dd8c0c2"
+}
