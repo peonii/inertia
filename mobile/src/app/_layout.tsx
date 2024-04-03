@@ -15,6 +15,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { useState, useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthContext } from "../context/AuthContext";
+import Frame from "./frame";
 
 const Layout: React.FC = () => {
   SplashScreen.preventAutoHideAsync();
@@ -47,20 +48,7 @@ const Layout: React.FC = () => {
     <AuthContext.Provider value={{ accessToken, setAccessToken }}>
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView style={{ flex: 1, height: "100%" }}>
-          <Stack
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: "#181818",
-              },
-              headerTintColor: "#fff",
-              headerTitleStyle: {
-                fontFamily: "Inter_700Bold",
-              },
-              headerBackTitleStyle: {
-                fontFamily: "Inter_500Medium",
-              },
-            }}
-          ></Stack>
+          <Frame />
         </GestureHandlerRootView>
       </QueryClientProvider>
     </AuthContext.Provider>

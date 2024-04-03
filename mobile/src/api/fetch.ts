@@ -20,6 +20,9 @@ export async function refreshToken(authContext: AuthContextType) {
       grant_type: "refresh_token",
       refresh_token: refreshToken,
     }),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 
   if (!tokenResponse.ok) {
@@ -52,6 +55,7 @@ export async function fetchTypeSafe<T>(
     headers: {
       ...init?.headers,
       Authorization: `Bearer ${authContext.accessToken}`,
+      'Content-Type': 'application/json'
     },
   });
 
@@ -64,6 +68,7 @@ export async function fetchTypeSafe<T>(
       headers: {
         ...init?.headers,
         Authorization: `Bearer ${authContext.accessToken}`,
+        'Content-Type': 'application/json'
       },
     });
 

@@ -74,7 +74,6 @@ const discovery = {
 
 const Login: React.FC = () => {
   const authContext = useAuth();
-  console.log("wtf kurwa");
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: "Inertia_mobile_app",
@@ -90,6 +89,9 @@ const Login: React.FC = () => {
   async function login(code: string) {
     const response = await fetch(discovery.tokenEndpoint, {
       body: JSON.stringify({ grant_type: "authorization_code", code: code }),
+      headers: {
+        "Content-Type": "application/json",
+      },
       method: "POST",
     });
     const data = (await response.json()) as {

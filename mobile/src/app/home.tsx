@@ -1,7 +1,7 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import HomeDetails from "../components/homeDetails";
 import { router } from "expo-router";
 import { Game, Team, User } from "../types";
@@ -160,6 +160,7 @@ type HomeProps = {
 };
 
 const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) => {
+  console.log("in home", userData, gamesData, teamsData, refetch);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [visibleGameDetailsId, setVisibleDetailsId] = useState("");
@@ -167,6 +168,10 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
   // const userData = "loading";
   // const gamesData = "loading";
   // const teamsData = "loading";
+
+  if (!userData) userData = "loading";
+  if (!gamesData) gamesData = "loading";
+  if (!teamsData) teamsData = "loading";
 
   //Turning games's data into a list of views
   const gamesList =
@@ -200,7 +205,6 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
         });
 
   // Push an additional item for adding games
-  console.log(gamesData);
   if (gamesData !== "loading") {
     gamesList.push(
       <PressableContainer
@@ -354,7 +358,7 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
         </RefreshContainer>
       )}
 
-      <HomeDetails userData={userData} ref={bottomSheetRef} />
+      <HomeDetails userData={userData} reference={bottomSheetRef} />
     </CenteredView>
   );
 };

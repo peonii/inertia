@@ -26,7 +26,14 @@ const IndexScreen: React.FC = () => {
     if (authContext.accessToken) {
       // We can assume that the token is valid
       // because it'll be refreshed if it's not
-      return router.replace("/home");
+      return router.replace({
+        pathname: "/home",
+        params: {
+          userData: "loading",
+          gamesData: "loading",
+          teamsData: "loading",
+        },
+      });
     }
 
     try {

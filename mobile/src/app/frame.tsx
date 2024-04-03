@@ -11,7 +11,6 @@ import { useRef } from "react";
 import BottomSheet from "@gorhom/bottom-sheet";
 
 const Frame: React.FC = () => {
-  SplashScreen.preventAutoHideAsync();
   const authContext = useAuth();
 
   const homeDetailsRef = useRef<BottomSheet>(null);
@@ -46,80 +45,95 @@ const Frame: React.FC = () => {
   const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
   const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
 
+  console.log(userData, gamesData, teamsData);
+
   return (
     <View>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerTitle: "Index",
-          headerBackTitle: "Index",
-          headerShown: false,
-        }}
-        initialParams={{
-          userData: userData,
-          gamesData: gamesData,
-          teamsData: teamsData,
-          refetch: {
-            teams: () => {},
-            games: () => {},
-            // teams: teamsDataRequest.refetch,
-            // games: gamesDataRequest.refetch,
-          },
-        }}
-      />
-      <Stack.Screen
-        name="login"
-        options={{
-          headerTitle: "Login",
-          headerBackTitle: "Login",
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="home"
-        options={{
-          headerTitle: "Home",
-          headerBackTitle: "Home",
-          headerShown: true,
-          header: () => {
-            return (
-              <TopBar
-                userData={"loading"}
-                onclicks={{
-                  inertiaIcon: () => {
-                    router.replace("/home");
-                  },
-                  profilePicture: () => {
-                    homeDetailsRef.current.expand();
-                  },
-                }}
-              />
-            );
-          },
-        }}
-      />
-      <Stack.Screen
-        name="team/[id]"
-        options={{
-          headerTitle: "Team",
-          headerBackTitle: "Home",
-          headerTransparent: true,
+      <Stack
+        screenOptions={{
           headerStyle: {
-            backgroundColor: "transparent",
+            backgroundColor: "#181818",
+          },
+          headerTintColor: "#fff",
+          headerTitleStyle: {
+            fontFamily: "Inter_700Bold",
+          },
+          headerBackTitleStyle: {
+            fontFamily: "Inter_500Medium",
           },
         }}
-      />
-      <Stack.Screen
-        name="error"
-        options={{
-          headerTitle: "Error",
-          headerBackTitle: "Error",
-          headerTransparent: true,
-          headerStyle: {
-            backgroundColor: "transparent",
-          },
-        }}
-      />
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            headerTitle: "Index",
+            headerBackTitle: "Index",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="login"
+          options={{
+            headerTitle: "Login",
+            headerBackTitle: "Login",
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="home"
+          options={{
+            headerTitle: "Home",
+            headerBackTitle: "Home",
+            headerShown: true,
+            header: () => {
+              return (
+                <TopBar
+                  userData={"loading"}
+                  onclicks={{
+                    inertiaIcon: () => {
+                      router.replace("/home");
+                    },
+                    profilePicture: () => {
+                      homeDetailsRef.current.expand();
+                    },
+                  }}
+                />
+              );
+            },
+          }}
+          initialParams={{
+            userData: userData,
+            gamesData: gamesData,
+            teamsData: teamsData,
+            refetch: {
+              teams: teamsDataRequest.refetch,
+              games: gamesDataRequest.refetch,
+            },
+          }}
+        />
+        <Stack.Screen
+          name="team/[id]"
+          options={{
+            headerTitle: "Team",
+            headerBackTitle: "Home",
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: "transparent",
+            },
+          }}
+        />
+        <Stack.Screen
+          name="error"
+          options={{
+            headerTitle: "Error",
+            headerBackTitle: "Error",
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: "transparent",
+            },
+          }}
+        />
+      </Stack>
       <HomeDetails reference={homeDetailsRef} userData={userData} />
     </View>
   );

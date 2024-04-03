@@ -101,7 +101,7 @@ const DarkFilter = styled.View`
 
 type HomeDetailsProps = {
   userData: User | "loading";
-  reference: React.Ref<BottomSheetMethods>;
+  reference: React.ForwardedRef<BottomSheetMethods>;
 };
 
 const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
