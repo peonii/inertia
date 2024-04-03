@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, name, xp, balance, emoji, color, is_runner, veto_period_end, game_id, created_at\n            FROM teams WHERE game_id = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "xp",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "balance",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "emoji",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_runner",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 7,
+        "name": "veto_period_end",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
+        "name": "game_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e6e8392b35b394188f2edd003515c145d02b64780eb9674a44f6f7d0f13beb0b"
+}

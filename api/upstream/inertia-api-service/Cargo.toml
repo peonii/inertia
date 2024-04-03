@@ -24,6 +24,7 @@ sha2 = "0.10.8"
 rand = "0.8.5"
 rmp-serde = "1.1.2"
 thiserror = "1.0.57"
+openssl = { version = "0.10", features = ["vendored"] }
 
 [lints.rust]
 unsafe_code = "forbid"

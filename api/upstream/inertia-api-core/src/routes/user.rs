@@ -42,7 +42,7 @@ pub async fn get_self_teams(
     let teams = state
         .service
         .team_service
-        .get_teams_by_game_id(&uid)
+        .get_teams_by_user_id(&uid)
         .await?;
 
     Ok(Json(teams))
