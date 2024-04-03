@@ -1,7 +1,8 @@
 import styled from "@emotion/native";
-import BottomSheet, { useBottomSheet } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
-import React, { LegacyRef, useEffect, useRef, useState } from "react";
+import { router } from "expo-router";
+import React, { LegacyRef, useState } from "react";
 import { ActivityIndicator, Dimensions, View, useWindowDimensions } from "react-native";
 import MapView from "react-native-maps";
 
@@ -84,7 +85,7 @@ const MediumTitle = styled.Text`
 type LocationPickerProps = {
   sheetRef: React.Ref<BottomSheetMethods>;
   onCancel: () => void;
-  onAccept: () => void;
+  onAccept: () => Promise<void>;
   mapRef: LegacyRef<MapView>;
   initialRegion: { lat: number; lng: number };
 };
@@ -98,10 +99,6 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
 }) => {
   const [isActive, setIsActive] = useState(false);
   const [isMapActivity, setIsMapActivity] = useState(false);
-  const currentRegion = useRef(initialRegion);
-  function updateRegion(newRegion: { lat: number; lng: number }) {
-    currentRegion.current = newRegion;
-  }
 
   const screenSize = {
     width: Dimensions.get("screen").width,
@@ -123,11 +120,13 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
       <BottomSheet
         snapPoints={["85%"]}
         ref={sheetRef}
-        enablePanDownToClose={true}
+        enablePanDownToClose={!isMapActivity}
         index={-1}
         backgroundStyle={{ backgroundColor: "#252525" }}
         onChange={(index) => {
           setIsActive(index > -1);
+          //@ts-expect-error idk
+          mapRef.current.setCamera({ zoom: 12 });
         }}
       >
         <Container
@@ -144,7 +143,7 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
             onPress={() => {
               onCancel();
               //@ts-expect-error chuj wie again
-              sheetRef.current.snapToIndex(-1);
+              sheetRef.current.close();
               setIsActive(false);
             }}
           >
@@ -164,10 +163,32 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
                 width: "100%",
                 height: "100%",
               }}
-              onRegionChange={({ latitude, longitude }) => {
-                updateRegion({ lat: latitude, lng: longitude });
-              }}
               ref={mapRef}
+              zoomTapEnabled={false}
+              zoomControlEnabled={false}
+              zoomEnabled={false}
+              onDoublePress={() => {
+                //@ts-expect-error zjebane to
+                mapRef.current.getCamera().then((camera) => {
+                  switch (camera.zoom) {
+                    case 12:
+                      //@ts-expect-error zjebane to
+                      mapRef.current.animateCamera({ zoom: 14 }, { duration: 500 });
+                      break;
+                    case 14:
+                      //@ts-expect-error zjebane to
+                      mapRef.current.animateCamera({ zoom: 16 }, { duration: 500 });
+                      break;
+                    case 16:
+                      //@ts-expect-error zjebane to
+                      mapRef.current.animateCamera({ zoom: 18 }, { duration: 500 });
+                      break;
+                    default:
+                      //@ts-expect-error zjebane to
+                      mapRef.current.animateCamera({ zoom: 12 }, { duration: 500 });
+                  }
+                });
+              }}
             ></MapView>
             {isMapActivity && <DarkFilter style={{ position: "absolute" }}></DarkFilter>}
             {isMapActivity ? (
@@ -182,11 +203,13 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
           <PressableContainer
             onPress={async () => {
               setIsMapActivity(true);
-              await onAccept();
+              await onAccept().catch(() => {
+                router.push("/error");
+              });
               setIsActive(false);
               setIsMapActivity(false);
               //@ts-expect-error chuj wie co mu sie tu nie podoba
-              sheetRef.current.snapToIndex(-1);
+              sheetRef.current.close();
             }}
           >
             <NextButtonView>

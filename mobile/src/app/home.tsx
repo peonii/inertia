@@ -1,22 +1,16 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import HomeDetails from "../components/homeDetails";
-import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
-import { fetchTypeSafe } from "../api/fetch";
-import { ENDPOINTS } from "../api/constants";
 import { Game, Team, User } from "../types";
-import { useAuth } from "../context/AuthContext";
-import * as Haptics from "expo-haptics";
-import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
 import GameCreationView from "../components/gameCreationView";
 import GameDetails from "../components/gameDetails";
-import { dimmColor, brightenColor, makeGradientColorsFromColor } from "../utilis";
+import { makeGradientColorsFromColor } from "../utilis";
 
 const fakeTeams: Team[] = [
   {
@@ -61,48 +55,6 @@ const CenteredView = styled.View`
 const PressableContainer = styled.Pressable`
   align-items: center;
   justify-content: center;
-`;
-
-const TopBar = styled.View`
-  margin-top: 63px;
-  width: 100%;
-  align-items: center;
-  flex-direction: row;
-`;
-
-const InertiaLogo = styled.Image`
-  width: 55px;
-  height: 55px;
-  left: 27px;
-`;
-
-const UserInfoContainer = styled.View`
-  align-items: center;
-  height: 100%;
-  justify-content: center;
-  position: absolute;
-  right: 27px;
-  overflow: hidden;
-  border-radius: 10px;
-`;
-const UserInfoButton = styled.Pressable`
-  align-items: center;
-  justify-content: center;
-  flex-direction: row;
-  gap: 10px;
-`;
-
-const Username = styled.Text`
-  font-size: 24px;
-  color: #ffffff;
-  font-family: Inter_600SemiBold;
-  letter-spacing: -1.6px;
-`;
-
-const UserProfilePicutre = styled.Image`
-  width: 39px;
-  height: 39px;
-  border-radius: 26px;
 `;
 
 const TitleWithIndicatiorView = styled.View`
@@ -179,31 +131,6 @@ const BalanceText = styled.Text`
   letter-spacing: -1.3px;
 `;
 
-const DarkFilterContainer = styled.TouchableOpacity`
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-`;
-
-const DarkFilter = styled.View`
-  opacity: 0.4;
-  background-color: #000000;
-  width: 100%;
-  height: 100%;
-`;
-
-const RetryButton = styled.Pressable`
-  padding-top: 15px;
-`;
-const RetryButtonText = styled.Text`
-  color: #ffffff;
-  text-decoration: underline;
-  font-family: Inter_400Regular;
-  font-size: 14px;
-`;
-
 const PlusIconHolder = styled.View`
   width: 50px;
   height: 50px;
@@ -222,57 +149,20 @@ const PlusIcon = styled.Text`
   padding-bottom: 4px;
 `;
 
-const Home: React.FC = () => {
-  const authContext = useAuth();
+type HomeProps = {
+  userData: User | "loading";
+  gamesData: Game[] | "loading";
+  teamsData: Team[] | "loading";
+  refetch: {
+    games: () => void;
+    teams: () => void;
+  };
+};
+
+const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [visibleGameDetailsId, setVisibleDetailsId] = useState("");
-
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("index: ", index);
-    index === -1 && setIsBottomSheetVisible(false);
-  }, []);
-
-  const userDataRequest = useQuery({
-    queryKey: ["userData"],
-    queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
-    staleTime: 1000 * 60 * 3,
-  });
-
-  const gamesDataRequest = useQuery({
-    queryKey: ["gamesData"],
-    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.me, authContext),
-    staleTime: 1000 * 60,
-  });
-
-  const teamsDataRequest = useQuery({
-    queryKey: ["teamsData"],
-    queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
-    staleTime: 1000 * 60,
-  });
-
-  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
-    userDataRequest.error && console.log(userDataRequest.error.message);
-    gamesDataRequest.error && console.log(gamesDataRequest.error.message);
-    teamsDataRequest.error && console.log(teamsDataRequest.error.message);
-    return (
-      <CenteredView>
-        <MediumTitle>Oops! Something went wrong</MediumTitle>
-        <RetryButton
-          onPress={() => {
-            router.replace("/");
-          }}
-        >
-          <RetryButtonText>Retry</RetryButtonText>
-        </RetryButton>
-      </CenteredView>
-    );
-  }
-
-  const userData = userDataRequest.isPending ? "loading" : userDataRequest.data;
-  const gamesData = gamesDataRequest.isPending ? "loading" : gamesDataRequest.data;
-  const teamsData = teamsDataRequest.isPending ? "loading" : teamsDataRequest.data;
 
   // const userData = "loading";
   // const gamesData = "loading";
@@ -380,15 +270,10 @@ const Home: React.FC = () => {
   // If no teams
   if (teamsData.length == 0) {
     teamList.push(
-      <TeamContainer key="0">
+      <TeamContainer key="0" style={{ alignItems: "center", justifyContent: "center" }}>
         <MediumTitle>no teams</MediumTitle>
       </TeamContainer>
     );
-  }
-
-  function logOut() {
-    SecureStore.setItemAsync("refreshToken", "null");
-    router.replace("/login");
   }
 
   return (
@@ -397,44 +282,18 @@ const Home: React.FC = () => {
         minHeight: Math.round(useWindowDimensions().height),
       }}
     >
-      <TopBar>
-        <PressableContainer
-          onPress={() => {
-            setVisibleDetailsId("");
-            setIsCreatingGame(false);
-          }}
-        >
-          <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
-        </PressableContainer>
-        <UserInfoContainer>
-          {userData == "loading" ? (
-            <LoadingGlyph width={170} height={50}></LoadingGlyph>
-          ) : (
-            <UserInfoButton
-              onPress={() => {
-                bottomSheetRef.current.expand();
-                userDataRequest.refetch();
-                setIsBottomSheetVisible(true);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              }}
-            >
-              <Username>{userData.display_name}</Username>
-              <UserProfilePicutre
-                source={{
-                  uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=39px`,
-                }}
-              />
-            </UserInfoButton>
-          )}
-        </UserInfoContainer>
-      </TopBar>
       {visibleGameDetailsId ? (
-        <GameDetails id={visibleGameDetailsId}></GameDetails>
+        <GameDetails
+          id={visibleGameDetailsId}
+          closeView={() => {
+            setVisibleDetailsId("");
+          }}
+        ></GameDetails>
       ) : isCreatingGame ? (
         <GameCreationView
           closeView={() => {
             setIsCreatingGame(false);
-            gamesDataRequest.refetch();
+            refetch.games();
           }}
           userId={userData != "loading" ? userData.id : ""}
         ></GameCreationView>
@@ -444,8 +303,8 @@ const Home: React.FC = () => {
             <RefreshControl
               refreshing={false}
               onRefresh={() => {
-                gamesDataRequest.refetch();
-                teamsDataRequest.refetch();
+                refetch.games();
+                refetch.teams();
               }}
             />
           }
@@ -494,31 +353,8 @@ const Home: React.FC = () => {
           </Section>
         </RefreshContainer>
       )}
-      {isBottomSheetVisible && (
-        <DarkFilterContainer
-          onPressOut={() => {
-            setIsBottomSheetVisible(false);
-            bottomSheetRef.current.close();
-          }}
-          activeOpacity={1}
-        >
-          <DarkFilter></DarkFilter>
-        </DarkFilterContainer>
-      )}
 
-      {/*/ Home Details List /*/}
-      {userData == "loading" ? null : (
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={["68%"]}
-          onChange={handleSheetChanges}
-          enablePanDownToClose={true}
-          backgroundStyle={{ backgroundColor: "#252525" }}
-        >
-          <HomeDetails userData={userData} logOutFunction={logOut} />
-        </BottomSheet>
-      )}
+      <HomeDetails userData={userData} ref={bottomSheetRef} />
     </CenteredView>
   );
 };

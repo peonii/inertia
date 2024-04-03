@@ -1,15 +1,17 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
-import { Animated, DimensionValue } from "react-native";
+import { AnimatableNumericValue, Animated, DimensionValue } from "react-native";
 
 type LoadingGlyphProps = {
   height?: DimensionValue;
   width?: DimensionValue;
+  borderRadius?: AnimatableNumericValue;
 };
 
 const LoadingGlyph: React.FC<LoadingGlyphProps> = ({
   height = "100%",
   width = "100%",
+  borderRadius = 0,
 }) => {
   // It is actually half of gradient's size
   const gradientSize = 0.4;
@@ -36,6 +38,7 @@ const LoadingGlyph: React.FC<LoadingGlyphProps> = ({
       style={{
         height: height,
         width: width,
+        borderRadius: borderRadius,
       }}
       colors={["#4a4a4a", "#5b5b5b", "#4a4a4a"]}
       start={{ x: gradientPositionValue - gradientSize, y: 0 }}

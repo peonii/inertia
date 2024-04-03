@@ -74,6 +74,7 @@ const discovery = {
 
 const Login: React.FC = () => {
   const authContext = useAuth();
+  console.log("wtf kurwa");
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: "Inertia_mobile_app",
@@ -81,6 +82,7 @@ const Login: React.FC = () => {
       redirectUri: AuthSession.makeRedirectUri({
         scheme: "inertia",
       }),
+      extraParams: { provider: "discord" },
     },
     discovery
   );

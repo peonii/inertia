@@ -1,5 +1,12 @@
 import styled from "@emotion/native";
+import * as SecureStore from "expo-secure-store";
 import { User } from "../types";
+import { router } from "expo-router";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Dimensions, View } from "react-native";
+import { useState } from "react";
+import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import LoadingGlyph from "./loadingGlyph";
 
 const LeftAlignedView = styled.View`
   padding: 14px 38px;
@@ -79,38 +86,104 @@ const LogoutButtonText = styled.Text`
   font-family: Inter_500Medium;
   letter-spacing: -1.2px;
 `;
+
+const PressableContainer = styled.Pressable`
+  align-items: center;
+  justify-content: center;
+`;
+
+const DarkFilter = styled.View`
+  opacity: 0.4;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+`;
+
 type HomeDetailsProps = {
-  userData: User;
-  logOutFunction: () => void;
+  userData: User | "loading";
+  reference: React.Ref<BottomSheetMethods>;
 };
 
-const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, logOutFunction }) => {
+const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
+  const [isActive, setIsActive] = useState(false);
+  console.log(userData);
+
+  const screenSize = {
+    width: Dimensions.get("screen").width,
+    height: Dimensions.get("screen").height,
+    position: "absolute" as "absolute" | "relative",
+    bottom: 0,
+    left: 0,
+    Zindex: 10,
+  };
   return (
-    <LeftAlignedView>
-      <ProfileSection>
-        <BigProfilePicture
-          source={{
-            uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=80px`,
+    <View style={screenSize}>
+      {isActive ? (
+        <PressableContainer
+          onPress={() => {
+            // @ts-expect-error idk why they have such a problem
+            ref.current.close();
+            setIsActive(false);
           }}
-        />
-        <ProfileTextSection>
-          <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
-            {userData.display_name}
-          </BigTitle>
-          <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
-        </ProfileTextSection>
-      </ProfileSection>
-      <MediumTitle>Stats</MediumTitle>
-      {/*/ Todo change when api is ready /*/}
-      <BigTitle>{`#${3} Global`}</BigTitle>
-      <StatsText>{`${0} wins, ${1} draw, ${2} losses`}</StatsText>
-      <StatsText>{`${1000} XP gained`}</StatsText>
-      <LogoutButtonContainer onPress={() => logOutFunction()}>
-        <LogoutButtonView>
-          <LogoutButtonText>Log out</LogoutButtonText>
-        </LogoutButtonView>
-      </LogoutButtonContainer>
-    </LeftAlignedView>
+        >
+          <DarkFilter></DarkFilter>
+        </PressableContainer>
+      ) : (
+        ""
+      )}
+
+      <BottomSheet
+        index={-1}
+        snapPoints={["68%"]}
+        ref={reference}
+        onChange={(index) => {
+          setIsActive(index > -1);
+        }}
+      >
+        <LeftAlignedView>
+          <ProfileSection>
+            {userData === "loading" ? (
+              <LoadingGlyph height={80} width={80} borderRadius={40} />
+            ) : (
+              <BigProfilePicture
+                source={{
+                  uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=80px`,
+                }}
+              />
+            )}
+            <ProfileTextSection>
+              {userData === "loading" ? (
+                <LoadingGlyph height={30} width={80} borderRadius={5} />
+              ) : (
+                <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
+                  {userData.display_name}
+                </BigTitle>
+              )}
+              {userData === "loading" ? (
+                <LoadingGlyph height={15} width={50} borderRadius={5} />
+              ) : (
+                <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
+              )}
+            </ProfileTextSection>
+          </ProfileSection>
+          <MediumTitle>Stats</MediumTitle>
+          {/*/ Todo change when api is ready /*/}
+          <BigTitle>{`#${3} Global`}</BigTitle>
+          <StatsText>{`${0} wins, ${1} draw, ${2} losses`}</StatsText>
+          <StatsText>{`${1000} XP gained`}</StatsText>
+          <LogoutButtonContainer
+            onPress={() => {
+              SecureStore.setItemAsync("refreshToken", "null");
+              router.replace("/login");
+            }}
+          >
+            <LogoutButtonView>
+              <LogoutButtonText>Log out</LogoutButtonText>
+            </LogoutButtonView>
+          </LogoutButtonContainer>
+        </LeftAlignedView>
+      </BottomSheet>
+    </View>
   );
 };
 

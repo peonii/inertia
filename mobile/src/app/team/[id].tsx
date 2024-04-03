@@ -7,7 +7,7 @@ import { fetchTypeSafe } from "../../api/fetch";
 import { ActiveQuest, Team } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, View, Image } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList } from "react-native";
 
@@ -167,9 +167,7 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
           contentContainerStyle={{ gap: 10 }}
           renderItem={({ item }) => (
             <TeamQuestItemContainer>
-              <TeamQuestIcon
-                source={require("./../../../assets/main_task.png")}
-              />
+              <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
               <TeamQuestCenteredView>
                 <TeamQuestHeader>{item.title}</TeamQuestHeader>
                 <TeamSubheader numberOfLines={1}>
@@ -191,8 +189,7 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () =>
-      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
   return (

@@ -32,6 +32,7 @@ export function makeGradientColorsFromColor(color: string) {
 }
 
 export function formatDate(dateString: string) {
+  if (!dateString) return "";
   const date = new Date(dateString);
   let day: string = date.getDate().toString();
   switch (day) {
@@ -59,6 +60,7 @@ export function formatDate(dateString: string) {
 }
 
 export function formatDateShort(dateString: string) {
+  if (!dateString) return "";
   const date = new Date(dateString);
   let day: string = date.getDate().toString();
   switch (day) {
@@ -80,7 +82,8 @@ export function formatDateShort(dateString: string) {
 }
 
 export function formatDateLong(dateString: string) {
-  if (!dateString) return "no date provided";
+  if (!dateString) return "";
+  console.log(dateString);
   const date = new Date(dateString);
   let day: string = date.getDate().toString();
   switch (day) {

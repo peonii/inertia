@@ -18,6 +18,7 @@ const Container = styled.View`
   height: 100%;
   background-color: #252525;
   position: absolute;
+  padding-top: 30px;
   bottom: 0;
 `;
 
@@ -116,7 +117,7 @@ const Divider = styled.View`
 `;
 
 const CurrentDetails = styled.View`
-  top: 80px;
+  top: 120px;
   right: 30px;
   align-items: flex-end;
   position: absolute;
@@ -477,6 +478,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
                 <MediumGrayTitle style={{ color: "#7c7c7c" }}>Edit</MediumGrayTitle>
                 {startDatePickerVisible && (
                   <DateTimePicker
+                    themeVariant="dark"
                     mode={isPickingTime ? "time" : "date"}
                     value={new Date(value)}
                     onChange={(event) => {
@@ -528,6 +530,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
                 <MediumGrayTitle style={{ color: "#7c7c7c" }}>Edit</MediumGrayTitle>
                 {endDatePickerVisible && (
                   <DateTimePicker
+                    themeVariant="dark"
                     mode={isPickingTime ? "time" : "date"}
                     value={new Date(value)}
                     onChange={(event) => {
@@ -644,9 +647,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
       </PressableContainer>
       <LocationPickerSheet
         sheetRef={locationPickerRef}
-        onCancel={() => {
-          locationPickerRef.current.close();
-        }}
+        onCancel={() => {}}
         onAccept={async () => {
           const camera = await mapRef.current.getCamera();
           console.log(camera);

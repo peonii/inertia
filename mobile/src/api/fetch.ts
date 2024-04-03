@@ -9,6 +9,7 @@ import { ENDPOINTS } from "./constants";
  */
 export async function refreshToken(authContext: AuthContextType) {
   const refreshToken = await SecureStore.getItemAsync("refreshToken");
+  console.log("we are here", refreshToken)
   if (!refreshToken) {
     throw new Error("No refresh token found");
   }

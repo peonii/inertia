@@ -11,9 +11,11 @@ import { VerticalSpacer, formatDateLong } from "../utilis";
 import LocationPickerSheet from "./locationPickerSheet";
 import MapView from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
 
-type GameDetailsProps = { id: string };
+type GameDetailsProps = { id: string; closeView: () => void };
 
 const Container = styled.View`
   flex: 1;
@@ -45,6 +47,7 @@ const SmallTitle = styled.Text`
 `;
 
 const ButtonsContainer = styled.View`
+  padding-top: 50px;
   flex-direction: row;
   gap: 20px;
   align-self: center;
@@ -97,43 +100,47 @@ const Loading: React.FC<LoadingProps> = ({ width, height }) => {
 };
 
 type GameFormData = {
-  date: {
-    start: string;
-    end: string;
-  };
-  location: {
-    lat: number;
-    lng: number;
-  };
+  start: string;
+  end: string;
+  lat: number;
+  lng: number;
 };
 
-const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
+const GameDetailScreen: React.FC<GameDetailsProps> = ({ id, closeView }) => {
   const { data, error } = useQuery({
     queryKey: ["game"],
-    queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `\\${id}`, authContext),
+    queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
     staleTime: 1000 * 60,
   });
+
+  if (error) {
+    router.push("/error");
+  }
 
   const [location, setLocation] = useState("");
 
   async function updateAdressText() {
     const adress = await mapRef.current.addressForCoordinate({
-      latitude: gameForm.getValues("location").lat,
-      longitude: gameForm.getValues("location").lng,
+      latitude: gameForm.getValues("lat"),
+      longitude: gameForm.getValues("lng"),
     });
     if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
     else setLocation(adress.locality);
   }
 
   function compareGameForms() {
-    if (!gameForm.getValues().location || !defaultValues.current) {
-      return false;
+    if (
+      !gameForm.getValues().lat ||
+      !gameForm.getValues().lng ||
+      !defaultValues.current
+    ) {
+      return true;
     }
     if (
-      gameForm.getValues().date.start === defaultValues.current.date.start &&
-      gameForm.getValues().date.end === defaultValues.current.date.end &&
-      gameForm.getValues().location.lat === defaultValues.current.location.lat &&
-      gameForm.getValues().location.lng === defaultValues.current.location.lng
+      gameForm.getValues().start === defaultValues.current.start &&
+      gameForm.getValues().end === defaultValues.current.end &&
+      gameForm.getValues().lat === defaultValues.current.lat &&
+      gameForm.getValues().lng === defaultValues.current.lng
     ) {
       return true;
     } else {
@@ -142,17 +149,19 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
   }
 
   const defaultValues = useRef({
-    location: { lat: 0, lng: 0 },
-    date: { start: "", end: "" },
+    lat: 0,
+    lng: 0,
+    start: "",
+    end: "",
   });
   const gameForm = useForm<GameFormData>();
+
   useEffect(() => {
     if (data) {
-      gameForm.setValue("date", {
-        start: data.time_start,
-        end: data.time_end,
-      });
-      gameForm.setValue("location", { lat: data.loc_lat, lng: data.loc_lng });
+      gameForm.setValue("start", data.time_start);
+      gameForm.setValue("end", data.time_end);
+      gameForm.setValue("lat", data.loc_lat);
+      gameForm.setValue("lng", data.loc_lng);
       updateAdressText();
       defaultValues.current = gameForm.getValues();
     }
@@ -162,6 +171,11 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
   const mapRef = useRef<MapView>(null);
 
   const authContext = useAuth();
+
+  const [startDatePickerVisible, setStartDatePickerVisible] = useState(false);
+  const [endDatePickerVisible, setEndDatePickerVisible] = useState(false);
+  const [isPickingTime, setIsPickingTime] = useState(false);
+  const tempDate = useRef(new Date());
 
   return (
     <Container>
@@ -181,33 +195,119 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
       <VerticalSpacer height={50}></VerticalSpacer>
 
       <MediumTitle>Date</MediumTitle>
-      <PressableContainer>
-        {data ? (
-          <View>
-            <SmallTitle style={{ color: "#a5a5a5" }}>
-              Starts @ {formatDateLong(data.time_start)}
-            </SmallTitle>
-            <SmallTitle>Edit</SmallTitle>
-          </View>
-        ) : (
-          <Loading height={30} width={"90%"}></Loading>
-        )}
-      </PressableContainer>
+      {data ? (
+        <Controller
+          control={gameForm.control}
+          name="start"
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <PressableContainer
+              onBlur={onBlur}
+              onPress={() => {
+                setIsPickingTime(false);
+                setStartDatePickerVisible(true);
+              }}
+            >
+              <SmallTitle style={{ color: "#a5a5a5" }}>
+                Starts @ {formatDateLong(value)}
+              </SmallTitle>
+              <SmallTitle>Edit</SmallTitle>
+              {startDatePickerVisible && (
+                <DateTimePicker
+                  themeVariant="dark"
+                  mode={isPickingTime ? "time" : "date"}
+                  value={new Date(value)}
+                  onChange={(event) => {
+                    if (event.type === "dismissed") {
+                      console.log("dismissed");
+                      setStartDatePickerVisible(false);
+                      return;
+                    }
+                    if (isPickingTime) {
+                      const date = tempDate.current;
+                      const newValues = new Date(event.nativeEvent.timestamp);
+                      date.setHours(newValues.getHours());
+                      date.setMinutes(newValues.getMinutes());
+                      onChange(date.toISOString());
+                      // Check if there are no errors with start Date
+                      if (date > new Date(gameForm.getValues("end"))) {
+                        date.setHours(date.getHours() + 1);
+                        gameForm.setValue("end", date.toISOString());
+                      }
+                      setStartDatePickerVisible(false);
+                    } else {
+                      tempDate.current = new Date(event.nativeEvent.timestamp);
+                      setIsPickingTime(true);
+                    }
+                  }}
+                ></DateTimePicker>
+              )}
+            </PressableContainer>
+          )}
+        ></Controller>
+      ) : (
+        <Loading height={30} width={"90%"}></Loading>
+      )}
 
       <VerticalSpacer height={30}></VerticalSpacer>
 
-      <PressableContainer>
-        {data ? (
-          <View>
-            <SmallTitle style={{ color: "#a5a5a5" }}>
-              Ends @ {formatDateLong(data?.time_end)}
-            </SmallTitle>
-            <SmallTitle>Edit</SmallTitle>
-          </View>
-        ) : (
-          <Loading height={30} width={"90%"}></Loading>
-        )}
-      </PressableContainer>
+      {data ? (
+        <Controller
+          control={gameForm.control}
+          name="end"
+          rules={{
+            required: true,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <PressableContainer
+              onBlur={onBlur}
+              onPress={() => {
+                setIsPickingTime(false);
+                setEndDatePickerVisible(true);
+              }}
+            >
+              <SmallTitle style={{ color: "#a5a5a5" }}>
+                Starts @ {formatDateLong(value)}
+              </SmallTitle>
+              <SmallTitle>Edit</SmallTitle>
+              {endDatePickerVisible && (
+                <DateTimePicker
+                  mode={isPickingTime ? "time" : "date"}
+                  value={new Date(value)}
+                  onChange={(event) => {
+                    if (event.type === "dismissed") {
+                      console.log("dismissed");
+                      setEndDatePickerVisible(false);
+                      return;
+                    }
+                    if (isPickingTime) {
+                      const date = tempDate.current;
+                      const newValues = new Date(event.nativeEvent.timestamp);
+                      date.setHours(newValues.getHours());
+                      date.setMinutes(newValues.getMinutes());
+                      onChange(date.toISOString());
+                      // Check if there are no errors with start Date
+                      if (date < new Date(gameForm.getValues("start"))) {
+                        date.setHours(date.getHours() - 1);
+                        gameForm.setValue("start", date.toISOString());
+                      }
+                      setEndDatePickerVisible(false);
+                    } else {
+                      tempDate.current = new Date(event.nativeEvent.timestamp);
+                      setIsPickingTime(true);
+                    }
+                  }}
+                ></DateTimePicker>
+              )}
+            </PressableContainer>
+          )}
+        ></Controller>
+      ) : (
+        <Loading height={30} width={"90%"}></Loading>
+      )}
+
       <Divider></Divider>
       <MediumTitle>Location</MediumTitle>
       <PressableContainer
@@ -225,11 +325,26 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
         )}
       </PressableContainer>
       <ButtonsContainer>
-        <PressableContainer>
+        <PressableContainer
+          onPress={() => {
+            closeView();
+            if (compareGameForms()) return;
+            // TODO: Api to apply changes
+          }}
+        >
           <ButtonView>
             <ButtonText style={compareGameForms() ? { color: "#7c7c7c" } : {}}>
-              Save
+              {compareGameForms() ? "Close" : "Save"}
             </ButtonText>
+          </ButtonView>
+        </PressableContainer>
+        <PressableContainer
+          onPress={() => {
+            // TODO: Api to apply changes, start game
+          }}
+        >
+          <ButtonView style={{ backgroundColor: "#439255" }}>
+            <ButtonText>Start</ButtonText>
           </ButtonView>
         </PressableContainer>
       </ButtonsContainer>
@@ -237,17 +352,12 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id }) => {
         mapRef={mapRef}
         sheetRef={sheetRef}
         onAccept={async () => {
-          sheetRef.current.forceClose();
           const camera = await mapRef.current.getCamera();
-          gameForm.setValue("location", {
-            lat: camera.center.latitude,
-            lng: camera.center.longitude,
-          });
+          gameForm.setValue("lat", camera.center.latitude);
+          gameForm.setValue("lng", camera.center.longitude);
           await updateAdressText();
         }}
-        onCancel={() => {
-          sheetRef.current.forceClose();
-        }}
+        onCancel={() => {}}
         initialRegion={{
           lat: 52.22884197323852,
           lng: 21.003216436837576,
