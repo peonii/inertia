@@ -1,13 +1,14 @@
 import styled from "@emotion/native";
-import { User } from "../types";
-import * as Haptics from "expo-haptics";
 import LoadingGlyph from "./loadingGlyph";
+import { router } from "expo-router";
+import { useDataContext } from "../context/DataContext";
 
 const Container = styled.View`
-  margin-top: 63px;
+  padding-top: 63px;
   width: 100%;
   align-items: center;
   flex-direction: row;
+  background-color: #252525;
 `;
 
 const InertiaLogo = styled.Image`
@@ -21,6 +22,7 @@ const UserInfoContainer = styled.View`
   height: 100%;
   justify-content: center;
   position: absolute;
+  bottom: 0;
   right: 27px;
   overflow: hidden;
   border-radius: 10px;
@@ -52,19 +54,19 @@ const PressableContainer = styled.Pressable`
 `;
 
 type TopBarProps = {
-  userData: User | "loading";
   onclicks: {
     profilePicture: () => void;
-    inertiaIcon: () => void;
   };
 };
 
-const TopBar: React.FC<TopBarProps> = ({ userData, onclicks }) => {
+const TopBar: React.FC<TopBarProps> = ({ onclicks }) => {
+  const dataContext = useDataContext();
+  const userData = dataContext.userData;
   return (
     <Container>
       <PressableContainer
         onPress={() => {
-          onclicks.inertiaIcon();
+          router.replace("/home");
         }}
       >
         <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
@@ -75,17 +77,13 @@ const TopBar: React.FC<TopBarProps> = ({ userData, onclicks }) => {
         ) : (
           <UserInfoButton
             onPress={() => {
-              //   bottomSheetRef.current.expand();
-              //   userDataRequest.refetch();
-              //   setIsBottomSheetVisible(true);
-              //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onclicks.profilePicture();
             }}
           >
-            <Username>{userData.display_name}</Username>
+            <Username>{userData.name}</Username>
             <UserProfilePicutre
               source={{
-                uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=39px`,
+                uri: `${userData.image}?size=64px`,
               }}
             />
           </UserInfoButton>

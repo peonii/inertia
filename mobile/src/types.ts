@@ -2,7 +2,7 @@ export type User = {
   id: string;
   discord_id: string;
   name: string;
-  display_name: string;
+  // display_name: string;
   image: string;
   email: string;
   access_token: string;

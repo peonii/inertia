@@ -11,11 +11,11 @@ export const ENDPOINTS = {
   },
   games: {
     all: `${BASE_URL}/api/v5/games`,
-    me: `${BASE_URL}/api/v5/games/@me`,
+    me: `${BASE_URL}/api/v5/users/@me/games`,
     create: `${BASE_URL}/api/v5/games`
   },
   teams: {
-    me: `${BASE_URL}/api/v5/teams/@me`,
+    me: `${BASE_URL}/api/v5/users/@me/teams`,
     id: (id: string) => `${BASE_URL}/api/v5/teams/${id}`,
   },
 };

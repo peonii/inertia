@@ -1,8 +1,6 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { forwardRef, useRef, useState } from "react";
-import HomeDetails from "../components/homeDetails";
+import { useState } from "react";
 import { router } from "expo-router";
 import { Game, Team, User } from "../types";
 import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
@@ -11,33 +9,11 @@ import GameStatus from "../components/gameStatus";
 import GameCreationView from "../components/gameCreationView";
 import GameDetails from "../components/gameDetails";
 import { makeGradientColorsFromColor } from "../utilis";
-
-const fakeTeams: Team[] = [
-  {
-    id: "1",
-    name: "Penguincat Inc",
-    color: "#4B6FA1",
-    emoji: "🐳",
-    xp: 1800,
-    balance: 900,
-    created_at: "2020-01-01T00:00:00.",
-    is_runner: true,
-    veto_period_end: "2021-01-01T00:00:00",
-    game_id: "1",
-  },
-  {
-    id: "2",
-    name: "Haste and Taste",
-    color: "#99000",
-    emoji: "🎸",
-    xp: 3600,
-    balance: 100,
-    created_at: "2020-01-01T00:00:00.",
-    is_runner: false,
-    veto_period_end: "2021-01-01T00:00:00",
-    game_id: "2",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { ENDPOINTS } from "../api/constants";
+import { fetchTypeSafe } from "../api/fetch";
+import { useAuth } from "../context/AuthContext";
+import { useDataContext } from "../context/DataContext";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -149,29 +125,50 @@ const PlusIcon = styled.Text`
   padding-bottom: 4px;
 `;
 
-type HomeProps = {
-  userData: User | "loading";
-  gamesData: Game[] | "loading";
-  teamsData: Team[] | "loading";
-  refetch: {
-    games: () => void;
-    teams: () => void;
-  };
-};
-
-const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) => {
-  console.log("in home", userData, gamesData, teamsData, refetch);
-  const bottomSheetRef = useRef<BottomSheet>(null);
+const Home: React.FC = () => {
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [visibleGameDetailsId, setVisibleDetailsId] = useState("");
+  const authContext = useAuth();
+  const DataContext = useDataContext();
+
+  const userDataRequest = useQuery({
+    queryKey: ["userData"],
+    queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
+    staleTime: 1000 * 60 * 3,
+  });
+
+  const gamesDataRequest = useQuery({
+    queryKey: ["gamesData"],
+    queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.me, authContext),
+    staleTime: 1000 * 60,
+  });
+
+  const teamsDataRequest = useQuery({
+    queryKey: ["teamsData"],
+    queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
+    staleTime: 1000 * 60,
+  });
+
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
+    userDataRequest.error && console.log(userDataRequest.error.message);
+    gamesDataRequest.error && console.log(gamesDataRequest.error.message);
+    teamsDataRequest.error && console.log(teamsDataRequest.error.message);
+
+    router.push("/error");
+    // TODO add some offline mode when already have old data
+  }
+
+  if (userDataRequest.data) DataContext.setUserData(userDataRequest.data);
+  if (gamesDataRequest.data) DataContext.setGamesData(gamesDataRequest.data);
+  if (teamsDataRequest.data) DataContext.setTeamsData(teamsDataRequest.data);
+
+  const userData = DataContext.userData;
+  const gamesData = DataContext.gamesData;
+  const teamsData = DataContext.teamsData;
 
   // const userData = "loading";
   // const gamesData = "loading";
   // const teamsData = "loading";
-
-  if (!userData) userData = "loading";
-  if (!gamesData) gamesData = "loading";
-  if (!teamsData) teamsData = "loading";
 
   //Turning games's data into a list of views
   const gamesList =
@@ -188,7 +185,7 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
             <PressableContainer
               key={game.id}
               onPress={() => {
-                setVisibleDetailsId(game.id);
+                router.push(`/game/${game.id}`);
               }}
             >
               <GameContainer>
@@ -297,7 +294,7 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
         <GameCreationView
           closeView={() => {
             setIsCreatingGame(false);
-            refetch.games();
+            gamesDataRequest.refetch();
           }}
           userId={userData != "loading" ? userData.id : ""}
         ></GameCreationView>
@@ -307,8 +304,8 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
             <RefreshControl
               refreshing={false}
               onRefresh={() => {
-                refetch.games();
-                refetch.teams();
+                gamesDataRequest.refetch();
+                teamsDataRequest.refetch();
               }}
             />
           }
@@ -357,8 +354,6 @@ const Home: React.FC<HomeProps> = ({ userData, gamesData, teamsData, refetch }) 
           </Section>
         </RefreshContainer>
       )}
-
-      <HomeDetails userData={userData} reference={bottomSheetRef} />
     </CenteredView>
   );
 };

@@ -1,27 +1,26 @@
-import { View, DimensionValue } from "react-native";
-import { useAuth } from "../context/AuthContext";
-import { fetchTypeSafe } from "../api/fetch";
-import { ENDPOINTS } from "../api/constants";
-import { useQuery } from "@tanstack/react-query";
-import { Game } from "../types";
 import styled from "@emotion/native";
-import LoadingGlyph from "./loadingGlyph";
-import { useEffect, useRef, useState } from "react";
-import { VerticalSpacer, formatDateLong } from "../utilis";
-import LocationPickerSheet from "./locationPickerSheet";
-import MapView from "react-native-maps";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { Controller, useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState, useRef, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { DimensionValue, View } from "react-native";
+import MapView from "react-native-maps";
+import { ENDPOINTS } from "../../api/constants";
+import { fetchTypeSafe } from "../../api/fetch";
+import LoadingGlyph from "../../components/loadingGlyph";
+import LocationPickerSheet from "../../components/locationPickerSheet";
+import { useAuth } from "../../context/AuthContext";
+import { Game } from "../../types";
+import { VerticalSpacer, formatDateLong } from "../../utilis";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { router } from "expo-router";
-
-type GameDetailsProps = { id: string; closeView: () => void };
 
 const Container = styled.View`
   flex: 1;
   height: 100%;
   width: 100%;
   padding: 30px;
+  background-color: "#252525";
 `;
 
 const BigTitle = styled.Text`
@@ -106,7 +105,8 @@ type GameFormData = {
   lng: number;
 };
 
-const GameDetailScreen: React.FC<GameDetailsProps> = ({ id, closeView }) => {
+const GameDetailScreen: React.FC = () => {
+  const id = useLocalSearchParams<{ id: string }>();
   const { data, error } = useQuery({
     queryKey: ["game"],
     queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
@@ -327,7 +327,7 @@ const GameDetailScreen: React.FC<GameDetailsProps> = ({ id, closeView }) => {
       <ButtonsContainer>
         <PressableContainer
           onPress={() => {
-            closeView();
+            router.back();
             if (compareGameForms()) return;
             // TODO: Api to apply changes
           }}

@@ -1,17 +1,18 @@
 import styled from "@emotion/native";
 import * as SecureStore from "expo-secure-store";
-import { User } from "../types";
 import { router } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Dimensions, View } from "react-native";
 import { useState } from "react";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import LoadingGlyph from "./loadingGlyph";
+import { useDataContext } from "../context/DataContext";
 
 const LeftAlignedView = styled.View`
   padding: 14px 38px;
   align-items: flex-start;
   flex-direction: column;
+  background-color: #252525;
   height: 100%;
 `;
 
@@ -100,13 +101,13 @@ const DarkFilter = styled.View`
 `;
 
 type HomeDetailsProps = {
-  userData: User | "loading";
-  reference: React.ForwardedRef<BottomSheetMethods>;
+  bottomSheetRef: React.Ref<BottomSheetMethods>;
 };
 
-const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
+const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
   const [isActive, setIsActive] = useState(false);
-  console.log(userData);
+  const DataContext = useDataContext();
+  const userData = DataContext.userData;
 
   const screenSize = {
     width: Dimensions.get("screen").width,
@@ -122,7 +123,7 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
         <PressableContainer
           onPress={() => {
             // @ts-expect-error idk why they have such a problem
-            ref.current.close();
+            bottomSheetRef.current.close();
             setIsActive(false);
           }}
         >
@@ -134,11 +135,16 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
 
       <BottomSheet
         index={-1}
+        enablePanDownToClose={true}
+        enableContentPanningGesture={true}
+        enableHandlePanningGesture={true}
         snapPoints={["68%"]}
-        ref={reference}
+        ref={bottomSheetRef}
         onChange={(index) => {
           setIsActive(index > -1);
         }}
+        backgroundStyle={{ backgroundColor: "#252525" }}
+        handleIndicatorStyle={{ backgroundColor: "#fff" }}
       >
         <LeftAlignedView>
           <ProfileSection>
@@ -147,7 +153,7 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
             ) : (
               <BigProfilePicture
                 source={{
-                  uri: `https://cdn.discordapp.com/avatars/${userData.discord_id}/${userData.image}.png?size=80px`,
+                  uri: `${userData.image}?size=128px`,
                 }}
               />
             )}
@@ -156,7 +162,7 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ userData, reference }) => {
                 <LoadingGlyph height={30} width={80} borderRadius={5} />
               ) : (
                 <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
-                  {userData.display_name}
+                  {userData.name}
                 </BigTitle>
               )}
               {userData === "loading" ? (
