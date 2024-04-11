@@ -9,58 +9,70 @@ import SwiftUI
 
 struct TeamItem: View {
     var team: Team
+    @EnvironmentObject private var gameService: GameService
     
     var statusText: String {
         team.isRunner ? "Runner" : "Hunter"
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ZStack {
-                Text(team.emoji)
-                    .font(.system(size: 64))
-                    .shadow(radius: 3)
-            }
-            .frame(width: 200, height: 175)
-            .background(
-                Color.init(hex: team.color).gradient
-            )
-            
+        NavigationLink {
+            TeamPlayWrapper(team: team)
+                .ignoresSafeArea()
+        } label: {
             VStack(alignment: .leading, spacing: 0) {
-                Text(team.name)
-                    .font(.system(size: 24))
-                    .fontWeight(.bold)
-                    .tracking(-1)
-                    .foregroundStyle(Color.colorPrimary)
+                ZStack {
+                    Text(team.emoji)
+                        .font(.system(size: 64))
+                        .shadow(radius: 3)
+                }
+                .frame(width: 200, height: 175)
+                .background(
+                    Color.init(hex: team.color).gradient
+                )
                 
-                Text("\(team.xp) XP  •  \(statusText)")
-                    .font(.system(size: 16))
-                    .fontWeight(.semibold)
-                    .tracking(-1)
-                    .foregroundStyle(Color.colorSecondary)
-                
-                Text("$\(team.balance)")
-                    .font(.system(size: 20))
-                    .fontWeight(.semibold)
-                    .tracking(-1)
-                    .foregroundStyle(Color.colorPrimary)
-                    .padding(.top)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(team.name)
+                        .font(.system(size: 24))
+                        .fontWeight(.bold)
+                        .tracking(-1)
+                        .foregroundStyle(Color.colorPrimary)
+                    
+                    Text("\(team.xp) XP  •  \(statusText)")
+                        .font(.system(size: 16))
+                        .fontWeight(.semibold)
+                        .tracking(-1)
+                        .foregroundStyle(Color.colorSecondary)
+                    
+                    Text("$\(team.balance)")
+                        .font(.system(size: 20))
+                        .fontWeight(.semibold)
+                        .tracking(-1)
+                        .foregroundStyle(Color.colorPrimary)
+                        .padding(.top)
+                }
+                .padding()
             }
-            .padding()
-        }
-        .background(Color.bgDarker)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .contextMenu {
-            Button {
+            .background(Color.bgDarker)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .contextMenu {
+                Button {
+                    ActivityManager.shared.startActivity(team: team, game: gameService.games[team.gameId]!, questsComplete: 2, maxQuests: 5)
+                } label: {
+                    Text("Track")
+                }
                 
-            } label: {
-                Label("Invite", systemImage: "link.badge.plus")
-            }
-            
-            Button(role: .destructive) {
+                Button {
+                    
+                } label: {
+                    Label("Invite", systemImage: "link.badge.plus")
+                }
                 
-            } label: {
-                Label("Delete", systemImage: "trash")
+                Button(role: .destructive) {
+                    
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
             }
         }
     }

@@ -15,6 +15,9 @@ extension Color {
     
     static let colorPrimary = Color("Primary")
     static let colorSecondary = Color("Secondary")
+    static let colorSecondaryLighter = Color("SecondaryLighter")
+    
+    static let colorAccentGreen = Color("AccentGreen")
 }
 
 extension Color {

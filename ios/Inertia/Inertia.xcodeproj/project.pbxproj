@@ -29,7 +29,50 @@
 		B007755C2BB9B40200DD393C /* TeamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007755B2BB9B40200DD393C /* TeamService.swift */; };
 		B007755E2BB9B66D00DD393C /* TeamItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007755D2BB9B66D00DD393C /* TeamItem.swift */; };
 		B00775602BB9BBC000DD393C /* TeamList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007755F2BB9BBC000DD393C /* TeamList.swift */; };
+		B00775622BB9CE0500DD393C /* GameCreateScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775612BB9CE0400DD393C /* GameCreateScreen.swift */; };
+		B00775652BBD2E2200DD393C /* TeamPlayWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */; };
+		B00775672BBD357600DD393C /* TeamPlayMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775662BBD357600DD393C /* TeamPlayMenuController.swift */; };
+		B00775692BBD459400DD393C /* TeamPlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775682BBD459400DD393C /* TeamPlayController.swift */; };
+		B007756B2BBD573100DD393C /* UILabel+addCharacterSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007756A2BBD573100DD393C /* UILabel+addCharacterSpacing.swift */; };
+		B007756D2BC3C59900DD393C /* ExpandedTeamList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007756C2BC3C59900DD393C /* ExpandedTeamList.swift */; };
+		B0523EAD2BC5234A00657990 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EAC2BC5234A00657990 /* LocationManager.swift */; };
+		B0523ECB2BC6815000657990 /* Quest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523ECA2BC6815000657990 /* Quest.swift */; };
+		B0523ED32BC6B05000657990 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0523ED22BC6B05000657990 /* WidgetKit.framework */; };
+		B0523ED52BC6B05000657990 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0523ED42BC6B05000657990 /* SwiftUI.framework */; };
+		B0523ED82BC6B05000657990 /* InertiaWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523ED72BC6B05000657990 /* InertiaWidgetsBundle.swift */; };
+		B0523EDA2BC6B05000657990 /* InertiaWidgetsLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523ED92BC6B05000657990 /* InertiaWidgetsLiveActivity.swift */; };
+		B0523EDC2BC6B05000657990 /* InertiaWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EDB2BC6B05000657990 /* InertiaWidgets.swift */; };
+		B0523EDE2BC6B05000657990 /* AppIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EDD2BC6B05000657990 /* AppIntent.swift */; };
+		B0523EE02BC6B05300657990 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0523EDF2BC6B05300657990 /* Assets.xcassets */; };
+		B0523EE42BC6B05300657990 /* InertiaWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B0523ED02BC6B05000657990 /* InertiaWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B0523EEB2BC6B6A300657990 /* ActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EEA2BC6B6A300657990 /* ActivityManager.swift */; };
+		B09FD1CB2BC3EA590016BB4A /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */; };
+		B09FD1D02BC40AD50016BB4A /* ExpandedGameList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B0523EE22BC6B05300657990 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B007751B2BB8A52300DD393C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0523ECF2BC6B05000657990;
+			remoteInfo = InertiaWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B0523EE82BC6B05300657990 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B0523EE42BC6B05300657990 /* InertiaWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B00775232BB8A52300DD393C /* Inertia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inertia.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -55,6 +98,27 @@
 		B007755B2BB9B40200DD393C /* TeamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamService.swift; sourceTree = "<group>"; };
 		B007755D2BB9B66D00DD393C /* TeamItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamItem.swift; sourceTree = "<group>"; };
 		B007755F2BB9BBC000DD393C /* TeamList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamList.swift; sourceTree = "<group>"; };
+		B00775612BB9CE0400DD393C /* GameCreateScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCreateScreen.swift; sourceTree = "<group>"; };
+		B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayWrapper.swift; sourceTree = "<group>"; };
+		B00775662BBD357600DD393C /* TeamPlayMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayMenuController.swift; sourceTree = "<group>"; };
+		B00775682BBD459400DD393C /* TeamPlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayController.swift; sourceTree = "<group>"; };
+		B007756A2BBD573100DD393C /* UILabel+addCharacterSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+addCharacterSpacing.swift"; sourceTree = "<group>"; };
+		B007756C2BC3C59900DD393C /* ExpandedTeamList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedTeamList.swift; sourceTree = "<group>"; };
+		B0523EAC2BC5234A00657990 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		B0523ECA2BC6815000657990 /* Quest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quest.swift; sourceTree = "<group>"; };
+		B0523ED02BC6B05000657990 /* InertiaWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = InertiaWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0523ED22BC6B05000657990 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		B0523ED42BC6B05000657990 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		B0523ED72BC6B05000657990 /* InertiaWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InertiaWidgetsBundle.swift; sourceTree = "<group>"; };
+		B0523ED92BC6B05000657990 /* InertiaWidgetsLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InertiaWidgetsLiveActivity.swift; sourceTree = "<group>"; };
+		B0523EDB2BC6B05000657990 /* InertiaWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InertiaWidgets.swift; sourceTree = "<group>"; };
+		B0523EDD2BC6B05000657990 /* AppIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntent.swift; sourceTree = "<group>"; };
+		B0523EDF2BC6B05300657990 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B0523EE12BC6B05300657990 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B0523EEA2BC6B6A300657990 /* ActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityManager.swift; sourceTree = "<group>"; };
+		B0523EEC2BC6BCA800657990 /* Inertia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Inertia.entitlements; sourceTree = "<group>"; };
+		B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
+		B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedGameList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +129,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0523ECD2BC6B05000657990 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0523ED52BC6B05000657990 /* SwiftUI.framework in Frameworks */,
+				B0523ED32BC6B05000657990 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -72,6 +145,8 @@
 			isa = PBXGroup;
 			children = (
 				B00775252BB8A52300DD393C /* Inertia */,
+				B0523ED62BC6B05000657990 /* InertiaWidgets */,
+				B0523ED12BC6B05000657990 /* Frameworks */,
 				B00775242BB8A52300DD393C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -80,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				B00775232BB8A52300DD393C /* Inertia.app */,
+				B0523ED02BC6B05000657990 /* InertiaWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,6 +163,7 @@
 		B00775252BB8A52300DD393C /* Inertia */ = {
 			isa = PBXGroup;
 			children = (
+				B0523EEC2BC6BCA800657990 /* Inertia.entitlements */,
 				B007753B2BB8AB5000DD393C /* Utils */,
 				B00775362BB8A87600DD393C /* Views */,
 				B00775352BB8A86C00DD393C /* Services */,
@@ -112,6 +189,7 @@
 				B00775392BB8A92800DD393C /* User.swift */,
 				B007754F2BB96B2B00DD393C /* Game.swift */,
 				B00775592BB9B12600DD393C /* Team.swift */,
+				B0523ECA2BC6815000657990 /* Quest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -129,6 +207,7 @@
 		B00775362BB8A87600DD393C /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				B09FD1C82BC3EA470016BB4A /* Shared */,
 				B00775442BB8B21A00DD393C /* Home */,
 				B00775282BB8A52300DD393C /* RootScreen.swift */,
 				B00775422BB8B10500DD393C /* LoginScreen.swift */,
@@ -144,6 +223,7 @@
 				B00775472BB8B84B00DD393C /* Color.swift */,
 				B00775492BB8C15700DD393C /* Keychain.swift */,
 				B007754D2BB93B6E00DD393C /* Haptics.swift */,
+				B007756A2BBD573100DD393C /* UILabel+addCharacterSpacing.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -162,8 +242,10 @@
 		B00775512BB96C9E00DD393C /* Game */ = {
 			isa = PBXGroup;
 			children = (
+				B00775612BB9CE0400DD393C /* GameCreateScreen.swift */,
 				B00775522BB96CBA00DD393C /* GameItem.swift */,
 				B00775562BB96DBA00DD393C /* GameList.swift */,
+				B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -171,10 +253,78 @@
 		B00775582BB9B11200DD393C /* Team */ = {
 			isa = PBXGroup;
 			children = (
+				B00775632BBD2DE000DD393C /* Play */,
 				B007755D2BB9B66D00DD393C /* TeamItem.swift */,
 				B007755F2BB9BBC000DD393C /* TeamList.swift */,
+				B007756C2BC3C59900DD393C /* ExpandedTeamList.swift */,
 			);
 			path = Team;
+			sourceTree = "<group>";
+		};
+		B00775632BBD2DE000DD393C /* Play */ = {
+			isa = PBXGroup;
+			children = (
+				B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */,
+				B00775662BBD357600DD393C /* TeamPlayMenuController.swift */,
+				B00775682BBD459400DD393C /* TeamPlayController.swift */,
+			);
+			path = Play;
+			sourceTree = "<group>";
+		};
+		B0523EAB2BC5233900657990 /* LocationManager */ = {
+			isa = PBXGroup;
+			children = (
+				B0523EAC2BC5234A00657990 /* LocationManager.swift */,
+			);
+			path = LocationManager;
+			sourceTree = "<group>";
+		};
+		B0523ED12BC6B05000657990 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B0523ED22BC6B05000657990 /* WidgetKit.framework */,
+				B0523ED42BC6B05000657990 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B0523ED62BC6B05000657990 /* InertiaWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				B0523ED72BC6B05000657990 /* InertiaWidgetsBundle.swift */,
+				B0523ED92BC6B05000657990 /* InertiaWidgetsLiveActivity.swift */,
+				B0523EDB2BC6B05000657990 /* InertiaWidgets.swift */,
+				B0523EDD2BC6B05000657990 /* AppIntent.swift */,
+				B0523EDF2BC6B05300657990 /* Assets.xcassets */,
+				B0523EE12BC6B05300657990 /* Info.plist */,
+			);
+			path = InertiaWidgets;
+			sourceTree = "<group>";
+		};
+		B0523EE92BC6B65C00657990 /* ActivityManager */ = {
+			isa = PBXGroup;
+			children = (
+				B0523EEA2BC6B6A300657990 /* ActivityManager.swift */,
+			);
+			path = ActivityManager;
+			sourceTree = "<group>";
+		};
+		B09FD1C82BC3EA470016BB4A /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				B0523EE92BC6B65C00657990 /* ActivityManager */,
+				B0523EAB2BC5233900657990 /* LocationManager */,
+				B09FD1C92BC3EA4C0016BB4A /* LocationPicker */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		B09FD1C92BC3EA4C0016BB4A /* LocationPicker */ = {
+			isa = PBXGroup;
+			children = (
+				B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */,
+			);
+			path = LocationPicker;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -187,15 +337,34 @@
 				B007751F2BB8A52300DD393C /* Sources */,
 				B00775202BB8A52300DD393C /* Frameworks */,
 				B00775212BB8A52300DD393C /* Resources */,
+				B0523EE82BC6B05300657990 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B0523EE32BC6B05300657990 /* PBXTargetDependency */,
 			);
 			name = Inertia;
 			productName = Inertia;
 			productReference = B00775232BB8A52300DD393C /* Inertia.app */;
 			productType = "com.apple.product-type.application";
+		};
+		B0523ECF2BC6B05000657990 /* InertiaWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0523EE52BC6B05300657990 /* Build configuration list for PBXNativeTarget "InertiaWidgetsExtension" */;
+			buildPhases = (
+				B0523ECC2BC6B05000657990 /* Sources */,
+				B0523ECD2BC6B05000657990 /* Frameworks */,
+				B0523ECE2BC6B05000657990 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InertiaWidgetsExtension;
+			productName = InertiaWidgetsExtension;
+			productReference = B0523ED02BC6B05000657990 /* InertiaWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -208,6 +377,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					B00775222BB8A52300DD393C = {
+						CreatedOnToolsVersion = 15.0.1;
+					};
+					B0523ECF2BC6B05000657990 = {
 						CreatedOnToolsVersion = 15.0.1;
 					};
 				};
@@ -226,6 +398,7 @@
 			projectRoot = "";
 			targets = (
 				B00775222BB8A52300DD393C /* Inertia */,
+				B0523ECF2BC6B05000657990 /* InertiaWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -240,6 +413,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0523ECE2BC6B05000657990 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0523EE02BC6B05300657990 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -250,12 +431,23 @@
 				B00775602BB9BBC000DD393C /* TeamList.swift in Sources */,
 				B007754E2BB93B6E00DD393C /* Haptics.swift in Sources */,
 				B007754C2BB9358400DD393C /* TopBarMenu.swift in Sources */,
+				B00775672BBD357600DD393C /* TeamPlayMenuController.swift in Sources */,
 				B007753A2BB8A92800DD393C /* User.swift in Sources */,
 				B00775502BB96B2B00DD393C /* Game.swift in Sources */,
+				B0523EAD2BC5234A00657990 /* LocationManager.swift in Sources */,
 				B00775532BB96CBA00DD393C /* GameItem.swift in Sources */,
 				B00775432BB8B10500DD393C /* LoginScreen.swift in Sources */,
+				B09FD1CB2BC3EA590016BB4A /* LocationPicker.swift in Sources */,
+				B0523ECB2BC6815000657990 /* Quest.swift in Sources */,
+				B0523EEB2BC6B6A300657990 /* ActivityManager.swift in Sources */,
 				B00775382BB8A8FD00DD393C /* AuthService.swift in Sources */,
+				B00775652BBD2E2200DD393C /* TeamPlayWrapper.swift in Sources */,
 				B00775412BB8ABF600DD393C /* Endpoints.swift in Sources */,
+				B007756D2BC3C59900DD393C /* ExpandedTeamList.swift in Sources */,
+				B00775622BB9CE0500DD393C /* GameCreateScreen.swift in Sources */,
+				B007756B2BBD573100DD393C /* UILabel+addCharacterSpacing.swift in Sources */,
+				B00775692BBD459400DD393C /* TeamPlayController.swift in Sources */,
+				B09FD1D02BC40AD50016BB4A /* ExpandedGameList.swift in Sources */,
 				B007755A2BB9B12600DD393C /* Team.swift in Sources */,
 				B00775462BB8B22300DD393C /* HomeScreen.swift in Sources */,
 				B00775292BB8A52300DD393C /* RootScreen.swift in Sources */,
@@ -270,7 +462,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0523ECC2BC6B05000657990 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0523EDA2BC6B05000657990 /* InertiaWidgetsLiveActivity.swift in Sources */,
+				B0523EDE2BC6B05000657990 /* AppIntent.swift in Sources */,
+				B0523EDC2BC6B05000657990 /* InertiaWidgets.swift in Sources */,
+				B0523ED82BC6B05000657990 /* InertiaWidgetsBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B0523EE32BC6B05300657990 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0523ECF2BC6B05000657990 /* InertiaWidgetsExtension */;
+			targetProxy = B0523EE22BC6B05300657990 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B007752F2BB8A52500DD393C /* Debug */ = {
@@ -395,14 +606,22 @@
 		B00775322BB8A52500DD393C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Inertia/Inertia.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Inertia/Preview Content\"";
 				DEVELOPMENT_TEAM = 2W5B7NT4AS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Inertia needs to use your location to display it to other users.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -424,14 +643,22 @@
 		B00775332BB8A52500DD393C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Inertia/Inertia.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Inertia/Preview Content\"";
 				DEVELOPMENT_TEAM = 2W5B7NT4AS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Inertia needs to use your location to display it to other users.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Inertia needs to use your location to display it to other users and to select locations.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -444,6 +671,64 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.nattie.Inertia;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B0523EE62BC6B05300657990 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2W5B7NT4AS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = InertiaWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = InertiaWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nattie.Inertia.InertiaWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B0523EE72BC6B05300657990 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2W5B7NT4AS;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = InertiaWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = InertiaWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.nattie.Inertia.InertiaWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -467,6 +752,15 @@
 			buildConfigurations = (
 				B00775322BB8A52500DD393C /* Debug */,
 				B00775332BB8A52500DD393C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0523EE52BC6B05300657990 /* Build configuration list for PBXNativeTarget "InertiaWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B0523EE62BC6B05300657990 /* Debug */,
+				B0523EE72BC6B05300657990 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

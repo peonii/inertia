@@ -12,17 +12,56 @@ struct GameList: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Your games")
-                .font(.system(size: 40))
-                .fontWeight(.bold)
-                .tracking(-1)
-                .foregroundStyle(Color.colorPrimary)
-                .padding(.horizontal, 25)
+            if gameService.hostedGames.count > 0 {
+                NavigationLink {
+                    ExpandedGameList()
+                } label: {
+                    HStack {
+                        Text("Your games")
+                            .font(.system(size: 40))
+                            .fontWeight(.bold)
+                            .tracking(-1)
+                            .foregroundStyle(Color.colorPrimary)
+                            .padding(.leading, 25)
+                            .padding(.trailing, 5)
+                        
+                        Image(systemName: "chevron.right")
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color.colorSecondary)
+                    }
+                }
+            } else {
+                Text("Your games")
+                    .font(.system(size: 40))
+                    .fontWeight(.bold)
+                    .tracking(-1)
+                    .foregroundStyle(Color.colorPrimary)
+                    .padding(.leading, 25)
+                    .padding(.trailing, 5)
+            }
             
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 25) {
                     ForEach(gameService.hostedGames, id: \.id) { game in
                         GameItem(game: game)
+                    }
+                    
+                    NavigationLink {
+                        GameCreateScreen()
+                    } label: {
+                        Label {
+                            Text("New")
+                                .fontWeight(.semibold)
+                                .tracking(-1)
+                        } icon: {
+                            Image(systemName: "plus")
+                                .foregroundStyle(Color.colorSecondary)
+                        }
+                            .foregroundStyle(Color.colorSecondary)
+                            .frame(width: 170, height: 50)
+                            .padding()
+                            .background(Color.bgDarker)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                 }
                 .scrollTargetLayout()

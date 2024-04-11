@@ -16,6 +16,7 @@ pub struct Location {
     pub heading: f64,
     pub speed: f64,
 
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: time::OffsetDateTime,
 }
 

@@ -5,6 +5,7 @@ pub mod auth;
 pub mod game;
 pub mod location;
 pub mod manager;
+pub mod quest;
 mod snowflake;
 pub mod team;
 pub mod user;

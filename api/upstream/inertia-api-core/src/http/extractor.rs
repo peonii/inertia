@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     async_trait,
-    extract::FromRequestParts,
+    extract::{FromRequest, FromRequestParts},
     http::{header::AUTHORIZATION, request::Parts, HeaderValue},
     Extension, RequestPartsExt,
 };
@@ -59,6 +59,8 @@ where
             .ok_or_else(|| InertiaError::Unauthorized)?;
 
         let auth = Self::from_header(&ctx, header).await?;
+
+        tracing::info!("authenticated as {}", auth.0);
 
         Ok(auth)
     }
