@@ -11,4 +11,6 @@ const (
 	QuestSnowflakeNode
 	ActiveQuestSnowflakeNode
 	StatsSnowflakeNode
+	DeviceSnowflakeNode
+	LiveActivitySnowflakeNode
 )
