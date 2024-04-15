@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/adjust/rmq/v5"
 	"github.com/go-andiamo/chioas"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -28,6 +29,7 @@ type api struct {
 	rdc    *redis.Client
 	logger *zap.Logger
 	config *APIConfig
+	queue  rmq.Queue
 
 	userRepo       repository.UserRepository
 	accountRepo    repository.AccountRepository
@@ -37,6 +39,7 @@ type api struct {
 	locationRepo   repository.LocationRepository
 	gameInviteRepo repository.GameInviteRepository
 	questRepo      repository.QuestRepository
+	notifRepo      repository.NotificationRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -46,7 +49,7 @@ type api struct {
 	wsHub    *wsHub
 }
 
-func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger) *api {
+func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger, queue rmq.Queue) *api {
 	ur := repository.MakePostgresUserRepository(db)
 	ar := repository.MakePostgresAccountRepository(db)
 	ocr := repository.MakeRedisOAuthCodeRepository(rdc)
@@ -58,6 +61,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	gir := repository.MakePostgresGameInviteRepository(db)
 	qr := repository.MakePostgresQuestRepository(db)
 	usr := repository.MakePostgresUserStatsRepository(db)
+	nr := repository.MakePostgresNotificationRepository(db)
 
 	wsServer := websocket.Start(ctx)
 
@@ -66,6 +70,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		logger: logger,
 		config: cfg,
 		rdc:    rdc,
+		queue:  queue,
 
 		userRepo:         ur,
 		accountRepo:      ar,
@@ -78,6 +83,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		locationRepo:     lr,
 		gameInviteRepo:   gir,
 		questRepo:        qr,
+		notifRepo:        nr,
 
 		wsServer: wsServer,
 		wsHub:    NewWsHub(),
@@ -107,6 +113,26 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 									http.StatusOK: chioas.Response{
 										Schema: &map[string]string{
 											"status": "ok",
+										},
+									},
+								},
+							},
+						},
+					},
+					"/devices": chioas.Path{
+						Tag:         "Devices",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Register a new device",
+										Handler:     a.registerDeviceHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{},
+										},
+										Request: &chioas.Request{
+											Schema: domain.DeviceCreate{},
 										},
 									},
 								},

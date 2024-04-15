@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/adjust/rmq/v5"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" // required for postgres
 	_ "github.com/golang-migrate/migrate/v4/source/file"       // required for file://
@@ -40,6 +41,17 @@ func APICmd(ctx context.Context) *cobra.Command {
 			}
 			rdc := redis.NewClient(rs)
 
+			errChan := make(chan error)
+			rdcq, err := rmq.OpenConnectionWithRedisClient("inertia", rdc, errChan)
+			if err != nil {
+				return err
+			}
+
+			queue, err := rdcq.OpenQueue("inertia")
+			if err != nil {
+				return err
+			}
+
 			m, err := migrate.New("file://migrations", os.Getenv("DATABASE_URL"))
 			if err != nil {
 				return err
@@ -47,14 +59,14 @@ func APICmd(ctx context.Context) *cobra.Command {
 
 			if err := m.Up(); err != nil {
 				logger.Info("No migrations to run")
-        logger.Info("Fail reason",
-          zap.Error(err),
-        )
+				logger.Info("Fail reason",
+					zap.Error(err),
+				)
 			} else {
 				logger.Info("Migrations ran successfully")
 			}
 
-			a := api.MakeAPI(ctx, cfg, db, rdc, logger)
+			a := api.MakeAPI(ctx, cfg, db, rdc, logger, queue)
 			srv := a.MakeServer(ctx, 3001)
 
 			go func() { _ = srv.ListenAndServe() }()
