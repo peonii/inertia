@@ -57,6 +57,7 @@ export async function fetchTypeSafe<T>(
     },
   });
 
+  console.log(url)
   if (response.status === 401) {
     await refreshToken(authContext);
 
@@ -71,6 +72,7 @@ export async function fetchTypeSafe<T>(
     });
 
     if (!retryResponse.ok) {
+      console.log(await response.json())
       throw new Error("Failed to fetch data");
     }
 

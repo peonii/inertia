@@ -16,11 +16,10 @@ import { VerticalSpacer, formatDateLong } from "../../utilis";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 const Container = styled.View`
-  flex: 1;
   height: 100%;
   width: 100%;
   padding: 30px;
-  background-color: "#252525";
+  background-color: #252525;
 `;
 
 const BigTitle = styled.Text`
@@ -106,15 +105,17 @@ type GameFormData = {
 };
 
 const GameDetailScreen: React.FC = () => {
-  const id = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  console.log(id);
+
   const { data, error } = useQuery({
-    queryKey: ["game"],
+    queryKey: [`game ${id}`],
     queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
     staleTime: 1000 * 60,
   });
 
   if (error) {
-    router.push("/error");
+    router.push("/error/" + error.message);
   }
 
   const [location, setLocation] = useState("");
@@ -186,7 +187,7 @@ const GameDetailScreen: React.FC = () => {
       )}
       {data ? (
         <SmallTitle style={{ color: "#a5a5a5" }}>
-          {data.official ? "Oficial " : "Not official "}game
+          {data.official ? "Oficial " : "Unofficial "}game
         </SmallTitle>
       ) : (
         <Loading height={30} width={"50%"}></Loading>
@@ -221,7 +222,6 @@ const GameDetailScreen: React.FC = () => {
                   value={new Date(value)}
                   onChange={(event) => {
                     if (event.type === "dismissed") {
-                      console.log("dismissed");
                       setStartDatePickerVisible(false);
                       return;
                     }
@@ -278,7 +278,6 @@ const GameDetailScreen: React.FC = () => {
                   value={new Date(value)}
                   onChange={(event) => {
                     if (event.type === "dismissed") {
-                      console.log("dismissed");
                       setEndDatePickerVisible(false);
                       return;
                     }
@@ -327,15 +326,12 @@ const GameDetailScreen: React.FC = () => {
       <ButtonsContainer>
         <PressableContainer
           onPress={() => {
-            router.back();
-            if (compareGameForms()) return;
+            router.replace("/home");
             // TODO: Api to apply changes
           }}
         >
           <ButtonView>
-            <ButtonText style={compareGameForms() ? { color: "#7c7c7c" } : {}}>
-              {compareGameForms() ? "Close" : "Save"}
-            </ButtonText>
+            <ButtonText>{compareGameForms() ? "Close" : "Save"}</ButtonText>
           </ButtonView>
         </PressableContainer>
         <PressableContainer

@@ -7,9 +7,11 @@ import { useAuth } from "../context/AuthContext";
 import { fetchTypeSafe } from "../api/fetch";
 import { ENDPOINTS } from "../api/constants";
 import { formatDate, formatDateLong, formatDateShort } from "../utilis";
-import LocationPickerSheet from "./locationPickerSheet";
+import LocationPickerSheet from "../components/locationPickerSheet";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing } from "react-native";
+import { Animated, Dimensions, Easing } from "react-native";
+import { router } from "expo-router";
+import { useDataContext } from "../context/DataContext";
 
 type formStatus = "active" | "done" | "undone";
 
@@ -17,7 +19,6 @@ const Container = styled.View`
   width: 100%;
   height: 100%;
   background-color: #252525;
-  position: absolute;
   padding-top: 30px;
   bottom: 0;
 `;
@@ -28,6 +29,7 @@ const BigTitle = styled.Text`
   font-family: Inter_700Bold;
   letter-spacing: -1.9px;
   padding: 20px;
+  padding-top: 0px;
   padding-left: 27px;
 `;
 
@@ -194,11 +196,6 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
   );
 };
 
-type GameCreationViewProps = {
-  closeView: () => void;
-  userId: string;
-};
-
 type NameFormData = {
   name: string;
 };
@@ -215,11 +212,20 @@ type LocationFormData = {
   };
 };
 
-const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }) => {
+const GameCreation: React.FC = () => {
   const authContext = useAuth();
   const [startDatePickerVisible, setStartDatePickerVisible] = useState(false);
   const [endDatePickerVisible, setEndDatePickerVisible] = useState(false);
   const [isPickingTime, setIsPickingTime] = useState(false);
+
+  const dataContext = useDataContext();
+
+  const userData = dataContext.userData;
+  if (userData === "loading") {
+    router.push(`/error/` + "User id not found");
+    return;
+  }
+  const userId = userData.id;
 
   //3 forms, each for every screen
   const nameForm = useForm<NameFormData>({
@@ -319,7 +325,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
       return;
     }
     if (lastActiveIndex == 0) {
-      closeView();
+      router.replace("/home");
     }
 
     setStatusArray((prev) => {
@@ -352,7 +358,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
         loc_lng: locationForm.getValues("location").lng,
       };
       await createGame(data);
-      closeView();
+      router.replace("/home");
       return;
     }
     if (statusArray.indexOf("active") < 2) slide(statusArray.indexOf("active"), "in");
@@ -402,7 +408,7 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
   }, []);
 
   return (
-    <Container>
+    <Container style={{ height: Dimensions.get("screen").height }}>
       <BigTitle>Host your game</BigTitle>
       <ProgressTracker statusArray={statusArray}></ProgressTracker>
 
@@ -664,4 +670,4 @@ const GameCreationView: React.FC<GameCreationViewProps> = ({ closeView, userId }
   );
 };
 
-export default GameCreationView;
+export default GameCreation;

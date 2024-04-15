@@ -38,7 +38,7 @@ const IndexScreen: React.FC = () => {
 
     try {
       await refreshToken(authContext);
-      return router.replace({ pathname: "/home", params: { chuj: "tak" } });
+      return router.replace("/home");
     } catch {
       return router.replace("/login");
     }

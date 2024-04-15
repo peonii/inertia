@@ -7,6 +7,11 @@ import { useState } from "react";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import LoadingGlyph from "./loadingGlyph";
 import { useDataContext } from "../context/DataContext";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTypeSafe } from "../api/fetch";
+import { ENDPOINTS } from "../api/constants";
+import { User } from "../types";
+import { useAuth } from "../context/AuthContext";
 
 const LeftAlignedView = styled.View`
   padding: 14px 38px;
@@ -108,6 +113,18 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
   const [isActive, setIsActive] = useState(false);
   const DataContext = useDataContext();
   const userData = DataContext.userData;
+  const authContext = useAuth();
+  const dataContext = useDataContext();
+
+  const userDataRequest = useQuery<User>({
+    queryKey: ["userData"],
+    queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
+    staleTime: 1000 * 60 * 3,
+  });
+
+  if (userDataRequest.data) {
+    dataContext.setUserData(userDataRequest.data);
+  }
 
   const screenSize = {
     width: Dimensions.get("screen").width,

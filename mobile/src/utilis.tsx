@@ -52,7 +52,7 @@ export function formatDate(dateString: string) {
   const month = months[date.getMonth()];
   const year = date.getFullYear();
   let hour: string | number =
-    date.getHours() < 12 ? date.getHours() : date.getHours() - 12;
+    date.getHours() <= 12 ? date.getHours() : date.getHours() - 12;
   hour = hour.toString().length === 1 ? "0" + hour : hour;
   const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
   const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
@@ -83,7 +83,6 @@ export function formatDateShort(dateString: string) {
 
 export function formatDateLong(dateString: string) {
   if (!dateString) return "";
-  console.log(dateString);
   const date = new Date(dateString);
   let day: string = date.getDate().toString();
   switch (day) {
@@ -103,7 +102,7 @@ export function formatDateLong(dateString: string) {
   const month = months[date.getMonth()];
   const year = date.getFullYear();
   let hour: string | number =
-    date.getHours() < 12 ? date.getHours() : date.getHours() - 12;
+    date.getHours() <= 12 ? date.getHours() : date.getHours() - 12;
   hour = hour.toString().length === 1 ? "0" + hour : hour;
   const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
   const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();

@@ -21,8 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
-      
+      },
+      "package": "dev.nattie.Inertia"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,6 +32,14 @@
       "expo-font",
       "expo-secure-store"
     ],
-    "scheme": "inertia"
+    "scheme": "inertia",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "5135c774-4588-4fb6-a497-b8401e5165aa"
+      }
+    }
   }
 }

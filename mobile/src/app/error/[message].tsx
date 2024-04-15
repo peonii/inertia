@@ -1,5 +1,5 @@
 import styled from "@emotion/native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 const CenteredView = styled.View`
   flex: 1;
@@ -14,6 +14,13 @@ const PressableContainer = styled.Pressable`
   justify-content: center;
 `;
 
+const ErrorMessage = styled.Text`
+  font-family: Inter_500Medium;
+  color: #fff;
+  text-align: center;
+  width: 75%;
+`;
+
 const TetriaryButton = styled.Text`
   font-family: Inter_500Medium;
   font-size: 16px;
@@ -22,8 +29,10 @@ const TetriaryButton = styled.Text`
 `;
 
 const Error: React.FC = () => {
+  const { message } = useLocalSearchParams<{ message: string }>();
   return (
     <CenteredView>
+      <ErrorMessage>{message}</ErrorMessage>
       <PressableContainer onPress={router.back}>
         <TetriaryButton>Retry</TetriaryButton>
       </PressableContainer>

@@ -1,19 +1,17 @@
 import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
 import { router } from "expo-router";
 import { Game, Team, User } from "../types";
 import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
-import GameCreationView from "../components/gameCreationView";
-import GameDetails from "../components/gameDetails";
 import { makeGradientColorsFromColor } from "../utilis";
 import { useQuery } from "@tanstack/react-query";
 import { ENDPOINTS } from "../api/constants";
 import { fetchTypeSafe } from "../api/fetch";
 import { useAuth } from "../context/AuthContext";
 import { useDataContext } from "../context/DataContext";
+import { HoldItem } from "react-native-hold-menu";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -107,43 +105,23 @@ const BalanceText = styled.Text`
   letter-spacing: -1.3px;
 `;
 
-const PlusIconHolder = styled.View`
-  width: 50px;
-  height: 50px;
-  border-radius: 25px;
-  background-color: #4a4a4a;
-  justify-content: center;
-`;
-
-const PlusIcon = styled.Text`
-  color: #ffffff;
-  font-size: 30px;
-  font-family: Inter_400Regular;
-  include-font-padding: false;
-  vertical-align: middle;
-  text-align: center;
-  padding-bottom: 4px;
-`;
-
 const Home: React.FC = () => {
-  const [isCreatingGame, setIsCreatingGame] = useState(false);
-  const [visibleGameDetailsId, setVisibleDetailsId] = useState("");
   const authContext = useAuth();
-  const DataContext = useDataContext();
+  const dataContext = useDataContext();
 
-  const userDataRequest = useQuery({
+  const userDataRequest = useQuery<User>({
     queryKey: ["userData"],
     queryFn: () => fetchTypeSafe<User>(ENDPOINTS.users.me, authContext),
     staleTime: 1000 * 60 * 3,
   });
 
-  const gamesDataRequest = useQuery({
+  const gamesDataRequest = useQuery<Game[]>({
     queryKey: ["gamesData"],
     queryFn: () => fetchTypeSafe<Game[]>(ENDPOINTS.games.me, authContext),
     staleTime: 1000 * 60,
   });
 
-  const teamsDataRequest = useQuery({
+  const teamsDataRequest = useQuery<Team[]>({
     queryKey: ["teamsData"],
     queryFn: () => fetchTypeSafe<Team[]>(ENDPOINTS.teams.me, authContext),
     staleTime: 1000 * 60,
@@ -154,21 +132,16 @@ const Home: React.FC = () => {
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
 
-    router.push("/error");
+    router.push("/error/" + "Couldn't connect to the server");
     // TODO add some offline mode when already have old data
   }
 
-  if (userDataRequest.data) DataContext.setUserData(userDataRequest.data);
-  if (gamesDataRequest.data) DataContext.setGamesData(gamesDataRequest.data);
-  if (teamsDataRequest.data) DataContext.setTeamsData(teamsDataRequest.data);
+  if (userDataRequest.data) dataContext.setUserData(userDataRequest.data);
+  if (gamesDataRequest.data) dataContext.setGamesData(gamesDataRequest.data);
+  if (teamsDataRequest.data) dataContext.setTeamsData(teamsDataRequest.data);
 
-  const userData = DataContext.userData;
-  const gamesData = DataContext.gamesData;
-  const teamsData = DataContext.teamsData;
-
-  // const userData = "loading";
-  // const gamesData = "loading";
-  // const teamsData = "loading";
+  const gamesData = dataContext.gamesData;
+  const teamsData = dataContext.teamsData;
 
   //Turning games's data into a list of views
   const gamesList =
@@ -182,22 +155,45 @@ const Home: React.FC = () => {
       : // Loaded
         gamesData.map((game) => {
           return (
-            <PressableContainer
+            <HoldItem
               key={game.id}
-              onPress={() => {
-                router.push(`/game/${game.id}`);
-              }}
+              items={[
+                {
+                  text: "Delete",
+                  onPress: async () => {
+                    await fetchTypeSafe<null>(
+                      ENDPOINTS.games.all + "/" + game.id,
+                      authContext,
+                      {
+                        method: "DELETE",
+                      }
+                    ).catch((error) => {
+                      console.log(error);
+                    });
+                    gamesDataRequest.refetch();
+                  },
+                  isDestructive: true,
+                  icon: "trash-2",
+                },
+              ]}
+              menuAnchorPosition="top-center"
             >
-              <GameContainer>
-                <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-                <GameStatus
-                  timeLine={{
-                    start: game.time_start,
-                    end: game.time_end,
-                  }}
-                ></GameStatus>
-              </GameContainer>
-            </PressableContainer>
+              <PressableContainer
+                onPress={() => {
+                  router.replace(`/game/${game.id}`);
+                }}
+              >
+                <GameContainer>
+                  <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
+                  <GameStatus
+                    timeLine={{
+                      start: game.time_start,
+                      end: game.time_end,
+                    }}
+                  ></GameStatus>
+                </GameContainer>
+              </PressableContainer>
+            </HoldItem>
           );
         });
 
@@ -207,7 +203,7 @@ const Home: React.FC = () => {
       <PressableContainer
         key="1"
         onPress={() => {
-          setIsCreatingGame(true);
+          router.replace("/gameCreation");
         }}
       >
         <GameContainer
@@ -217,9 +213,9 @@ const Home: React.FC = () => {
             paddingLeft: 0,
           }}
         >
-          <PlusIconHolder>
-            <PlusIcon>+</PlusIcon>
-          </PlusIconHolder>
+          <SmallTitle style={{ fontFamily: "Inter_500Medium", color: "#a3a3a3" }}>
+            {"+ New game"}
+          </SmallTitle>
         </GameContainer>
       </PressableContainer>
     );
@@ -241,7 +237,7 @@ const Home: React.FC = () => {
           return (
             <PressableContainer
               key={team.id}
-              onPress={() => router.push(`/team/${team.id}`)}
+              onPress={() => router.replace(`/team/${team.id}`)}
             >
               <TeamContainer>
                 <LinearGradient
@@ -268,76 +264,52 @@ const Home: React.FC = () => {
           );
         });
 
-  // If no teams
-  if (teamsData.length == 0) {
-    teamList.push(
-      <TeamContainer key="0" style={{ alignItems: "center", justifyContent: "center" }}>
-        <MediumTitle>no teams</MediumTitle>
-      </TeamContainer>
-    );
-  }
-
   return (
     <CenteredView
       style={{
         minHeight: Math.round(useWindowDimensions().height),
       }}
     >
-      {visibleGameDetailsId ? (
-        <GameDetails
-          id={visibleGameDetailsId}
-          closeView={() => {
-            setVisibleDetailsId("");
-          }}
-        ></GameDetails>
-      ) : isCreatingGame ? (
-        <GameCreationView
-          closeView={() => {
-            setIsCreatingGame(false);
-            gamesDataRequest.refetch();
-          }}
-          userId={userData != "loading" ? userData.id : ""}
-        ></GameCreationView>
-      ) : (
-        <RefreshContainer
-          refreshControl={
-            <RefreshControl
-              refreshing={false}
-              onRefresh={() => {
-                gamesDataRequest.refetch();
-                teamsDataRequest.refetch();
-              }}
-            />
-          }
-        >
-          <Section>
-            <TitleWithIndicatiorView>
-              <BigTitle>Your games</BigTitle>
-              {gamesData === "loading" ? (
-                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-              ) : null}
-            </TitleWithIndicatiorView>
-            <ListContainer
-              horizontal
-              snapToInterval={240}
-              // snapToAlignment="start"
-              contentContainerStyle={{
-                paddingRight: 10,
-                paddingLeft: 10,
-              }}
-              showsHorizontalScrollIndicator={false}
-              style={gamesList.length === 1 ? { width: 260 } : {}}
-            >
-              {gamesList}
-            </ListContainer>
-          </Section>
-          <Section>
-            <TitleWithIndicatiorView>
-              <BigTitle>Your teams</BigTitle>
-              {teamsData === "loading" ? (
-                <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
-              ) : null}
-            </TitleWithIndicatiorView>
+      <RefreshContainer
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {
+              gamesDataRequest.refetch();
+              teamsDataRequest.refetch();
+            }}
+          />
+        }
+      >
+        <Section>
+          <TitleWithIndicatiorView>
+            <BigTitle>Your games</BigTitle>
+            {gamesData === "loading" ? (
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+            ) : null}
+          </TitleWithIndicatiorView>
+          <ListContainer
+            horizontal
+            snapToInterval={240}
+            // snapToAlignment="start"
+            contentContainerStyle={{
+              paddingRight: 10,
+              paddingLeft: 10,
+            }}
+            showsHorizontalScrollIndicator={false}
+            style={gamesList.length === 1 ? { width: 260 } : null}
+          >
+            {gamesList}
+          </ListContainer>
+        </Section>
+        <Section>
+          <TitleWithIndicatiorView>
+            <BigTitle>Your teams</BigTitle>
+            {teamsData === "loading" ? (
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
+            ) : null}
+          </TitleWithIndicatiorView>
+          {teamList.length > 0 ? (
             <ListContainer
               horizontal
               snapToInterval={220}
@@ -347,13 +319,19 @@ const Home: React.FC = () => {
                 paddingLeft: 10,
               }}
               showsHorizontalScrollIndicator={false}
-              style={teamList.length === 1 ? { width: 240 } : {}}
+              style={teamList.length === 1 ? { width: 240 } : null}
             >
               {teamList}
             </ListContainer>
-          </Section>
-        </RefreshContainer>
-      )}
+          ) : (
+            <CenteredView style={{ height: 80, justifyContent: "center" }}>
+              <SmallTitle style={{ width: 200, textAlign: "center" }}>
+                {"You don't have any teams"}
+              </SmallTitle>
+            </CenteredView>
+          )}
+        </Section>
+      </RefreshContainer>
     </CenteredView>
   );
 };

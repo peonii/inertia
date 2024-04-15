@@ -2,7 +2,7 @@ import styled from "@emotion/native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { router } from "expo-router";
-import React, { LegacyRef, useState } from "react";
+import { LegacyRef, useEffect, useState } from "react";
 import { ActivityIndicator, Dimensions, View, useWindowDimensions } from "react-native";
 import MapView from "react-native-maps";
 
@@ -100,14 +100,20 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
   const [isActive, setIsActive] = useState(false);
   const [isMapActivity, setIsMapActivity] = useState(false);
 
+  useEffect(() => {
+    if (isActive) router.setParams({ dark: "yes" });
+    else router.setParams({ dark: null });
+  }, [isActive]);
+
   const screenSize = {
     width: Dimensions.get("screen").width,
     height: Dimensions.get("screen").height,
     position: "absolute" as "absolute" | "relative",
     bottom: 0,
     left: 0,
-    Zindex: 10,
+    Zindex: 100,
   };
+
   return (
     <View style={screenSize}>
       {isActive ? (
@@ -118,11 +124,12 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
         ""
       )}
       <BottomSheet
-        snapPoints={["85%"]}
+        snapPoints={["98%"]}
         ref={sheetRef}
         enablePanDownToClose={!isMapActivity}
         index={-1}
         backgroundStyle={{ backgroundColor: "#252525" }}
+        handleIndicatorStyle={{ backgroundColor: "#fff" }}
         onChange={(index) => {
           setIsActive(index > -1);
           //@ts-expect-error idk
