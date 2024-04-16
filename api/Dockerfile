@@ -7,5 +7,7 @@ RUN go mod download && go mod verify
 COPY . .
 RUN go build -v -o /bin/app ./cmd/inertia
 
-EXPOSE 3001
-CMD ["/bin/app", "api"]
+ADD launch.sh /bin/
+RUN chmod +x /bin/launch.sh
+
+ENTRYPOINT ["/bin/launch.sh"]

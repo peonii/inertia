@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -155,6 +156,39 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
 		if err != nil {
 			return
+		}
+
+		users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
+		if err != nil {
+			return
+		}
+
+		// Remove all team members from notified users
+		for _, member := range members {
+			for i, user := range users {
+				if user == member.ID {
+					users = append(users[:i], users[i+1:]...)
+					break
+				}
+			}
+		}
+
+		devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
+		if err != nil {
+			return
+		}
+
+		for _, device := range devices {
+			notif := domain.Notification{
+				Title:    "Quest completed",
+				Body:     fmt.Sprintf("The team %s completed the quest %s", team.Name, quest.Title),
+				Priority: 10,
+				DeviceID: device.ID,
+			}
+
+			if err := a.scheduleNotification(&notif); err != nil {
+				continue
+			}
 		}
 
 		for _, member := range members {

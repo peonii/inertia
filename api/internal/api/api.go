@@ -29,7 +29,8 @@ type api struct {
 	rdc    *redis.Client
 	logger *zap.Logger
 	config *APIConfig
-	queue  rmq.Queue
+
+	notifsQueue rmq.Queue
 
 	userRepo       repository.UserRepository
 	accountRepo    repository.AccountRepository
@@ -49,7 +50,7 @@ type api struct {
 	wsHub    *wsHub
 }
 
-func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger, queue rmq.Queue) *api {
+func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger, queue rmq.Connection) *api {
 	ur := repository.MakePostgresUserRepository(db)
 	ar := repository.MakePostgresAccountRepository(db)
 	ocr := repository.MakeRedisOAuthCodeRepository(rdc)
@@ -65,12 +66,17 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 
 	wsServer := websocket.Start(ctx)
 
+	notifsQueue, err := queue.OpenQueue("inertia-notifications")
+	if err != nil {
+		panic(fmt.Sprintf("failed to open notifications queue: %v", err))
+	}
+
 	return &api{
-		db:     db,
-		logger: logger,
-		config: cfg,
-		rdc:    rdc,
-		queue:  queue,
+		db:          db,
+		logger:      logger,
+		config:      cfg,
+		rdc:         rdc,
+		notifsQueue: notifsQueue,
 
 		userRepo:         ur,
 		accountRepo:      ar,

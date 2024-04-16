@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/peonii/inertia/internal/domain"
+	"go.uber.org/zap"
 )
 
 type wsAuthPayload struct {
@@ -227,7 +228,7 @@ func (a *api) authorizeDiscordCallbackHandler(w http.ResponseWriter, r *http.Req
 
 	var user *domain.User
 	account, err := a.accountRepo.FindByAccountID(r.Context(), userResp.ID, "discord")
-	if err != nil {
+	if err != nil || account == nil {
 		accts, err := a.accountRepo.FindByEmail(r.Context(), userResp.Email)
 		if err != nil || len(accts) == 0 {
 			// This means the user doesn't exist and we have to create them
@@ -245,6 +246,10 @@ func (a *api) authorizeDiscordCallbackHandler(w http.ResponseWriter, r *http.Req
 				AuthRole: domain.UserAuthRoleBasic,
 			}
 
+			a.logger.Info("creating user",
+				zap.Any("user", userCreate),
+			)
+
 			user, err = a.userRepo.Create(r.Context(), userCreate)
 			if err != nil {
 				a.sendError(w, r, http.StatusInternalServerError, err, "failed to create user")
@@ -253,7 +258,7 @@ func (a *api) authorizeDiscordCallbackHandler(w http.ResponseWriter, r *http.Req
 		} else {
 			user, err = a.userRepo.FindOne(r.Context(), account.UserID)
 			if err != nil {
-				a.sendError(w, r, http.StatusInternalServerError, err, "failed to find user")
+				a.sendError(w, r, http.StatusInternalServerError, err, "failed to find user (non-critical)")
 				return
 			}
 
@@ -293,6 +298,7 @@ func (a *api) authorizeDiscordCallbackHandler(w http.ResponseWriter, r *http.Req
 		if err != nil {
 			// Something went REALLY wrong
 			a.sendError(w, r, http.StatusInternalServerError, err, "failed to find user")
+			return
 		}
 
 		dn := userResp.DisplayName

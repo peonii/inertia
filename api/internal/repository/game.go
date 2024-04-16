@@ -18,6 +18,8 @@ type GameRepository interface {
 	Create(ctx context.Context, game *domain.GameCreate) (*domain.Game, error)
 	Update(ctx context.Context, id string, game *domain.GameUpdate) (*domain.Game, error)
 	Delete(ctx context.Context, id string) error
+
+	FindAllUsersIDs(ctx context.Context, gameID string) ([]string, error)
 }
 
 type PostgresGameRepository struct {
@@ -214,4 +216,31 @@ func (r *PostgresGameRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (r *PostgresGameRepository) FindAllUsersIDs(ctx context.Context, id string) ([]string, error) {
+	query := `
+		SELECT u.id
+		FROM users u
+		JOIN teams_users tu ON u.id = tu.user_id
+		JOIN teams t ON tu.team_id = t.id
+		WHERE t.game_id = $1
+	`
+
+	rows, err := r.db.Query(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := []string{}
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+
+		ids = append(ids, id)
+	}
+
+	return ids, nil
 }

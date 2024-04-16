@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/peonii/inertia/internal/domain"
 	"go.uber.org/zap"
 )
 
@@ -39,4 +40,17 @@ func (a *api) sendError(w http.ResponseWriter, r *http.Request, code int, err er
 func (a *api) session(r *http.Request) string {
 	uid := r.Context().Value(UserIDKey).(string)
 	return uid
+}
+
+func (a *api) scheduleNotification(n *domain.Notification) error {
+	marshaled, err := json.Marshal(n)
+	if err != nil {
+		return err
+	}
+
+	if err := a.notifsQueue.PublishBytes(marshaled); err != nil {
+		return err
+	}
+
+	return nil
 }

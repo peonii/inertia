@@ -27,29 +27,11 @@ func (a *api) updateLocationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	devices, err := a.notifRepo.GetDevicesForUser(r.Context(), uid)
-	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to get devices")
-		return
-	}
-
-	for _, device := range devices {
-		n := domain.Notification{
-			Title: "Published new location",
-			Body:  "You published a new location",
-
-			DeviceID: device.ID,
-			Priority: 10,
-		}
-		marshaled, _ := json.Marshal(n)
-		a.queue.PublishBytes(marshaled)
-	}
-
-	a.wsHub.Broadcast <- wsLocationMsg{
-		GameID:   loc.GameID,
-		Location: loc.Location,
-		UserID:   uid,
-	}
+	// a.wsHub.Broadcast <- wsLocationMsg{
+	// 	GameID:   loc.GameID,
+	// 	Location: loc.Location,
+	// 	UserID:   uid,
+	// }
 
 	a.sendJson(w, http.StatusOK, loc)
 }

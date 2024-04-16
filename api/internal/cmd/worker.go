@@ -3,31 +3,25 @@ package cmd
 import (
 	"context"
 	"os"
+	"runtime"
 
 	"github.com/adjust/rmq/v5"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres" // required for postgres
-	_ "github.com/golang-migrate/migrate/v4/source/file"       // required for file://
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/peonii/inertia/internal/api"
+	"github.com/peonii/inertia/internal/worker"
 	"github.com/redis/go-redis/v9"
+	"github.com/sideshow/apns2/token"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-func APICmd(ctx context.Context) *cobra.Command {
-	apiCmd := &cobra.Command{
-		Use: "api",
+func WorkerCmd(ctx context.Context) *cobra.Command {
+	workerCmd := &cobra.Command{
+		Use: "worker",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			logger, err := zap.NewProduction()
 			if err != nil {
 				return err
-			}
-
-			cfg := &api.APIConfig{
-				DiscordClientID:     os.Getenv("DISCORD_CLIENT_ID"),
-				DiscordClientSecret: os.Getenv("DISCORD_CLIENT_SECRET"),
-				DiscordRedirectURI:  os.Getenv("DISCORD_REDIRECT_URI"),
 			}
 
 			db, err := pgxpool.New(ctx, os.Getenv("DATABASE_URL"))
@@ -40,6 +34,7 @@ func APICmd(ctx context.Context) *cobra.Command {
 				return err
 			}
 			rdc := redis.NewClient(rs)
+			defer rdc.Close()
 
 			errChan := make(chan error)
 			queue, err := rmq.OpenConnectionWithRedisClient("inertia", rdc, errChan)
@@ -61,23 +56,26 @@ func APICmd(ctx context.Context) *cobra.Command {
 				logger.Info("Migrations ran successfully")
 			}
 
-			a := api.MakeAPI(ctx, cfg, db, rdc, logger, queue)
-			srv := a.MakeServer(ctx, 3001)
+			apnsKey, err := token.AuthKeyFromFile("apns_key.p8")
+			if err != nil {
+				return err
+			}
+			tok := token.Token{
+				AuthKey: apnsKey,
+				KeyID:   os.Getenv("APNS_KEY_ID"),
+				TeamID:  os.Getenv("APNS_TEAM_ID"),
+			}
 
-			go func() { _ = srv.ListenAndServe() }()
-
-			logger.Info("Started HTTP server")
+			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*16)
+			notifsWorker.Start()
 
 			<-ctx.Done()
 
-			logger.Info("Shutting down HTTP server")
-
-			srv.Shutdown(ctx)
-			logger.Sync()
+			notifsWorker.Stop()
 
 			return nil
 		},
 	}
 
-	return apiCmd
+	return workerCmd
 }
