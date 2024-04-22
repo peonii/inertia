@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/domain"
 	"github.com/peonii/inertia/internal/repository"
+	"github.com/redis/go-redis/v9"
 	"github.com/sideshow/apns2"
 	"github.com/sideshow/apns2/token"
 	"go.uber.org/zap"
@@ -21,6 +22,7 @@ type NotificationWorker struct {
 
 	logger    *zap.Logger
 	queue     rmq.Connection
+	rdc       *redis.Client
 	db        *pgxpool.Pool
 	apnsToken *token.Token
 
@@ -41,11 +43,12 @@ type notificationConsumer struct {
 	rmq.Consumer
 }
 
-func NewNotificationWorker(ctx context.Context, logger *zap.Logger, token *token.Token, db *pgxpool.Pool, queue rmq.Connection, development bool, consumers int) *NotificationWorker {
+func NewNotificationWorker(ctx context.Context, logger *zap.Logger, token *token.Token, rdc *redis.Client, db *pgxpool.Pool, queue rmq.Connection, development bool, consumers int) *NotificationWorker {
 	return &NotificationWorker{
 		Context:     ctx,
 		logger:      logger,
 		apnsToken:   token,
+		rdc:         rdc,
 		db:          db,
 		queue:       queue,
 		development: development,
@@ -97,12 +100,26 @@ func NewNotificationConsumer(nw *NotificationWorker, tag int) *notificationConsu
 }
 
 func (nc *notificationConsumer) Consume(delivery rmq.Delivery) {
+	payload := delivery.Payload()
 	var n domain.Notification
-	if err := json.Unmarshal([]byte(delivery.Payload()), &n); err != nil {
+	if err := json.Unmarshal([]byte(payload), &n); err != nil {
 		nc.logger.Error("failed to unmarshal notification", zap.Error(err))
 		delivery.Reject()
 		return
 	}
+
+	key := fmt.Sprintf("locks:notifications:%s", payload)
+	_, err := nc.rdc.Get(nc, key).Bool()
+	if err != nil {
+		// has already been locked
+		return
+	}
+
+	// attempt to lock the notification
+	nc.rdc.Set(nc, key, true, time.Second*60)
+	defer func() {
+		nc.rdc.Del(nc, key)
+	}()
 
 	nc.logger.Info("received notification",
 		zap.Int("tag", nc.tag),

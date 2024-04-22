@@ -9,6 +9,6 @@ import Foundation
 
 struct Constants {
     static let ENDPOINT_STAGING = "https://inertia-devel.fly.dev"
-    
-    static let ENDPOINT = Constants.ENDPOINT_STAGING
+    static let ENDPOINT_PROD = "https://inertia.live"
+    static let ENDPOINT = Constants.ENDPOINT_PROD
 }

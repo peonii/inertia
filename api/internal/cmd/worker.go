@@ -68,7 +68,7 @@ func WorkerCmd(ctx context.Context) *cobra.Command {
 				TeamID:  os.Getenv("APNS_TEAM_ID"),
 			}
 
-			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*16)
+			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, rdc, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*8)
 			notifsWorker.Start()
 
 			cleaner := rmq.NewCleaner(queue)
