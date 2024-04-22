@@ -51,7 +51,7 @@ func (a *api) updateLocationHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	a.wsHub.Broadcast <- wsLocationMsg{
+	a.WsHub.Broadcast <- wsLocationMsg{
 		GameID:   loc.GameID,
 		Location: loc.Location,
 		UserID:   uid,
