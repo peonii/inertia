@@ -18,11 +18,17 @@ func (a *api) registerDeviceHandler(w http.ResponseWriter, r *http.Request) {
 
 	device.UserID = s
 
-	_, err := a.notifRepo.CreateDevice(r.Context(), &device)
+	_, err := a.notifRepo.GetDeviceByToken(r.Context(), device.Token)
 	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create device")
-		return
-	}
+		_, err := a.notifRepo.CreateDevice(r.Context(), &device)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create device")
+			return
+		}
 
-	a.sendJson(w, http.StatusOK, nil)
+		a.sendJson(w, http.StatusOK, nil)
+	} else {
+		// Device already exists
+		a.sendJson(w, http.StatusOK, nil)
+	}
 }

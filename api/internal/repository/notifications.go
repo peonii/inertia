@@ -16,6 +16,7 @@ type NotificationRepository interface {
 	CreateDevice(ctx context.Context, device *domain.DeviceCreate) (*domain.Device, error)
 	PurgeStaleDevices(ctx context.Context) error
 	DeleteDevice(ctx context.Context, id string) error
+	GetDeviceByToken(ctx context.Context, token string) (*domain.Device, error)
 
 	// GetLiveActivity(ctx context.Context, id string) (*domain.LiveActivity, error)
 	// GetLiveActivitiesForUsers(ctx context.Context, userIDs []string) ([]*domain.LiveActivity, error)
@@ -173,4 +174,27 @@ func (r *PostgresNotificationRepository) DeleteDevice(ctx context.Context, id st
 
 	_, err := r.db.Exec(ctx, query, id)
 	return err
+}
+
+func (r *PostgresNotificationRepository) GetDeviceByToken(ctx context.Context, token string) (*domain.Device, error) {
+	query := `
+		SELECT
+			id, user_id, service_type, token, expires_at, created_at
+		FROM devices
+		WHERE token = $1
+	`
+
+	var device domain.Device
+	if err := r.db.QueryRow(ctx, query, token).Scan(
+		&device.ID,
+		&device.UserID,
+		&device.ServiceType,
+		&device.Token,
+		&device.ExpiresAt,
+		&device.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	return &device, nil
 }
