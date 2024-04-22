@@ -29,10 +29,13 @@ extension AuthServiceError: LocalizedError {
 
 @MainActor
 class AuthService: ObservableObject {
+    static var shared = AuthService()
+    
     @Published var user: User?
     var token: String?
     var refreshToken: String?
     let http: URLSession
+    var deviceToken: String?
     
     init() {
         self.http = URLSession(configuration: .default)
@@ -235,6 +238,26 @@ class AuthService: ObservableObject {
             throw AuthServiceError.invalidResponseError
         } catch {
             throw AuthServiceError.fetchError
+        }
+    }
+    
+    private struct CreateDevicePayload: Codable {
+        var token: String
+        var serviceType: String
+        
+        enum CodingKeys: String, CodingKey {
+            case token = "token"
+            case serviceType = "service_type"
+        }
+    }
+    
+    public func registerDevice() async throws {
+        if let deviceToken = self.deviceToken {
+            let payload = CreateDevicePayload(token: deviceToken, serviceType: "apns")
+            
+            try await self.post(endpoint: Endpoints.DEVICES_CREATE, body: payload)
+        } else {
+            throw AuthServiceError.unauthenticatedError
         }
     }
 }

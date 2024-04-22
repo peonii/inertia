@@ -72,10 +72,10 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	}
 
 	return &api{
-		db:          db,
-		logger:      logger,
-		config:      cfg,
-		rdc:         rdc,
+		db:     db,
+		logger: logger,
+		config: cfg,
+		rdc:    rdc,
 		notifsQueue: notifsQueue,
 
 		userRepo:         ur,

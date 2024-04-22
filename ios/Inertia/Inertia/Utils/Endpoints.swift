@@ -20,4 +20,6 @@ struct Endpoints {
     static func GAMES_DELETE(_ id: String) -> String {
         return GAMES_BASE + "/\(id)"
     }
+    
+    static let DEVICES_CREATE = Constants.ENDPOINT + "/api/v5/devices"
 }

@@ -11,7 +11,7 @@ kill_timeout = 5
 
 [processes]
 api = "/bin/app api"
-worker = "/bin/app worker"
+# worker = "/bin/app worker"
 
 [build]
 
@@ -30,13 +30,13 @@ force_https = true
 handlers = ['http', 'tls']
 port = 443
 
-[[services]]
-processes = ['worker']
-min_machines_running = 1
-auto_start_machines = true
-auto_stop_machines = true
-[[services.ports]]
-port = 3001
+# [[services]]
+# processes = ['worker']
+# min_machines_running = 1
+# auto_start_machines = true
+# auto_stop_machines = true
+# [[services.ports]]
+# port = 3001
 
 
 [[vm]]

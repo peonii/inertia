@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"context"
+	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/adjust/rmq/v5"
 	"github.com/golang-migrate/migrate/v4"
@@ -68,6 +70,19 @@ func WorkerCmd(ctx context.Context) *cobra.Command {
 
 			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*16)
 			notifsWorker.Start()
+
+			cleaner := rmq.NewCleaner(queue)
+
+			go func() {
+				for range time.Tick(time.Second * 10) {
+					returned, err := cleaner.Clean()
+					if err != nil {
+						log.Printf("failed to clean: %s", err)
+						continue
+					}
+					log.Printf("cleaned %d", returned)
+				}
+			}()
 
 			<-ctx.Done()
 

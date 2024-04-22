@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/peonii/inertia/internal/domain"
+	"go.uber.org/zap"
 )
 
 type LocationPayload struct {
@@ -25,6 +26,29 @@ func (a *api) updateLocationHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.sendError(w, r, http.StatusInternalServerError, err, "failed to update location")
 		return
+	}
+
+	devices, err := a.notifRepo.GetDevicesForUser(r.Context(), uid)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to get devices")
+		return
+	}
+
+	for _, device := range devices {
+		n := domain.Notification{
+			Title: "Published new location",
+			Body:  "You published a new location",
+
+			DeviceID: device.ID,
+			Priority: 10,
+		}
+
+		if err := a.scheduleNotification(&n); err != nil {
+			a.logger.Error(
+				"failed to schedule notification",
+				zap.Error(err),
+			)
+		}
 	}
 
 	// a.wsHub.Broadcast <- wsLocationMsg{
