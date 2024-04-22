@@ -47,7 +47,7 @@ type api struct {
 	refreshTokenRepo repository.RefreshTokenRepository
 
 	wsServer *websocket.Server
-	wsHub    *wsHub
+	WsHub    *wsHub
 }
 
 func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.Client, logger *zap.Logger, queue rmq.Connection) *api {
@@ -72,10 +72,10 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	}
 
 	return &api{
-		db:     db,
-		logger: logger,
-		config: cfg,
-		rdc:    rdc,
+		db:          db,
+		logger:      logger,
+		config:      cfg,
+		rdc:         rdc,
 		notifsQueue: notifsQueue,
 
 		userRepo:         ur,
@@ -92,7 +92,7 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		notifRepo:        nr,
 
 		wsServer: wsServer,
-		wsHub:    NewWsHub(),
+		WsHub:    NewWsHub(),
 	}
 }
 
@@ -580,7 +580,7 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 			isRunner = team.IsRunner
 		}
 
-		a.wsHub.Register <- &wsClient{
+		a.WsHub.Register <- &wsClient{
 			conn:     c,
 			user:     u,
 			gameID:   p.GameID,

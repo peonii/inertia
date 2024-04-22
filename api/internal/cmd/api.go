@@ -65,8 +65,9 @@ func APICmd(ctx context.Context) *cobra.Command {
 			srv := a.MakeServer(ctx, 3001)
 
 			go func() { _ = srv.ListenAndServe() }()
-
 			logger.Info("Started HTTP server")
+			go func() { a.WsHub.Run() }()
+			logger.Info("Started WebSocket server")
 
 			<-ctx.Done()
 
