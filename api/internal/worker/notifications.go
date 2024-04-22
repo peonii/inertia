@@ -110,8 +110,9 @@ func (nc *notificationConsumer) Consume(delivery rmq.Delivery) {
 
 	key := fmt.Sprintf("locks:notifications:%s", payload)
 	_, err := nc.rdc.Get(nc, key).Bool()
-	if err != nil {
+	if err == nil {
 		// has already been locked
+		nc.logger.Error("notification locked", zap.String("key", key))
 		return
 	}
 
