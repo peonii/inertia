@@ -1,4 +1,4 @@
-export const BASE_URL = "https://inertia-devel.fly.dev";
+export const BASE_URL = "https://inertia.live";
 
 export const ENDPOINTS = {
   oauth2: {
@@ -12,7 +12,8 @@ export const ENDPOINTS = {
   games: {
     all: `${BASE_URL}/api/v5/games`,
     me: `${BASE_URL}/api/v5/users/@me/games`,
-    create: `${BASE_URL}/api/v5/games`
+    create: `${BASE_URL}/api/v5/games`,
+    update: (id: string) => `{${BASE_URL}/api/v5/games/${id}`
   },
   teams: {
     me: `${BASE_URL}/api/v5/users/@me/teams`,

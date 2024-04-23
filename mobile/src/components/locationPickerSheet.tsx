@@ -124,14 +124,14 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
         ""
       )}
       <BottomSheet
-        snapPoints={["98%"]}
+        snapPoints={["84%"]}
         ref={sheetRef}
         enablePanDownToClose={!isMapActivity}
         index={-1}
         backgroundStyle={{ backgroundColor: "#252525" }}
         handleIndicatorStyle={{ backgroundColor: "#fff" }}
-        onChange={(index) => {
-          setIsActive(index > -1);
+        onAnimate={(_, toIndex) => {
+          setIsActive(toIndex > -1);
           //@ts-expect-error idk
           mapRef.current.setCamera({ zoom: 12 });
         }}

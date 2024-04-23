@@ -9,7 +9,7 @@ import { ENDPOINTS } from "../api/constants";
 import { formatDate, formatDateLong, formatDateShort } from "../utilis";
 import LocationPickerSheet from "../components/locationPickerSheet";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, Easing } from "react-native";
+import { Animated, Easing, Keyboard } from "react-native";
 import { router } from "expo-router";
 import { useDataContext } from "../context/DataContext";
 
@@ -20,7 +20,7 @@ const Container = styled.View`
   height: 100%;
   background-color: #252525;
   padding-top: 30px;
-  bottom: 0;
+  top: 0px;
 `;
 
 const BigTitle = styled.Text`
@@ -119,7 +119,7 @@ const Divider = styled.View`
 `;
 
 const CurrentDetails = styled.View`
-  top: 120px;
+  top: 100px;
   right: 30px;
   align-items: flex-end;
   position: absolute;
@@ -341,8 +341,6 @@ const GameCreation: React.FC = () => {
     await fetchTypeSafe(ENDPOINTS.games.create, authContext, {
       method: "POST",
       body: JSON.stringify(gameData),
-    }).catch((error) => {
-      console.log(error);
     });
   }
 
@@ -398,7 +396,10 @@ const GameCreation: React.FC = () => {
       latitude: locationForm.getValues("location").lat,
       longitude: locationForm.getValues("location").lng,
     });
-    if (adress.subLocality) setAdressText(`${adress.subLocality}, ${adress.locality}`);
+    console.log(adress);
+    if (adress.thoroughfare) setAdressText(`${adress.thoroughfare}, ${adress.locality}`);
+    else if (adress.subLocality)
+      setAdressText(`${adress.subLocality}, ${adress.locality}`);
     else setAdressText(adress.locality);
   }
   useEffect(() => {
@@ -408,7 +409,7 @@ const GameCreation: React.FC = () => {
   }, []);
 
   return (
-    <Container style={{ height: Dimensions.get("screen").height }}>
+    <Container>
       <BigTitle>Host your game</BigTitle>
       <ProgressTracker statusArray={statusArray}></ProgressTracker>
 
@@ -430,7 +431,7 @@ const GameCreation: React.FC = () => {
           height: 320,
           width: "400%",
           position: "absolute",
-          top: "23%",
+          top: 150,
           left: currentScreen.interpolate({
             inputRange: [0, 3],
             outputRange: ["-0%", "-300%"],
@@ -617,11 +618,14 @@ const GameCreation: React.FC = () => {
       <PressableContainer
         style={{
           position: "absolute",
-          bottom: "28%",
+          bottom: "12%",
           paddingLeft: 5,
           alignSelf: "center",
         }}
         onPress={(() => {
+          if (statusArray.indexOf("active") === 0) {
+            Keyboard.dismiss();
+          }
           switch (statusArray.indexOf("active")) {
             case 0:
               return nameForm.handleSubmit(goNext);
@@ -641,7 +645,7 @@ const GameCreation: React.FC = () => {
         </NextButtonView>
       </PressableContainer>
       <PressableContainer
-        style={{ position: "absolute", bottom: "28%" }}
+        style={{ position: "absolute", bottom: "12%" }}
         onPress={goPrevious}
       >
         {/* I know its a previous button stfu */}

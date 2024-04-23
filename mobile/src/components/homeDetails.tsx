@@ -157,8 +157,8 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
         enableHandlePanningGesture={true}
         snapPoints={["68%"]}
         ref={bottomSheetRef}
-        onChange={(index) => {
-          setIsActive(index > -1);
+        onAnimate={(_, toIndex) => {
+          setIsActive(toIndex > -1);
         }}
         backgroundStyle={{ backgroundColor: "#252525" }}
         handleIndicatorStyle={{ backgroundColor: "#fff" }}

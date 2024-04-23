@@ -56,7 +56,6 @@ export async function fetchTypeSafe<T>(
       'Content-Type': 'application/json'
     },
   });
-
   console.log(url)
   if (response.status === 401) {
     await refreshToken(authContext);

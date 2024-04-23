@@ -125,7 +125,12 @@ const GameDetailScreen: React.FC = () => {
       latitude: gameForm.getValues("lat"),
       longitude: gameForm.getValues("lng"),
     });
-    if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
+
+    console.log(gameForm.getValues("lat"), gameForm.getValues("lng"));
+    console.log(adress);
+
+    if (adress.thoroughfare) setLocation(`${adress.thoroughfare}, ${adress.locality}`);
+    else if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
     else setLocation(adress.locality);
   }
 
@@ -309,25 +314,46 @@ const GameDetailScreen: React.FC = () => {
 
       <Divider></Divider>
       <MediumTitle>Location</MediumTitle>
-      <PressableContainer
-        onPress={() => {
-          sheetRef.current.snapToIndex(0);
-        }}
-      >
-        {location ? (
+      {location ? (
+        <PressableContainer
+          onPress={() => {
+            mapRef.current.animateToRegion(
+              {
+                latitude: gameForm.getValues("lat"),
+                longitude: gameForm.getValues("lng"),
+                latitudeDelta: 0.1383,
+                longitudeDelta: 0.06315,
+              },
+              0
+            );
+
+            sheetRef.current.snapToIndex(0);
+          }}
+        >
           <View>
             <SmallTitle style={{ color: "#a5a5a5" }}>{location}</SmallTitle>
             <SmallTitle>Edit</SmallTitle>
           </View>
-        ) : (
-          <Loading height={30} width={"50%"}></Loading>
-        )}
-      </PressableContainer>
+        </PressableContainer>
+      ) : (
+        <Loading height={30} width={"50%"}></Loading>
+      )}
       <ButtonsContainer>
         <PressableContainer
-          onPress={() => {
-            router.replace("/home");
-            // TODO: Api to apply changes
+          onPress={async () => {
+            if (!compareGameForms()) {
+              await fetchTypeSafe<null>(ENDPOINTS.games.update(id), authContext, {
+                method: "PATCH",
+                body: JSON.stringify({
+                  time_start: gameForm.getValues("start"),
+                  time_end: gameForm.getValues("end"),
+                  loc_lat: gameForm.getValues("lat"),
+                  loc_lng: gameForm.getValues("lng"),
+                }),
+              });
+              router.replace("/home");
+              // TODO: Api to apply changes
+            }
           }}
         >
           <ButtonView>

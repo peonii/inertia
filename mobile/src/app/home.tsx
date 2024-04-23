@@ -2,7 +2,12 @@ import styled from "@emotion/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Game, Team, User } from "../types";
-import { ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
+import {
+  ActivityIndicator,
+  RefreshControl,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import LoadingGlyph from "../components/loadingGlyph";
 import GameStatus from "../components/gameStatus";
 import { makeGradientColorsFromColor } from "../utilis";
@@ -11,7 +16,7 @@ import { ENDPOINTS } from "../api/constants";
 import { fetchTypeSafe } from "../api/fetch";
 import { useAuth } from "../context/AuthContext";
 import { useDataContext } from "../context/DataContext";
-import { HoldItem } from "react-native-hold-menu";
+import ContextMenu from "react-native-context-menu-view";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -80,7 +85,6 @@ const GameContainer = styled.View`
   width: 220px;
   height: 86px;
   border-radius: 10px;
-  margin: 0px 10px;
   overflow: hidden;
 `;
 
@@ -155,45 +159,45 @@ const Home: React.FC = () => {
       : // Loaded
         gamesData.map((game) => {
           return (
-            <HoldItem
-              key={game.id}
-              items={[
-                {
-                  text: "Delete",
-                  onPress: async () => {
-                    await fetchTypeSafe<null>(
-                      ENDPOINTS.games.all + "/" + game.id,
-                      authContext,
-                      {
-                        method: "DELETE",
-                      }
-                    ).catch((error) => {
-                      console.log(error);
-                    });
-                    gamesDataRequest.refetch();
+            <View style={{ paddingHorizontal: 10 }} key={game.id}>
+              <ContextMenu
+                // actions={[
+                //   {
+                //     title: "Delete",
+                //     destructive: true,
+                //     icon: "Trash-2",
+                //   },
+                // ]}
+                // onPress={() => {
+                //   fetchTypeSafe<null>(ENDPOINTS.games.all + "/" + game.id, authContext, {
+                //     method: "Delete",
+                //   });
+                // }}
+                title={"Dropdown Menu"}
+                actions={[
+                  {
+                    title: "Test Item",
                   },
-                  isDestructive: true,
-                  icon: "trash-2",
-                },
-              ]}
-              menuAnchorPosition="top-center"
-            >
-              <PressableContainer
-                onPress={() => {
-                  router.replace(`/game/${game.id}`);
-                }}
+                ]}
+                dropdownMenuMode={true}
               >
-                <GameContainer>
-                  <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
-                  <GameStatus
-                    timeLine={{
-                      start: game.time_start,
-                      end: game.time_end,
-                    }}
-                  ></GameStatus>
-                </GameContainer>
-              </PressableContainer>
-            </HoldItem>
+                <PressableContainer
+                  onPress={() => {
+                    router.replace(`/game/${game.id}`);
+                  }}
+                >
+                  <GameContainer>
+                    <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
+                    <GameStatus
+                      timeLine={{
+                        start: game.time_start,
+                        end: game.time_end,
+                      }}
+                    ></GameStatus>
+                  </GameContainer>
+                </PressableContainer>
+              </ContextMenu>
+            </View>
           );
         });
 

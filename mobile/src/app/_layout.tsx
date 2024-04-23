@@ -20,12 +20,19 @@ import TopBar from "../components/topBar";
 import HomeDetails from "../components/homeDetails";
 import { DataContext } from "../context/DataContext";
 import { Game, Team, User } from "../types";
-import { HoldMenuProvider } from "react-native-hold-menu";
 import { View } from "react-native";
-import Feather from "@expo/vector-icons/Feather";
+import * as Notifications from "expo-notifications";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Layout: React.FC = () => {
   SplashScreen.preventAutoHideAsync();
+
+  useEffect(() => {
+    (async () => {
+      const token = (await Notifications.getDevicePushTokenAsync()).data;
+      console.log("tokenosik iwjdwoa ijdiao w", token);
+    })();
+  }, []);
 
   const queryClient = new QueryClient();
   const [accessToken, setAccessToken] = useState("");
@@ -33,8 +40,6 @@ const Layout: React.FC = () => {
   const [gamesData, setGamesData] = useState("loading" as Game[] | "loading");
   const [teamsData, setTeamsData] = useState("loading" as Team[] | "loading");
   const homeDetailsRef = useRef<BottomSheet>(null);
-
-  console.log(accessToken);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_900Black,
@@ -58,7 +63,6 @@ const Layout: React.FC = () => {
     return null;
   }
   const globalHeader = (props) => {
-    console.log(props.route.params.dark);
     return (
       <View>
         <TopBar
@@ -98,10 +102,10 @@ const Layout: React.FC = () => {
     >
       <AuthContext.Provider value={{ accessToken, setAccessToken }}>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView
-            style={{ flex: 1, height: "100%", backgroundColor: "#252525" }}
-          >
-            <HoldMenuProvider iconComponent={Feather} theme="dark">
+          <SafeAreaView style={{ flex: 1 }}>
+            <GestureHandlerRootView
+              style={{ flex: 1, height: "100%", backgroundColor: "#252525" }}
+            >
               <Stack
                 screenOptions={{
                   headerStyle: {
@@ -173,8 +177,8 @@ const Layout: React.FC = () => {
                 />
               </Stack>
               <HomeDetails bottomSheetRef={homeDetailsRef} />
-            </HoldMenuProvider>
-          </GestureHandlerRootView>
+            </GestureHandlerRootView>
+          </SafeAreaView>
         </QueryClientProvider>
       </AuthContext.Provider>
     </DataContext.Provider>
