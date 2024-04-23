@@ -29,10 +29,13 @@ extension AuthServiceError: LocalizedError {
 
 @MainActor
 class AuthService: ObservableObject {
+    static var shared = AuthService()
+    
     @Published var user: User?
     var token: String?
     var refreshToken: String?
     let http: URLSession
+    var deviceToken: String?
     
     init() {
         self.http = URLSession(configuration: .default)
@@ -207,6 +210,54 @@ class AuthService: ObservableObject {
             throw AuthServiceError.invalidResponseError
         } catch {
             throw AuthServiceError.fetchError
+        }
+    }
+    
+    public func delete(endpoint: String) async throws {
+        guard let url = URL(string: endpoint) else { throw AuthServiceError.invalidURLError }
+        guard let token = self.token else { throw AuthServiceError.unauthenticatedError }
+        
+        do {
+            var request = URLRequest(url: url)
+            
+            request.httpMethod = "DELETE"
+            request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            do {
+                let _ = try await self.http.data(for: request)
+            } catch {
+                try await self.refreshAccessToken()
+                let _ = try await self.http.data(for: request)
+            }
+            
+            return
+        } catch is EncodingError {
+            throw AuthServiceError.invalidBodyError
+        } catch is DecodingError {
+            throw AuthServiceError.invalidResponseError
+        } catch {
+            throw AuthServiceError.fetchError
+        }
+    }
+    
+    private struct CreateDevicePayload: Codable {
+        var token: String
+        var serviceType: String
+        
+        enum CodingKeys: String, CodingKey {
+            case token = "token"
+            case serviceType = "service_type"
+        }
+    }
+    
+    public func registerDevice() async throws {
+        if let deviceToken = self.deviceToken {
+            let payload = CreateDevicePayload(token: deviceToken, serviceType: "apns")
+            
+            try await self.post(endpoint: Endpoints.DEVICES_CREATE, body: payload)
+        } else {
+            throw AuthServiceError.unauthenticatedError
         }
     }
 }

@@ -7,6 +7,24 @@
 
 import Foundation
 
+struct GameCreate: Codable {
+    var name: String
+    var timeStart: String
+    var timeEnd: String
+    var locLat: Double
+    var locLng: Double
+    var hostId: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name = "name"
+        case timeStart = "time_start"
+        case timeEnd = "time_end"
+        case locLat = "loc_lat"
+        case locLng = "loc_lng"
+        case hostId = "host_id"
+    }
+}
+
 struct Game: Codable {
     var id: String
     var name: String
@@ -57,6 +75,6 @@ struct Game: Codable {
     }
     
     static func mock(id: String = "123") -> Game {
-        Game(id: id, name: "Penguincat Inc.", official: true, timeStart: "2024-04-31T10:00:00+00:00", timeEnd: "2024-04-31T20:00:00+00:00", locLat: 52.23, locLng: 24.21, hostId: "123", createdAt: "2024-03-31T10:02:01+00:00")
+        Game(id: id, name: "Penguincat Inc.", official: true, timeStart: "2024-04-21T10:00:00Z", timeEnd: "2024-04-21T20:00:00Z", locLat: 52.23, locLng: 24.21, hostId: "123", createdAt: "2024-03-31T10:02:01Z")
     }
 }

@@ -14,4 +14,12 @@ struct Endpoints {
     static let USERS_ME = Constants.ENDPOINT + "/api/v5/users/@me"
     static let USERS_ME_GAMES = Constants.ENDPOINT + "/api/v5/users/@me/games"
     static let USERS_ME_TEAMS = Constants.ENDPOINT + "/api/v5/users/@me/teams"
+    
+    static let GAMES_CREATE = Constants.ENDPOINT + "/api/v5/games"
+    static let GAMES_BASE = Constants.ENDPOINT + "/api/v5/games"
+    static func GAMES_DELETE(_ id: String) -> String {
+        return GAMES_BASE + "/\(id)"
+    }
+    
+    static let DEVICES_CREATE = Constants.ENDPOINT + "/api/v5/devices"
 }

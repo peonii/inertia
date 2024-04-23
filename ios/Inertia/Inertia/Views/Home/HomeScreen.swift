@@ -14,19 +14,30 @@ struct HomeScreen: View {
     @StateObject var teamService = TeamService()
     
     var body: some View {
-        VStack {
-            TopBarMenu()
-            
-            GameList()
-            
-            TeamList()
-                .padding(.top, 40)
-            
-            Spacer()
+        NavigationStack {
+            ZStack {
+                Color.bg.ignoresSafeArea()
+                
+                VStack {
+                    TopBarMenu()
+                    
+                    GameList()
+                    
+                    TeamList()
+                        .padding(.top, 40)
+                    
+                    Spacer()
+                }
+            }
+            .navigationTitle("Home")
+            .toolbar(.hidden)
         }
+        .scrollContentBackground(.hidden)
         .environmentObject(gameService)
         .environmentObject(teamService)
         .task {
+            LocationManager.shared.startUpdatingLocation()
+            
             do {
                 try await gameService.fetchHostedGames(for: authService)
                 try await teamService.fetchJoinedTeams(for: authService)

@@ -30,7 +30,7 @@ struct SplashScreen: View {
 }
 
 struct RootScreen: View {
-    @StateObject private var authService = AuthService()
+    @StateObject private var authService = AuthService.shared
     @State var hasTriedCachedLogIn = false
     
     var body: some View {
@@ -54,6 +54,9 @@ struct RootScreen: View {
                 authService.getRefreshTokenFromKeychain()
                 try await authService.refreshAccessToken()
                 try await authService.refreshUserData()
+                try await
+                    authService
+                    .registerDevice()
             } catch {
                 KeychainHelper.shared.delete(service: "inertia-auth", account: "inertia")
             }
