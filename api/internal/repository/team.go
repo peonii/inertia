@@ -23,6 +23,9 @@ type TeamRepository interface {
 	AddTeamMember(ctx context.Context, teamID, userID string) error
 	IsTeamMember(ctx context.Context, t *domain.Team, u *domain.User) (bool, error)
 
+	MakeRunner(ctx context.Context, teamID string) error
+	MakeHunter(ctx context.Context, teamID string) error
+
 	Update(ctx context.Context, id string, team *domain.TeamUpdate) (*domain.Team, error)
 }
 
@@ -337,4 +340,30 @@ func (r *PostgresTeamRepository) Update(ctx context.Context, id string, team *do
 	}
 
 	return &t, nil
+}
+
+func (r *PostgresTeamRepository) MakeRunner(ctx context.Context, teamID string) error {
+	query := `
+		UPDATE teams SET is_runner = true WHERE id = $1
+	`
+
+	_, err := r.db.Exec(ctx, query, teamID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *PostgresTeamRepository) MakeHunter(ctx context.Context, teamID string) error {
+	query := `
+		UPDATE teams SET is_runner = false WHERE id = $1
+	`
+
+	_, err := r.db.Exec(ctx, query, teamID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

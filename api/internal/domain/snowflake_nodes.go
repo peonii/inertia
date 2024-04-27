@@ -13,4 +13,5 @@ const (
 	StatsSnowflakeNode
 	DeviceSnowflakeNode
 	LiveActivitySnowflakeNode
+	PowerupSnowflakeNode
 )

@@ -110,7 +110,8 @@ const GameDetailScreen: React.FC = () => {
 
   const { data, error } = useQuery({
     queryKey: [`game ${id}`],
-    queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
+    queryFn: () =>
+      fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
     staleTime: 1000 * 60,
   });
 
@@ -129,8 +130,10 @@ const GameDetailScreen: React.FC = () => {
     console.log(gameForm.getValues("lat"), gameForm.getValues("lng"));
     console.log(adress);
 
-    if (adress.thoroughfare) setLocation(`${adress.thoroughfare}, ${adress.locality}`);
-    else if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
+    if (adress.thoroughfare)
+      setLocation(`${adress.thoroughfare}, ${adress.locality}`);
+    else if (adress.subLocality)
+      setLocation(`${adress.subLocality}, ${adress.locality}`);
     else setLocation(adress.locality);
   }
 
@@ -324,7 +327,7 @@ const GameDetailScreen: React.FC = () => {
                 latitudeDelta: 0.1383,
                 longitudeDelta: 0.06315,
               },
-              0
+              0,
             );
 
             sheetRef.current.snapToIndex(0);
@@ -342,17 +345,23 @@ const GameDetailScreen: React.FC = () => {
         <PressableContainer
           onPress={async () => {
             if (!compareGameForms()) {
-              await fetchTypeSafe<null>(ENDPOINTS.games.update(id), authContext, {
-                method: "PATCH",
-                body: JSON.stringify({
-                  time_start: gameForm.getValues("start"),
-                  time_end: gameForm.getValues("end"),
-                  loc_lat: gameForm.getValues("lat"),
-                  loc_lng: gameForm.getValues("lng"),
-                }),
-              });
+              await fetchTypeSafe<null>(
+                ENDPOINTS.games.update(id),
+                authContext,
+                {
+                  method: "PATCH",
+                  body: JSON.stringify({
+                    time_start: gameForm.getValues("start"),
+                    time_end: gameForm.getValues("end"),
+                    loc_lat: gameForm.getValues("lat"),
+                    loc_lng: gameForm.getValues("lng"),
+                  }),
+                },
+              );
               router.replace("/home");
               // TODO: Api to apply changes
+            } else {
+              router.replace("/home");
             }
           }}
         >

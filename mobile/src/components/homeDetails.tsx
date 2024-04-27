@@ -3,7 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Dimensions, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import LoadingGlyph from "./loadingGlyph";
 import { useDataContext } from "../context/DataContext";
@@ -109,6 +109,15 @@ type HomeDetailsProps = {
   bottomSheetRef: React.Ref<BottomSheetMethods>;
 };
 
+const screenSize = {
+  width: Dimensions.get("screen").width,
+  height: Dimensions.get("screen").height,
+  position: "absolute" as "absolute" | "relative",
+  bottom: 0,
+  left: 0,
+  Zindex: 10,
+};
+
 const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
   const [isActive, setIsActive] = useState(false);
   const DataContext = useDataContext();
@@ -122,18 +131,12 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
     staleTime: 1000 * 60 * 3,
   });
 
-  if (userDataRequest.data) {
-    dataContext.setUserData(userDataRequest.data);
-  }
+  useEffect(() => {
+    if (userDataRequest.data) {
+      dataContext.setUserData(userDataRequest.data);
+    }
+  }, [userDataRequest.data, userDataRequest.error]);
 
-  const screenSize = {
-    width: Dimensions.get("screen").width,
-    height: Dimensions.get("screen").height,
-    position: "absolute" as "absolute" | "relative",
-    bottom: 0,
-    left: 0,
-    Zindex: 10,
-  };
   return (
     <View style={screenSize}>
       {isActive ? (
@@ -185,7 +188,9 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
               {userData === "loading" ? (
                 <LoadingGlyph height={15} width={50} borderRadius={5} />
               ) : (
-                <RoleText>{userData.auth_level == 99 ? "Admin" : "Player"}</RoleText>
+                <RoleText>
+                  {userData.auth_level == 99 ? "Admin" : "Player"}
+                </RoleText>
               )}
             </ProfileTextSection>
           </ProfileSection>

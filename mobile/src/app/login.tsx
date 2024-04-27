@@ -83,7 +83,7 @@ const Login: React.FC = () => {
       }),
       extraParams: { provider: "discord" },
     },
-    discovery
+    discovery,
   );
 
   async function login(code: string) {
@@ -135,7 +135,9 @@ const Login: React.FC = () => {
             //router.replace("/home");
           }}
         >
-          <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
+          <LoginButtonText disabled={!request}>
+            Log in with Discord
+          </LoginButtonText>
         </LoginButton>
       </LoginButtonContainer>
     </CenteredView>

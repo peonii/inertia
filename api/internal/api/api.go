@@ -41,6 +41,7 @@ type api struct {
 	gameInviteRepo repository.GameInviteRepository
 	questRepo      repository.QuestRepository
 	notifRepo      repository.NotificationRepository
+	powerupRepo    repository.PowerupRepository
 
 	oauthCodeRepo    repository.OAuthCodeRepository
 	accessTokenRepo  repository.AccessTokenRepository
@@ -63,8 +64,9 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 	qr := repository.MakePostgresQuestRepository(db)
 	usr := repository.MakePostgresUserStatsRepository(db)
 	nr := repository.MakePostgresNotificationRepository(db)
+	pr := repository.MakePostgresPowerupRepository(db)
 
-	wsServer := websocket.Start(ctx)
+	wsServer := websocket.New()
 
 	notifsQueue, err := queue.OpenQueue("inertia-notifications")
 	if err != nil {
@@ -90,9 +92,10 @@ func MakeAPI(ctx context.Context, cfg *APIConfig, db *pgxpool.Pool, rdc *redis.C
 		gameInviteRepo:   gir,
 		questRepo:        qr,
 		notifRepo:        nr,
+		powerupRepo:      pr,
 
 		wsServer: wsServer,
-		WsHub:    NewWsHub(),
+		WsHub:    NewWsHub(logger, db),
 	}
 }
 
@@ -559,9 +562,12 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 		r.Get("/d/callback", a.authorizeDiscordCallbackHandler)
 	})
 
-	r.HandleFunc("/ws", a.wsServer.Handler)
+	a.wsServer.Run(ctx)
 
 	a.wsServer.On("join", func(c *websocket.Conn, msg *websocket.Message) {
+		a.logger.Info("received join message",
+			zap.String("message", string(msg.Data)),
+		)
 		p := &wsAuthPayload{}
 		json.Unmarshal(msg.Data, p)
 
@@ -580,13 +586,21 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 			isRunner = team.IsRunner
 		}
 
+		a.logger.Info("attempting to register user",
+			zap.String("user", u.ID),
+		)
+
 		a.WsHub.Register <- &wsClient{
 			conn:     c,
 			user:     u,
 			gameID:   p.GameID,
 			isRunner: isRunner,
 		}
+
+		c.Send("ok")
 	})
+
+	r.HandleFunc("/ws", a.wsServer.Handler)
 
 	if err := apiSpec.SetupRoutes(r, apiSpec); err != nil {
 		panic(err)

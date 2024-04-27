@@ -115,3 +115,56 @@ func (a *api) createTeamHandler(w http.ResponseWriter, r *http.Request) {
 
 	a.sendJson(w, http.StatusOK, team)
 }
+
+func (a *api) catchTeamHandler(w http.ResponseWriter, r *http.Request) {
+	uid := a.session(r)
+
+	tid := chi.URLParam(r, "id")
+
+	team, err := a.teamRepo.FindOne(r.Context(), tid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
+		return
+	}
+
+	user, err := a.userRepo.FindOne(r.Context(), uid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find user")
+		return
+	}
+
+	isMember, err := a.teamRepo.IsTeamMember(r.Context(), team, user)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to verify team membership")
+		return
+	}
+
+	if !isMember {
+		a.sendError(w, r, http.StatusUnauthorized, err, "user is not a member of the team")
+		return
+	}
+
+	err = a.teamRepo.MakeRunner(r.Context(), tid)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team runner")
+		return
+	}
+
+	otherTeams, err := a.teamRepo.FindByGameID(r.Context(), team.GameID)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find teams")
+		return
+	}
+
+	for _, t := range otherTeams {
+		if t.IsRunner {
+			err = a.teamRepo.MakeHunter(r.Context(), t.ID)
+			if err != nil {
+				a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team hunter")
+				return
+			}
+		}
+	}
+
+	a.sendJson(w, http.StatusOK, nil)
+}
