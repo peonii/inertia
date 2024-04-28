@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"time"
 
+	firebase "firebase.google.com/go/v4"
 	"github.com/adjust/rmq/v5"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -68,7 +69,16 @@ func WorkerCmd(ctx context.Context) *cobra.Command {
 				TeamID:  os.Getenv("APNS_TEAM_ID"),
 			}
 
-			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, rdc, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*8)
+			firebaseApp, err := firebase.NewApp(ctx, nil)
+			if err != nil {
+				return err
+			}
+			fcmClient, err := firebaseApp.Messaging(ctx)
+			if err != nil {
+				return err
+			}
+
+			notifsWorker := worker.NewNotificationWorker(ctx, logger, &tok, fcmClient, rdc, db, queue, os.Getenv("RUNTIME_ENV") == "DEV", runtime.NumCPU()*8)
 			notifsWorker.Start()
 
 			cleaner := rmq.NewCleaner(queue)

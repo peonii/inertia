@@ -352,6 +352,19 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 									},
 								},
 							},
+							"/{id}/create-invite": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Create an invite for a game",
+										Handler:     a.createGameInvite,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema: domain.GameInvite{},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 					"/teams": chioas.Path{
@@ -406,6 +419,17 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 											http.MethodPost: chioas.Method{
 												Description: "Generate a side quest for a team",
 												Handler:     a.generateNewSideQuestHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{},
+												},
+											},
+										},
+									},
+									"/catch-team": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodPost: chioas.Method{
+												Description: "Catch the running team and become the new runner",
+												Handler:     a.catchTeamHandler,
 												Responses: chioas.Responses{
 													http.StatusOK: chioas.Response{},
 												},

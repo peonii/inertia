@@ -138,6 +138,33 @@ func (a *api) generateMainQuestsHandler(w http.ResponseWriter, r *http.Request) 
 	a.sendJson(w, http.StatusNoContent, nil)
 }
 
+func (a *api) createGameInvite(w http.ResponseWriter, r *http.Request) {
+	uid := a.session(r)
+	gid := chi.URLParam(r, "id")
+
+	game, err := a.gameRepo.FindOne(r.Context(), gid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find game")
+		return
+	}
+
+	if game.HostID != uid {
+		a.sendError(w, r, http.StatusForbidden, nil, "cannot invite to someone else's game")
+		return
+	}
+
+	var invite domain.GameInviteCreate
+	invite.GameID = gid
+
+	inv, err := a.gameInviteRepo.Create(r.Context(), &invite)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to create invite")
+		return
+	}
+
+	a.sendJson(w, http.StatusCreated, inv)
+}
+
 func (a *api) purgeActiveQuestsHandler(w http.ResponseWriter, r *http.Request) {
 	uid := a.session(r)
 	gid := chi.URLParam(r, "id")

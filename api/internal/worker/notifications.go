@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"firebase.google.com/go/v4/messaging"
 	"github.com/adjust/rmq/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peonii/inertia/internal/domain"
@@ -25,6 +26,7 @@ type NotificationWorker struct {
 	rdc       *redis.Client
 	db        *pgxpool.Pool
 	apnsToken *token.Token
+	fcmClient *fcm.Client
 
 	development bool
 	consumers   int
@@ -43,11 +45,12 @@ type notificationConsumer struct {
 	rmq.Consumer
 }
 
-func NewNotificationWorker(ctx context.Context, logger *zap.Logger, token *token.Token, rdc *redis.Client, db *pgxpool.Pool, queue rmq.Connection, development bool, consumers int) *NotificationWorker {
+func NewNotificationWorker(ctx context.Context, logger *zap.Logger, token *token.Token, fcmClient *messaging.Client, rdc *redis.Client, db *pgxpool.Pool, queue rmq.Connection, development bool, consumers int) *NotificationWorker {
 	return &NotificationWorker{
 		Context:     ctx,
 		logger:      logger,
 		apnsToken:   token,
+		fcmClient:   fcmClient,
 		rdc:         rdc,
 		db:          db,
 		queue:       queue,
@@ -171,7 +174,23 @@ func (nc *notificationConsumer) Consume(delivery rmq.Delivery) {
 			nc.papns.PushWithContext(nc, notification)
 		}
 	} else if device.ServiceType == domain.DeviceServiceTypeFCM {
-		// send to FCM
+		notification := &messaging.Message{
+			Token: device.Token,
+			Notification: &messaging.Notification{
+				Title: n.Title,
+				Body:  n.Body,
+			},
+		}
+
+		if _, err := nc.fcmClient.Send(nc, notification); err != nil {
+			nc.logger.Error("failed to send notification", zap.Error(err))
+			delivery.Reject()
+			return
+		}
+
+		nc.logger.Info("notification sent",
+			zap.String("device_token", device.Token),
+		)
 	} else {
 		nc.logger.Error("unknown service type", zap.String("service_type", device.ServiceType))
 		delivery.Reject()
