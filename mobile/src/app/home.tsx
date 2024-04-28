@@ -18,6 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import { useDataContext } from "../context/DataContext";
 import ContextMenu from "react-native-context-menu-view";
 import { useEffect } from "react";
+import * as Notifications from "expo-notifications";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -157,6 +158,25 @@ const Home: React.FC = () => {
     gamesDataRequest.error,
     teamsDataRequest.error,
   ]);
+
+  useEffect(() => {
+    if (userDataRequest.data) {
+      const user = userDataRequest.data;
+      (async () => {
+        const token = await Notifications.getDevicePushTokenAsync();
+        console.log("Token", token.type, token.data);
+
+        fetchTypeSafe<null>(ENDPOINTS.devices.register, authContext, {
+          method: "POST",
+          body: JSON.stringify({
+            token: token.data,
+            service_type: "fcm",
+            user_id: user.id,
+          }),
+        });
+      })();
+    }
+  }, [userDataRequest.data]);
 
   const gamesData = dataContext.gamesData;
   const teamsData = dataContext.teamsData;

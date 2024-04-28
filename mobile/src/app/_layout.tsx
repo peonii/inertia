@@ -21,18 +21,10 @@ import HomeDetails from "../components/homeDetails";
 import { DataContext } from "../context/DataContext";
 import { Game, Team, User } from "../types";
 import { View } from "react-native";
-import * as Notifications from "expo-notifications";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Layout: React.FC = () => {
   SplashScreen.preventAutoHideAsync();
-
-  useEffect(() => {
-    (async () => {
-      const token = await Notifications.getDevicePushTokenAsync();
-      console.log("Token", token.type, token.data);
-    })();
-  }, []);
 
   const queryClient = new QueryClient();
   const [accessToken, setAccessToken] = useState("");

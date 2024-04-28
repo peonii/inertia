@@ -13,10 +13,13 @@ export const ENDPOINTS = {
     all: `${BASE_URL}/api/v5/games`,
     me: `${BASE_URL}/api/v5/users/@me/games`,
     create: `${BASE_URL}/api/v5/games`,
-    update: (id: string) => `{${BASE_URL}/api/v5/games/${id}`
+    update: (id: string) => `{${BASE_URL}/api/v5/games/${id}`,
   },
   teams: {
     me: `${BASE_URL}/api/v5/users/@me/teams`,
     id: (id: string) => `${BASE_URL}/api/v5/teams/${id}`,
+  },
+  devices: {
+    register: `${BASE_URL}/api/v5/devices`,
   },
 };

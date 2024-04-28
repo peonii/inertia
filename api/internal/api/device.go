@@ -32,3 +32,34 @@ func (a *api) registerDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		a.sendJson(w, http.StatusOK, nil)
 	}
 }
+
+func (a *api) UNSTABLE_testNotificationDelivery(w http.ResponseWriter, r *http.Request) {
+	// This is a test endpoint to send a notification to a device
+	// This is an unstable endpoint and should be removed in production
+	// It is intended for testing purposes only
+
+	user := a.session(r)
+
+	devices, err := a.notifRepo.GetDevicesForUser(r.Context(), user)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to get devices")
+		return
+	}
+
+	for _, device := range devices {
+		notification := domain.Notification{
+			Title:    "Test Notification",
+			Body:     "This is a test notification",
+			DeviceID: device.ID,
+			Priority: 10,
+		}
+
+		err := a.scheduleNotification(&notification)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to schedule notification")
+			return
+		}
+	}
+
+	a.sendJson(w, http.StatusOK, nil)
+}
