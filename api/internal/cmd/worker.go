@@ -16,6 +16,7 @@ import (
 	"github.com/sideshow/apns2/token"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"google.golang.org/api/option"
 )
 
 func WorkerCmd(ctx context.Context) *cobra.Command {
@@ -69,7 +70,7 @@ func WorkerCmd(ctx context.Context) *cobra.Command {
 				TeamID:  os.Getenv("APNS_TEAM_ID"),
 			}
 
-			firebaseApp, err := firebase.NewApp(ctx, nil)
+			firebaseApp, err := firebase.NewApp(ctx, nil, option.WithCredentialsFile("./SECRET_firebase.json"))
 			if err != nil {
 				return err
 			}
