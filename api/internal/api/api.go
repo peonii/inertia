@@ -146,6 +146,17 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 									},
 								},
 							},
+							"/test": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Test a user's devices",
+										Handler:     a.UNSTABLE_testNotificationDelivery,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{},
+										},
+									},
+								},
+							},
 						},
 					},
 					"/users": chioas.Path{
