@@ -21,4 +21,20 @@ class TeamService: ObservableObject {
             self.teams[team.id] = team
         }
     }
+    
+    struct TicketBuyPayload: Codable {
+        var ticketType: String
+        var amount: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case ticketType = "type"
+            case amount = "amount"
+        }
+    }
+    
+    public func buyTickets(for authService: AuthService, id: String, amount: Int, type: String) async throws {
+        let body = TicketBuyPayload(ticketType: type, amount: amount)
+        
+        try await authService.post(endpoint: Endpoints.TEAMS_BUY_TICKET(id), body: body)
+    }
 }

@@ -156,12 +156,28 @@ func (a *api) buyTicketHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.Balance < body.Amount {
+	cost := 0
+	switch body.Type {
+	case "bus":
+		cost = 20
+	case "tram":
+		cost = 30
+	case "m1":
+		cost = 70
+	case "m2":
+		cost = 60
+	case "km":
+		cost = 70
+	case "wkd":
+		cost = 40
+	}
+
+	if team.Balance < body.Amount*cost {
 		a.sendError(w, r, http.StatusUnauthorized, errors.New("team does not have enough balance"), "failed to verify team balance")
 		return
 	}
 
-	newBalance := team.Balance - body.Amount
+	newBalance := team.Balance - (body.Amount * cost)
 
 	teamUpdate := domain.TeamUpdate{
 		Balance: &newBalance,

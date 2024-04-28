@@ -17,6 +17,8 @@ struct TicketBuyView: View {
     var team: Team?
     @State private var selectedTicketType: TicketType = .bus
     @State private var numberTickets = 1
+    @EnvironmentObject private var authService: AuthService
+    @EnvironmentObject private var teamService: TeamService
     
     var body: some View {
         VStack {
@@ -55,6 +57,10 @@ struct TicketBuyView: View {
             Spacer()
             
             Button("Buy") {
+                Task {
+                    try? await teamService.buyTickets(for: authService, id: team?.id ?? "", amount: numberTickets, type: selectedTicketType.rawValue)
+                    try? await teamService.fetchJoinedTeams(for: authService)
+                }
             }
             .font(.system(size: 24))
             .fontWeight(.semibold)

@@ -21,5 +21,10 @@ struct Endpoints {
         return GAMES_BASE + "/\(id)"
     }
     
+    static let TEAMS_BASE = Constants.ENDPOINT + "/api/v5/teams"
+    static func TEAMS_BUY_TICKET(_ id: String) -> String {
+        return TEAMS_BASE + "/\(id)/buy-ticket"
+    }
+    
     static let DEVICES_CREATE = Constants.ENDPOINT + "/api/v5/devices"
 }
