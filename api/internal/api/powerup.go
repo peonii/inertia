@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/peonii/inertia/internal/domain"
@@ -72,6 +73,46 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to create powerup")
 		return
 	}
+
+	go func() {
+		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
+		if err != nil {
+			return
+		}
+
+		users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
+		if err != nil {
+			return
+		}
+
+		// Remove all team members from notified users
+		for _, member := range members {
+			for i, user := range users {
+				if user == member.ID {
+					users = append(users[:i], users[i+1:]...)
+					break
+				}
+			}
+		}
+
+		devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
+		if err != nil {
+			return
+		}
+
+		for _, device := range devices {
+			notif := domain.Notification{
+				Title:    "Quest completed",
+				Body:     fmt.Sprintf("The team %s used a powerup!", team.Name),
+				Priority: 10,
+				DeviceID: device.ID,
+			}
+
+			if err := a.scheduleNotification(&notif); err != nil {
+				continue
+			}
+		}
+	}()
 
 	a.sendJson(w, http.StatusOK, nil)
 }

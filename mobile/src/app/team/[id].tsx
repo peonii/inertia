@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { ActivityIndicator, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList } from "react-native";
+import { useRef, useState } from "react";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -50,6 +51,14 @@ const TeamSubheader = styled.Text`
   opacity: 0.5;
 `;
 
+const QuestDescription = styled.Text`
+  font-size: 17px;
+  font-family: Inter_400Regular;
+  letter-spacing: -1.2px;
+  color: #ffffff;
+  opacity: 0.7;
+`;
+
 const TeamSectionHeader = styled.Text`
   font-size: 17px;
   font-family: Inter_700Bold;
@@ -73,7 +82,7 @@ const TeamQuestHeader = styled.Text`
 const TeamQuestItemContainer = styled.View`
   flex-direction: row;
   gap: 10px;
-  width: 100%;
+  width: 85%;
 `;
 
 const TeamQuestIcon = styled.Image`
@@ -110,7 +119,8 @@ const mockData: {
       id: "2",
       quest_id: "2",
       title: "Kasacja 2",
-      description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
+      description:
+        "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę. Długi tekst długi tekst długi tekst długi tekst długi tekst długi tekst.",
       xp: 300,
       money: 0,
       quest_type: "main",
@@ -167,14 +177,15 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
           contentContainerStyle={{ gap: 10 }}
           renderItem={({ item }) => (
             <TeamQuestItemContainer>
-              <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
+              <TeamQuestIcon
+                source={require("./../../../assets/main_task.png")}
+              />
               <TeamQuestCenteredView>
                 <TeamQuestHeader>{item.title}</TeamQuestHeader>
                 <TeamSubheader numberOfLines={1}>
-                  {item.description.length > 36
-                    ? item.description.slice(0, 36) + "..."
-                    : item.description}
+                  {item.money > 0 ? `$${item.money}` : `${item.xp} XP`}
                 </TeamSubheader>
+                <QuestDescription>{item.description}</QuestDescription>
               </TeamQuestCenteredView>
             </TeamQuestItemContainer>
           )}
@@ -189,7 +200,8 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () =>
+      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
   return (
@@ -204,7 +216,7 @@ const TeamDetailScreen: React.FC = () => {
         }}
       />
       <BottomSheet
-        snapPoints={["35%", "85%"]}
+        snapPoints={["15%", "95%"]}
         handleIndicatorStyle={{ opacity: 0 }}
         backgroundStyle={{ backgroundColor: "#252525" }}
         enableOverDrag={true}

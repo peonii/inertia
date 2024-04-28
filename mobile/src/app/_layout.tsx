@@ -110,78 +110,76 @@ const Layout: React.FC = () => {
         <BottomSheetModalProvider>
           <AuthContext.Provider value={{ accessToken, setAccessToken }}>
             <QueryClientProvider client={queryClient}>
-              <SafeAreaView style={{ flex: 1 }}>
-                <Stack
-                  screenOptions={{
+              <Stack
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: "#181818",
+                  },
+                  headerTintColor: "#fff",
+                  headerTitleStyle: {
+                    fontFamily: "Inter_700Bold",
+                  },
+                  headerBackTitleStyle: {
+                    fontFamily: "Inter_500Medium",
+                  },
+                }}
+              >
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    headerTitle: "Index",
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    headerTitle: "Login",
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="home"
+                  options={{
+                    headerTitle: "Home",
+                    header: globalHeader,
+                  }}
+                />
+                <Stack.Screen
+                  name="game/[id]"
+                  options={{
+                    header: globalHeader,
+                  }}
+                />
+                <Stack.Screen
+                  name="gameCreation"
+                  options={{
+                    header: globalHeader,
+                  }}
+                />
+                <Stack.Screen
+                  name="team/[id]"
+                  options={{
+                    headerTitle: "",
+                    headerBackTitle: "Home",
+                    headerTransparent: true,
                     headerStyle: {
-                      backgroundColor: "#181818",
-                    },
-                    headerTintColor: "#fff",
-                    headerTitleStyle: {
-                      fontFamily: "Inter_700Bold",
-                    },
-                    headerBackTitleStyle: {
-                      fontFamily: "Inter_500Medium",
+                      backgroundColor: "transparent",
                     },
                   }}
-                >
-                  <Stack.Screen
-                    name="index"
-                    options={{
-                      headerTitle: "Index",
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="login"
-                    options={{
-                      headerTitle: "Login",
-                      headerShown: false,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="home"
-                    options={{
-                      headerTitle: "Home",
-                      header: globalHeader,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="game/[id]"
-                    options={{
-                      header: globalHeader,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="gameCreation"
-                    options={{
-                      header: globalHeader,
-                    }}
-                  />
-                  <Stack.Screen
-                    name="team/[id]"
-                    options={{
-                      headerTitle: "",
-                      headerBackTitle: "Home",
-                      headerTransparent: true,
-                      headerStyle: {
-                        backgroundColor: "transparent",
-                      },
-                    }}
-                  />
-                  <Stack.Screen
-                    name="error/[message]"
-                    options={{
-                      headerTitle: "Error",
-                      headerBackTitle: "Error",
-                      headerTransparent: true,
-                      headerStyle: {
-                        backgroundColor: "transparent",
-                      },
-                    }}
-                  />
-                </Stack>
-              </SafeAreaView>
+                />
+                <Stack.Screen
+                  name="error/[message]"
+                  options={{
+                    headerTitle: "Error",
+                    headerBackTitle: "Error",
+                    headerTransparent: true,
+                    headerStyle: {
+                      backgroundColor: "transparent",
+                    },
+                  }}
+                />
+              </Stack>
               <HomeDetails bottomSheetRef={homeDetailsRef} />
             </QueryClientProvider>
           </AuthContext.Provider>
