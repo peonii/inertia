@@ -1,5 +1,5 @@
 import styled from "@emotion/native";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState, useRef, useEffect } from "react";
@@ -176,7 +176,7 @@ const GameDetailScreen: React.FC = () => {
     }
   }, [data]);
 
-  const sheetRef = useRef<BottomSheet>(null);
+  const sheetRef = useRef<BottomSheetModal>(null);
   const mapRef = useRef<MapView>(null);
 
   const authContext = useAuth();
@@ -320,17 +320,18 @@ const GameDetailScreen: React.FC = () => {
       {location ? (
         <PressableContainer
           onPress={() => {
-            mapRef.current.animateToRegion(
-              {
-                latitude: gameForm.getValues("lat"),
-                longitude: gameForm.getValues("lng"),
-                latitudeDelta: 0.1383,
-                longitudeDelta: 0.06315,
-              },
-              0,
-            );
-
+            sheetRef.current.present();
             sheetRef.current.snapToIndex(0);
+
+            // mapRef.current.animateToRegion(
+            //   {
+            //     latitude: gameForm.getValues("lat"),
+            //     longitude: gameForm.getValues("lng"),
+            //     latitudeDelta: 0.1383,
+            //     longitudeDelta: 0.06315,
+            //   },
+            //   0,
+            // );
           }}
         >
           <View>

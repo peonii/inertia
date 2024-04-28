@@ -1,9 +1,17 @@
 import styled from "@emotion/native";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetMethods,
+  BottomSheetModalMethods,
+} from "@gorhom/bottom-sheet/lib/typescript/types";
 import { router } from "expo-router";
 import { LegacyRef, useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, View, useWindowDimensions } from "react-native";
+import {
+  ActivityIndicator,
+  Dimensions,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import MapView from "react-native-maps";
 
 const Container = styled.View`
@@ -83,7 +91,7 @@ const MediumTitle = styled.Text`
 `;
 
 type LocationPickerProps = {
-  sheetRef: React.Ref<BottomSheetMethods>;
+  sheetRef: React.Ref<BottomSheetModalMethods>;
   onCancel: () => void;
   onAccept: () => Promise<void>;
   mapRef: LegacyRef<MapView>;
@@ -114,118 +122,133 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
     Zindex: 100,
   };
 
+  // {isActive ? (
+  //   <PressableContainer onPress={onCancel}>
+  //     <DarkFilter></DarkFilter>
+  //   </PressableContainer>
+  // ) : (
+  //   ""
+  // )}
+
   return (
-    <View style={screenSize}>
-      {isActive ? (
-        <PressableContainer onPress={onCancel}>
-          <DarkFilter></DarkFilter>
-        </PressableContainer>
-      ) : (
-        ""
-      )}
-      <BottomSheet
-        snapPoints={["84%"]}
-        ref={sheetRef}
-        enablePanDownToClose={!isMapActivity}
-        index={-1}
-        backgroundStyle={{ backgroundColor: "#252525" }}
-        handleIndicatorStyle={{ backgroundColor: "#fff" }}
-        onAnimate={(_, toIndex) => {
-          setIsActive(toIndex > -1);
-          //@ts-expect-error idk
-          mapRef.current.setCamera({ zoom: 12 });
+    <BottomSheetModal
+      snapPoints={["84%"]}
+      ref={sheetRef}
+      enablePanDownToClose={!isMapActivity}
+      index={-1}
+      backgroundStyle={{ backgroundColor: "#252525" }}
+      handleIndicatorStyle={{ backgroundColor: "#fff" }}
+      onAnimate={(_, toIndex) => {
+        setIsActive(toIndex > -1);
+        //@ts-expect-error idk
+        mapRef.current.setCamera({ zoom: 12 });
+      }}
+    >
+      <Container
+        style={{
+          alignItems: "center",
+          height: Math.round(useWindowDimensions().height * 0.66),
         }}
       >
-        <Container
-          style={{
-            alignItems: "center",
-            height: Math.round(useWindowDimensions().height * 0.66),
+        <SmallTitle style={{ alignSelf: "flex-start", left: 16 }}>
+          Select location
+        </SmallTitle>
+        <PressableContainer
+          style={{ position: "absolute", right: 16 }}
+          onPress={() => {
+            onCancel();
+            //@ts-expect-error chuj wie again
+            sheetRef.current.close();
+            setIsActive(false);
           }}
         >
-          <SmallTitle style={{ alignSelf: "flex-start", left: 16 }}>
-            Select location
-          </SmallTitle>
-          <PressableContainer
-            style={{ position: "absolute", right: 16 }}
-            onPress={() => {
-              onCancel();
-              //@ts-expect-error chuj wie again
-              sheetRef.current.close();
-              setIsActive(false);
+          <ExitButton>
+            <ExitButtonText>x</ExitButtonText>
+          </ExitButton>
+        </PressableContainer>
+        <MapContainer>
+          <MapView
+            initialRegion={{
+              latitude: initialRegion.lat,
+              longitude: initialRegion.lng,
+              latitudeDelta: 0.1383,
+              longitudeDelta: 0.06315,
             }}
-          >
-            <ExitButton>
-              <ExitButtonText>x</ExitButtonText>
-            </ExitButton>
-          </PressableContainer>
-          <MapContainer>
-            <MapView
-              initialRegion={{
-                latitude: initialRegion.lat,
-                longitude: initialRegion.lng,
-                latitudeDelta: 0.1383,
-                longitudeDelta: 0.06315,
-              }}
-              style={{
-                width: "100%",
-                height: "100%",
-              }}
-              ref={mapRef}
-              zoomTapEnabled={false}
-              zoomControlEnabled={false}
-              zoomEnabled={false}
-              onDoublePress={() => {
-                //@ts-expect-error zjebane to
-                mapRef.current.getCamera().then((camera) => {
-                  switch (camera.zoom) {
-                    case 12:
-                      //@ts-expect-error zjebane to
-                      mapRef.current.animateCamera({ zoom: 14 }, { duration: 500 });
-                      break;
-                    case 14:
-                      //@ts-expect-error zjebane to
-                      mapRef.current.animateCamera({ zoom: 16 }, { duration: 500 });
-                      break;
-                    case 16:
-                      //@ts-expect-error zjebane to
-                      mapRef.current.animateCamera({ zoom: 18 }, { duration: 500 });
-                      break;
-                    default:
-                      //@ts-expect-error zjebane to
-                      mapRef.current.animateCamera({ zoom: 12 }, { duration: 500 });
-                  }
-                });
-              }}
-            ></MapView>
-            {isMapActivity && <DarkFilter style={{ position: "absolute" }}></DarkFilter>}
-            {isMapActivity ? (
-              <ActivityIndicator
-                style={{ position: "absolute" }}
-                size={"large"}
-              ></ActivityIndicator>
-            ) : (
-              <Crosshair source={require("../../assets/map-crosshair.png")}></Crosshair>
-            )}
-          </MapContainer>
-          <PressableContainer
-            onPress={async () => {
-              setIsMapActivity(true);
-              await onAccept().catch(() => {
-                router.push("/error");
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+            ref={mapRef}
+            zoomTapEnabled={false}
+            zoomControlEnabled={false}
+            zoomEnabled={false}
+            onDoublePress={() => {
+              //@ts-expect-error zjebane to
+              mapRef.current.getCamera().then((camera) => {
+                switch (camera.zoom) {
+                  case 12:
+                    //@ts-expect-error zjebane to
+                    mapRef.current.animateCamera(
+                      { zoom: 14 },
+                      { duration: 500 },
+                    );
+                    break;
+                  case 14:
+                    //@ts-expect-error zjebane to
+                    mapRef.current.animateCamera(
+                      { zoom: 16 },
+                      { duration: 500 },
+                    );
+                    break;
+                  case 16:
+                    //@ts-expect-error zjebane to
+                    mapRef.current.animateCamera(
+                      { zoom: 18 },
+                      { duration: 500 },
+                    );
+                    break;
+                  default:
+                    //@ts-expect-error zjebane to
+                    mapRef.current.animateCamera(
+                      { zoom: 12 },
+                      { duration: 500 },
+                    );
+                }
               });
-              setIsActive(false);
-              setIsMapActivity(false);
-              //@ts-expect-error chuj wie co mu sie tu nie podoba
-              sheetRef.current.close();
             }}
-          >
-            <NextButtonView>
-              <MediumTitle>Done</MediumTitle>
-            </NextButtonView>
-          </PressableContainer>
-        </Container>
-      </BottomSheet>
-    </View>
+          ></MapView>
+          {isMapActivity && (
+            <DarkFilter style={{ position: "absolute" }}></DarkFilter>
+          )}
+          {isMapActivity ? (
+            <ActivityIndicator
+              style={{ position: "absolute" }}
+              size={"large"}
+            ></ActivityIndicator>
+          ) : (
+            <Crosshair
+              source={require("../../assets/map-crosshair.png")}
+            ></Crosshair>
+          )}
+        </MapContainer>
+        <PressableContainer
+          onPress={async () => {
+            setIsMapActivity(true);
+            await onAccept().catch(() => {
+              router.push("/error");
+            });
+            setIsActive(false);
+            setIsMapActivity(false);
+            //@ts-expect-error chuj wie co mu sie tu nie podoba
+            sheetRef.current.close();
+          }}
+        >
+          <NextButtonView>
+            <MediumTitle>Done</MediumTitle>
+          </NextButtonView>
+        </PressableContainer>
+      </Container>
+    </BottomSheetModal>
   );
 };
 

@@ -171,7 +171,7 @@ const Home: React.FC = () => {
             method: "POST",
             body: JSON.stringify({
               token: token.data,
-              service_type: "fcm",
+              service_type: token.type === "android" ? "fcm" : "apns",
               user_id: user.id,
             }),
           });

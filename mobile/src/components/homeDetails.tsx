@@ -1,10 +1,16 @@
 import styled from "@emotion/native";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+} from "@gorhom/bottom-sheet";
 import { Dimensions, View } from "react-native";
-import { useEffect, useState } from "react";
-import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import { useCallback, useEffect, useState } from "react";
+import {
+  BottomSheetMethods,
+  BottomSheetModalMethods,
+} from "@gorhom/bottom-sheet/lib/typescript/types";
 import LoadingGlyph from "./loadingGlyph";
 import { useDataContext } from "../context/DataContext";
 import { useQuery } from "@tanstack/react-query";
@@ -106,7 +112,7 @@ const DarkFilter = styled.View`
 `;
 
 type HomeDetailsProps = {
-  bottomSheetRef: React.Ref<BottomSheetMethods>;
+  bottomSheetRef: React.Ref<BottomSheetModalMethods>;
 };
 
 const screenSize = {
@@ -137,81 +143,90 @@ const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
     }
   }, [userDataRequest.data, userDataRequest.error]);
 
+  // {/* {isActive ? (
+  //   <PressableContainer
+  //     onPress={() => {
+  //       // @ts-expect-error idk why they have such a problem
+  //       bottomSheetRef.current.close();
+  //       setIsActive(false);
+  //     }}
+  //   >
+  //     <DarkFilter></DarkFilter>
+  //   </PressableContainer>
+  // ) : (
+  //   ""
+  // )} */}
+
+  const renderBackdrop = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        enableTouchThrough={true}
+        pressBehavior="close"
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+      />
+    ),
+    [],
+  );
+
   return (
-    <View style={screenSize}>
-      {isActive ? (
-        <PressableContainer
+    <BottomSheetModal
+      index={0}
+      enablePanDownToClose={true}
+      enableContentPanningGesture={true}
+      enableHandlePanningGesture={true}
+      snapPoints={["70%"]}
+      ref={bottomSheetRef}
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{ backgroundColor: "#252525" }}
+      handleIndicatorStyle={{ backgroundColor: "#353535" }}
+    >
+      <LeftAlignedView>
+        <ProfileSection>
+          {userData === "loading" ? (
+            <LoadingGlyph height={80} width={80} borderRadius={40} />
+          ) : (
+            <BigProfilePicture
+              source={{
+                uri: `${userData.image}?size=128px`,
+              }}
+            />
+          )}
+          <ProfileTextSection>
+            {userData === "loading" ? (
+              <LoadingGlyph height={30} width={80} borderRadius={5} />
+            ) : (
+              <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
+                {userData.name}
+              </BigTitle>
+            )}
+            {userData === "loading" ? (
+              <LoadingGlyph height={15} width={50} borderRadius={5} />
+            ) : (
+              <RoleText>
+                {userData.auth_level == 99 ? "Admin" : "Player"}
+              </RoleText>
+            )}
+          </ProfileTextSection>
+        </ProfileSection>
+        <MediumTitle>Stats</MediumTitle>
+        {/*/ Todo change when api is ready /*/}
+        <BigTitle>{`#${3} Global`}</BigTitle>
+        <StatsText>{`${0} wins, ${1} draw, ${2} losses`}</StatsText>
+        <StatsText>{`${1000} XP gained`}</StatsText>
+        <LogoutButtonContainer
           onPress={() => {
-            // @ts-expect-error idk why they have such a problem
-            bottomSheetRef.current.close();
-            setIsActive(false);
+            SecureStore.setItemAsync("refreshToken", "null");
+            router.replace("/login");
           }}
         >
-          <DarkFilter></DarkFilter>
-        </PressableContainer>
-      ) : (
-        ""
-      )}
-
-      <BottomSheet
-        index={-1}
-        enablePanDownToClose={true}
-        enableContentPanningGesture={true}
-        enableHandlePanningGesture={true}
-        snapPoints={["68%"]}
-        ref={bottomSheetRef}
-        onAnimate={(_, toIndex) => {
-          setIsActive(toIndex > -1);
-        }}
-        backgroundStyle={{ backgroundColor: "#252525" }}
-        handleIndicatorStyle={{ backgroundColor: "#fff" }}
-      >
-        <LeftAlignedView>
-          <ProfileSection>
-            {userData === "loading" ? (
-              <LoadingGlyph height={80} width={80} borderRadius={40} />
-            ) : (
-              <BigProfilePicture
-                source={{
-                  uri: `${userData.image}?size=128px`,
-                }}
-              />
-            )}
-            <ProfileTextSection>
-              {userData === "loading" ? (
-                <LoadingGlyph height={30} width={80} borderRadius={5} />
-              ) : (
-                <BigTitle style={{ maxWidth: "100%" }} numberOfLines={1}>
-                  {userData.name}
-                </BigTitle>
-              )}
-              {userData === "loading" ? (
-                <LoadingGlyph height={15} width={50} borderRadius={5} />
-              ) : (
-                <RoleText>
-                  {userData.auth_level == 99 ? "Admin" : "Player"}
-                </RoleText>
-              )}
-            </ProfileTextSection>
-          </ProfileSection>
-          <MediumTitle>Stats</MediumTitle>
-          {/*/ Todo change when api is ready /*/}
-          <BigTitle>{`#${3} Global`}</BigTitle>
-          <StatsText>{`${0} wins, ${1} draw, ${2} losses`}</StatsText>
-          <StatsText>{`${1000} XP gained`}</StatsText>
-          <LogoutButtonContainer
-            onPress={() => {
-              SecureStore.setItemAsync("refreshToken", "null");
-              router.replace("/login");
-            }}
-          >
-            <LogoutButtonView>
-              <LogoutButtonText>Log out</LogoutButtonText>
-            </LogoutButtonView>
-          </LogoutButtonContainer>
-        </LeftAlignedView>
-      </BottomSheet>
-    </View>
+          <LogoutButtonView>
+            <LogoutButtonText>Log out</LogoutButtonText>
+          </LogoutButtonView>
+        </LogoutButtonContainer>
+      </LeftAlignedView>
+    </BottomSheetModal>
   );
 };
 

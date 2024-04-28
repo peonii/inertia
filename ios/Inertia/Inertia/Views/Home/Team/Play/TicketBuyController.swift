@@ -76,6 +76,8 @@ struct TicketBuyView: View {
 
 class TicketBuyController: UIViewController {
     var team: Team?
+    var authService: AuthService?
+    var teamService: TeamService?
     
     let hvc = UIHostingController(rootView: TicketBuyView())
     

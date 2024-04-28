@@ -15,7 +15,10 @@ import { SplashScreen, Stack } from "expo-router";
 import { useState, useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthContext } from "../context/AuthContext";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+} from "@gorhom/bottom-sheet";
 import TopBar from "../components/topBar";
 import HomeDetails from "../components/homeDetails";
 import { DataContext } from "../context/DataContext";
@@ -36,7 +39,7 @@ const Layout: React.FC = () => {
   const [userData, setUserData] = useState("loading" as User | "loading");
   const [gamesData, setGamesData] = useState("loading" as Game[] | "loading");
   const [teamsData, setTeamsData] = useState("loading" as Team[] | "loading");
-  const homeDetailsRef = useRef<BottomSheet>(null);
+  const homeDetailsRef = useRef<BottomSheetModal>(null);
 
   const [fontsLoaded, fontError] = useFonts({
     Inter_900Black,
@@ -65,7 +68,7 @@ const Layout: React.FC = () => {
         <TopBar
           onclicks={{
             profilePicture: () => {
-              homeDetailsRef.current.expand();
+              homeDetailsRef.current.present();
             },
           }}
         />
@@ -87,98 +90,104 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <DataContext.Provider
-      value={{
-        userData,
-        setUserData,
-        gamesData,
-        setGamesData,
-        teamsData,
-        setTeamsData,
+    <GestureHandlerRootView
+      style={{
+        flex: 1,
+        height: "100%",
+        backgroundColor: "#252525",
       }}
     >
-      <AuthContext.Provider value={{ accessToken, setAccessToken }}>
-        <QueryClientProvider client={queryClient}>
-          <SafeAreaView style={{ flex: 1 }}>
-            <GestureHandlerRootView
-              style={{ flex: 1, height: "100%", backgroundColor: "#252525" }}
-            >
-              <Stack
-                screenOptions={{
-                  headerStyle: {
-                    backgroundColor: "#181818",
-                  },
-                  headerTintColor: "#fff",
-                  headerTitleStyle: {
-                    fontFamily: "Inter_700Bold",
-                  },
-                  headerBackTitleStyle: {
-                    fontFamily: "Inter_500Medium",
-                  },
-                }}
-              >
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    headerTitle: "Index",
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="login"
-                  options={{
-                    headerTitle: "Login",
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="home"
-                  options={{
-                    headerTitle: "Home",
-                    header: globalHeader,
-                  }}
-                />
-                <Stack.Screen
-                  name="game/[id]"
-                  options={{
-                    header: globalHeader,
-                  }}
-                />
-                <Stack.Screen
-                  name="gameCreation"
-                  options={{
-                    header: globalHeader,
-                  }}
-                />
-                <Stack.Screen
-                  name="team/[id]"
-                  options={{
-                    headerTitle: "",
-                    headerBackTitle: "Home",
-                    headerTransparent: true,
+      <DataContext.Provider
+        value={{
+          userData,
+          setUserData,
+          gamesData,
+          setGamesData,
+          teamsData,
+          setTeamsData,
+        }}
+      >
+        <BottomSheetModalProvider>
+          <AuthContext.Provider value={{ accessToken, setAccessToken }}>
+            <QueryClientProvider client={queryClient}>
+              <SafeAreaView style={{ flex: 1 }}>
+                <Stack
+                  screenOptions={{
                     headerStyle: {
-                      backgroundColor: "transparent",
+                      backgroundColor: "#181818",
+                    },
+                    headerTintColor: "#fff",
+                    headerTitleStyle: {
+                      fontFamily: "Inter_700Bold",
+                    },
+                    headerBackTitleStyle: {
+                      fontFamily: "Inter_500Medium",
                     },
                   }}
-                />
-                <Stack.Screen
-                  name="error/[message]"
-                  options={{
-                    headerTitle: "Error",
-                    headerBackTitle: "Error",
-                    headerTransparent: true,
-                    headerStyle: {
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                />
-              </Stack>
+                >
+                  <Stack.Screen
+                    name="index"
+                    options={{
+                      headerTitle: "Index",
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="login"
+                    options={{
+                      headerTitle: "Login",
+                      headerShown: false,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="home"
+                    options={{
+                      headerTitle: "Home",
+                      header: globalHeader,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="game/[id]"
+                    options={{
+                      header: globalHeader,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="gameCreation"
+                    options={{
+                      header: globalHeader,
+                    }}
+                  />
+                  <Stack.Screen
+                    name="team/[id]"
+                    options={{
+                      headerTitle: "",
+                      headerBackTitle: "Home",
+                      headerTransparent: true,
+                      headerStyle: {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  />
+                  <Stack.Screen
+                    name="error/[message]"
+                    options={{
+                      headerTitle: "Error",
+                      headerBackTitle: "Error",
+                      headerTransparent: true,
+                      headerStyle: {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  />
+                </Stack>
+              </SafeAreaView>
               <HomeDetails bottomSheetRef={homeDetailsRef} />
-            </GestureHandlerRootView>
-          </SafeAreaView>
-        </QueryClientProvider>
-      </AuthContext.Provider>
-    </DataContext.Provider>
+            </QueryClientProvider>
+          </AuthContext.Provider>
+        </BottomSheetModalProvider>
+      </DataContext.Provider>
+    </GestureHandlerRootView>
   );
 };
 
