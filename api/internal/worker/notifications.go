@@ -26,7 +26,7 @@ type NotificationWorker struct {
 	rdc       *redis.Client
 	db        *pgxpool.Pool
 	apnsToken *token.Token
-	fcmClient *fcm.Client
+	fcmClient *messaging.Client
 
 	development bool
 	consumers   int
