@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -114,6 +115,65 @@ func (a *api) createTeamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.sendJson(w, http.StatusOK, team)
+}
+
+type ticketBuyRequest struct {
+	Amount int    `json:"amount"`
+	Type   string `json:"type"`
+}
+
+func (a *api) buyTicketHandler(w http.ResponseWriter, r *http.Request) {
+
+	uid := a.session(r)
+	tid := chi.URLParam(r, "id")
+
+	var body ticketBuyRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode body")
+		return
+	}
+
+	team, err := a.teamRepo.FindOne(r.Context(), tid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
+		return
+	}
+
+	user, err := a.userRepo.FindOne(r.Context(), uid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find user")
+		return
+	}
+
+	isMember, err := a.teamRepo.IsTeamMember(r.Context(), team, user)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to verify team membership")
+		return
+	}
+
+	if !isMember {
+		a.sendError(w, r, http.StatusUnauthorized, errors.New("user is not a member of the team"), "failed to verify team membership")
+		return
+	}
+
+	if team.Balance < body.Amount {
+		a.sendError(w, r, http.StatusUnauthorized, errors.New("team does not have enough balance"), "failed to verify team balance")
+		return
+	}
+
+	newBalance := team.Balance - body.Amount
+
+	teamUpdate := domain.TeamUpdate{
+		Balance: &newBalance,
+	}
+
+	team, err = a.teamRepo.Update(r.Context(), tid, &teamUpdate)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to update team balance")
+		return
+	}
+
+	a.sendJson(w, http.StatusOK, nil)
 }
 
 func (a *api) catchTeamHandler(w http.ResponseWriter, r *http.Request) {

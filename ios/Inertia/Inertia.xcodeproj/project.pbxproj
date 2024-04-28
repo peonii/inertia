@@ -49,6 +49,7 @@
 		B0523EEB2BC6B6A300657990 /* ActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EEA2BC6B6A300657990 /* ActivityManager.swift */; };
 		B09FD1CB2BC3EA590016BB4A /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */; };
 		B09FD1D02BC40AD50016BB4A /* ExpandedGameList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */; };
+		B0D63DE82BDE60B0005D05ED /* TicketBuyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -121,6 +122,7 @@
 		B0523EEC2BC6BCA800657990 /* Inertia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Inertia.entitlements; sourceTree = "<group>"; };
 		B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
 		B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedGameList.swift; sourceTree = "<group>"; };
+		B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketBuyController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -270,6 +272,7 @@
 				B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */,
 				B00775662BBD357600DD393C /* TeamPlayMenuController.swift */,
 				B00775682BBD459400DD393C /* TeamPlayController.swift */,
+				B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */,
 			);
 			path = Play;
 			sourceTree = "<group>";
@@ -456,6 +459,7 @@
 				B00775462BB8B22300DD393C /* HomeScreen.swift in Sources */,
 				B00775292BB8A52300DD393C /* RootScreen.swift in Sources */,
 				B007755E2BB9B66D00DD393C /* TeamItem.swift in Sources */,
+				B0D63DE82BDE60B0005D05ED /* TicketBuyController.swift in Sources */,
 				B00775272BB8A52300DD393C /* InertiaApp.swift in Sources */,
 				B007753F2BB8AB9500DD393C /* Constants.swift in Sources */,
 				B00775552BB96CC400DD393C /* GameService.swift in Sources */,

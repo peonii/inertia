@@ -447,6 +447,20 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 											},
 										},
 									},
+									"/buy-ticket": chioas.Path{
+										Methods: chioas.Methods{
+											http.MethodPost: chioas.Method{
+												Description: "Buy a ticket for a team",
+												Handler:     a.buyTicketHandler,
+												Responses: chioas.Responses{
+													http.StatusOK: chioas.Response{},
+												},
+												Request: &chioas.Request{
+													Schema: ticketBuyRequest{},
+												},
+											},
+										},
+									},
 								},
 								Methods: chioas.Methods{
 									http.MethodGet: chioas.Method{
@@ -555,6 +569,26 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 													},
 												},
 											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"/powerups": chioas.Path{
+						Tag:         "Powerups",
+						Middlewares: chi.Middlewares{a.authMiddleware},
+						Paths: chioas.Paths{
+							"/": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodPost: chioas.Method{
+										Description: "Use a powerup",
+										Handler:     a.usePowerupHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{},
+										},
+										Request: &chioas.Request{
+											Schema: domain.PowerupCreate{},
 										},
 									},
 								},

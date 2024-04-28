@@ -166,14 +166,16 @@ const Home: React.FC = () => {
         const token = await Notifications.getDevicePushTokenAsync();
         console.log("Token", token.type, token.data);
 
-        fetchTypeSafe<null>(ENDPOINTS.devices.register, authContext, {
-          method: "POST",
-          body: JSON.stringify({
-            token: token.data,
-            service_type: "fcm",
-            user_id: user.id,
-          }),
-        });
+        if (token.data != "") {
+          fetchTypeSafe<null>(ENDPOINTS.devices.register, authContext, {
+            method: "POST",
+            body: JSON.stringify({
+              token: token.data,
+              service_type: "fcm",
+              user_id: user.id,
+            }),
+          });
+        }
       })();
     }
   }, [userDataRequest.data]);

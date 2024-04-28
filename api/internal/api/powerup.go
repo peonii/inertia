@@ -35,6 +35,38 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cost := 0
+	switch body.Type {
+	case domain.PowerupTypeBlacklist:
+		cost = 600
+	case domain.PowerupTypeFreezeHunters:
+		cost = 1000
+	case domain.PowerupTypeFreezeRunners:
+		cost = 1000
+	case domain.PowerupTypeHunt:
+		cost = 200
+	case domain.PowerupTypeHideTracker:
+		cost = 500
+	case domain.PowerupTypeRevealHunters:
+		cost = 400
+	}
+
+	if team.Balance < cost {
+		a.sendError(w, r, http.StatusUnauthorized, nil, "team does not have enough balance")
+		return
+	}
+
+	newBalance := team.Balance - cost
+	tu := domain.TeamUpdate{
+		Balance: &newBalance,
+	}
+
+	team, err = a.teamRepo.Update(r.Context(), body.CasterID, &tu)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to update team balance")
+		return
+	}
+
 	err = a.powerupRepo.Create(r.Context(), &body)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to create powerup")

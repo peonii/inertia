@@ -22,9 +22,14 @@ import { DataContext } from "../context/DataContext";
 import { Game, Team, User } from "../types";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Notifications from "expo-notifications";
 
 const Layout: React.FC = () => {
   SplashScreen.preventAutoHideAsync();
+
+  useEffect(() => {
+    Notifications.requestPermissionsAsync();
+  });
 
   const queryClient = new QueryClient();
   const [accessToken, setAccessToken] = useState("");

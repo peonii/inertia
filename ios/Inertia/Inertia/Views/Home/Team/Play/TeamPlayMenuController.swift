@@ -98,12 +98,15 @@ class TeamPlayMenuController: UIViewController, UIAdaptivePresentationController
     var balanceLabel = UILabel()
     var dollarBalanceLabel = UILabel()
     var ticketBuyButton = UIButton()
+    var ticketBuyVC = TicketBuyController()
     
     var questsTableHeader = UILabel()
     var questsTable = ContentSizedTableView()
     
     override func viewDidLoad() {
         view.backgroundColor = UIColor(Color.bg)
+        
+        ticketBuyVC.team = team
         
         teamNameLabel.translatesAutoresizingMaskIntoConstraints = false
         teamNameLabel.text = team?.name
@@ -153,6 +156,7 @@ class TeamPlayMenuController: UIViewController, UIAdaptivePresentationController
             dollarBalanceLabel.bottomAnchor.constraint(equalTo: balanceLabel.bottomAnchor, constant: -4)
         ])
         
+        ticketBuyButton.addTarget(self, action: #selector(showTicketBuyController), for: .touchUpInside)
         var conf = UIButton.Configuration.plain()
         conf.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
         ticketBuyButton.configuration = conf
@@ -275,12 +279,16 @@ class TeamPlayMenuController: UIViewController, UIAdaptivePresentationController
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         self.quests.count
     }
+    
+    @objc func showTicketBuyController() {
+        self.show(self.ticketBuyVC, sender: self)
+    }
 }
 
-#Preview {
-    var tvc = TeamPlayMenuController()
-    tvc.team = .mock()
-    tvc.quests = [.mock(), .mock(), .mock()]
-    
-    return tvc
-}
+//#Preview {
+//    var tvc = TeamPlayMenuController()
+//    tvc.team = .mock()
+//    tvc.quests = [.mock(), .mock(), .mock()]
+//    
+//    return tvc
+//}

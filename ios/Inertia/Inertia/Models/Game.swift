@@ -37,29 +37,51 @@ struct Game: Codable {
     var createdAt: String
    
     var timeStartDate: Date {
-        let fmtStyle: Date.ISO8601FormatStyle =
-            .iso8601
-            .year()
-            .month()
-            .day()
-            .timeZone(separator: .omitted)
-            .time(includingFractionalSeconds: false)
-            .timeSeparator(.colon)
-        
-        return try! fmtStyle.parse(timeStart)
+        do {
+            var fmtStyle: Date.ISO8601FormatStyle =
+                .iso8601
+                .year()
+                .month()
+                .day()
+                .timeZone(separator: .omitted)
+                .time(includingFractionalSeconds: true)
+                .timeSeparator(.colon)
+            return try fmtStyle.parse(timeStart)
+        } catch {
+            var fmtStyle: Date.ISO8601FormatStyle =
+                .iso8601
+                .year()
+                .month()
+                .day()
+                .timeZone(separator: .omitted)
+                .time(includingFractionalSeconds: false)
+                .timeSeparator(.colon)
+            return try! fmtStyle.parse(timeStart)
+        }
     }
     
     var timeEndDate: Date {
-        let fmtStyle: Date.ISO8601FormatStyle =
-            .iso8601
-            .year()
-            .month()
-            .day()
-            .timeZone(separator: .omitted)
-            .time(includingFractionalSeconds: false)
-            .timeSeparator(.colon)
-        
-        return try! fmtStyle.parse(timeEnd)
+        do {
+            var fmtStyle: Date.ISO8601FormatStyle =
+                .iso8601
+                .year()
+                .month()
+                .day()
+                .timeZone(separator: .omitted)
+                .time(includingFractionalSeconds: true)
+                .timeSeparator(.colon)
+            return try fmtStyle.parse(timeEnd)
+        } catch {
+            var fmtStyle: Date.ISO8601FormatStyle =
+                .iso8601
+                .year()
+                .month()
+                .day()
+                .timeZone(separator: .omitted)
+                .time(includingFractionalSeconds: false)
+                .timeSeparator(.colon)
+            return try! fmtStyle.parse(timeEnd)
+        }
     }
     
     enum CodingKeys: String, CodingKey {
