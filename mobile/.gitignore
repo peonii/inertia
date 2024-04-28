@@ -40,3 +40,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# this shouldn't be the case, but fsr i have to gitignore prebuild directories!
+android/
+ios/

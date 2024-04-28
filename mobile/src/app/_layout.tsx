@@ -29,8 +29,8 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      const token = (await Notifications.getDevicePushTokenAsync()).data;
-      console.log("tokenosik iwjdwoa ijdiao w", token);
+      const token = await Notifications.getDevicePushTokenAsync();
+      console.log("Token", token.type, token.data);
     })();
   }, []);
 
