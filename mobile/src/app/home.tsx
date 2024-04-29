@@ -19,6 +19,7 @@ import { useDataContext } from "../context/DataContext";
 import ContextMenu from "react-native-context-menu-view";
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
+import HomeDetails from "../components/homeDetails";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
