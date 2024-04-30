@@ -106,12 +106,10 @@ type GameFormData = {
 
 const GameDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
-  console.log(id);
 
   const { data, error } = useQuery({
     queryKey: [`game ${id}`],
-    queryFn: () =>
-      fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
+    queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
     staleTime: 1000 * 60,
   });
 
@@ -126,14 +124,8 @@ const GameDetailScreen: React.FC = () => {
       latitude: gameForm.getValues("lat"),
       longitude: gameForm.getValues("lng"),
     });
-
-    console.log(gameForm.getValues("lat"), gameForm.getValues("lng"));
-    console.log(adress);
-
-    if (adress.thoroughfare)
-      setLocation(`${adress.thoroughfare}, ${adress.locality}`);
-    else if (adress.subLocality)
-      setLocation(`${adress.subLocality}, ${adress.locality}`);
+    if (adress.thoroughfare) setLocation(`${adress.thoroughfare}, ${adress.locality}`);
+    else if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
     else setLocation(adress.locality);
   }
 
@@ -166,11 +158,13 @@ const GameDetailScreen: React.FC = () => {
   const gameForm = useForm<GameFormData>();
 
   useEffect(() => {
+    console.log(data);
     if (data) {
       gameForm.setValue("start", data.time_start);
       gameForm.setValue("end", data.time_end);
       gameForm.setValue("lat", data.loc_lat);
       gameForm.setValue("lng", data.loc_lng);
+      console.log("it shall update");
       updateAdressText();
       defaultValues.current = gameForm.getValues();
     }
@@ -346,19 +340,15 @@ const GameDetailScreen: React.FC = () => {
         <PressableContainer
           onPress={async () => {
             if (!compareGameForms()) {
-              await fetchTypeSafe<null>(
-                ENDPOINTS.games.update(id),
-                authContext,
-                {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    time_start: gameForm.getValues("start"),
-                    time_end: gameForm.getValues("end"),
-                    loc_lat: gameForm.getValues("lat"),
-                    loc_lng: gameForm.getValues("lng"),
-                  }),
-                },
-              );
+              await fetchTypeSafe<null>(ENDPOINTS.games.update(id), authContext, {
+                method: "PATCH",
+                body: JSON.stringify({
+                  time_start: gameForm.getValues("start"),
+                  time_end: gameForm.getValues("end"),
+                  loc_lat: gameForm.getValues("lat"),
+                  loc_lng: gameForm.getValues("lng"),
+                }),
+              });
               router.replace("/home");
               // TODO: Api to apply changes
             } else {

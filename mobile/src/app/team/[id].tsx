@@ -2,15 +2,16 @@ import styled from "@emotion/native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import MapView from "react-native-maps";
+import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, Team } from "../../types";
+import { ActiveQuest, Players, Team } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
 import { ActivityIndicator, View } from "react-native";
 import * as Haptics from "expo-haptics";
-import { FlatList } from "react-native";
+import { FlatList, Image, Text } from "react-native";
 import { useRef, useState } from "react";
+import customMapTheme from "../../context/customMap";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -96,6 +97,7 @@ const TeamQuestCenteredView = styled.View`
 
 const mockData: {
   quests: ActiveQuest[];
+  locations: Players[];
 } = {
   quests: [
     {
@@ -151,6 +153,21 @@ const mockData: {
       started_at: "2021-08-02T13:22:21Z",
     },
   ],
+  locations: [
+    {
+      name: "Saon",
+      lat: 52.139509,
+      lng: 20.802601,
+      alt: 0,
+      precision: 2,
+      heading: 2,
+      speed: 1,
+      user_id: "1778678293780758528",
+      team_name: "Wielorybnia",
+      experience: 500,
+      rank: 1,
+    },
+  ],
 };
 
 const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
@@ -177,9 +194,7 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
           contentContainerStyle={{ gap: 10 }}
           renderItem={({ item }) => (
             <TeamQuestItemContainer>
-              <TeamQuestIcon
-                source={require("./../../../assets/main_task.png")}
-              />
+              <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
               <TeamQuestCenteredView>
                 <TeamQuestHeader>{item.title}</TeamQuestHeader>
                 <TeamSubheader numberOfLines={1}>
@@ -195,13 +210,31 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
   );
 };
 
+const Markers = mockData.locations.map((playerData) => {
+  return (
+    <Marker
+      key={playerData.user_id}
+      coordinate={{
+        latitude: playerData.lat,
+        longitude: playerData.lng,
+      }}
+      calloutAnchor={{ x: 1, y: 0.5 }}
+    >
+      <Callout>
+        <View style={{ width: "100%", backgroundColor: "#212121" }}>
+          <Text>{playerData.name}</Text>
+        </View>
+      </Callout>
+    </Marker>
+  );
+});
+
 const TeamDetailScreen: React.FC = () => {
   const authContext = useAuth();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () =>
-      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
   return (
@@ -214,9 +247,16 @@ const TeamDetailScreen: React.FC = () => {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
-      />
+        showsUserLocation={true}
+        compassOffset={{ x: 1, y: 1 }}
+        showsMyLocationButton={true}
+        userLocationCalloutEnabled={true}
+        customMapStyle={customMapTheme}
+      >
+        {Markers}
+      </MapView>
       <BottomSheet
-        snapPoints={["15%", "95%"]}
+        snapPoints={[110, "95%"]}
         handleIndicatorStyle={{ opacity: 0 }}
         backgroundStyle={{ backgroundColor: "#252525" }}
         enableOverDrag={true}
