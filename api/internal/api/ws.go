@@ -141,6 +141,10 @@ func (h *wsHub) Run() {
           User: sender,
           Team: senderTeam,
         }
+
+        h.logger.Info("sending payload",
+          zap.Any("payload", payload),
+        )
   
 				client.conn.Send(wsMsg{
 					Type: "loc",
