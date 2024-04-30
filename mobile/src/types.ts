@@ -53,3 +53,17 @@ export type ActiveQuest = {
   created_at: string;
   started_at: string;
 };
+
+export type Players = {
+  name: string;
+  lat: number,
+  lng: number,
+  alt: number,
+  precision: number,
+  heading: number,
+  speed: number,
+  user_id: string;
+  team_name: string;
+  experience: number;
+  rank: number;
+}

@@ -19,7 +19,6 @@ import { useDataContext } from "../context/DataContext";
 import ContextMenu from "react-native-context-menu-view";
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
-import HomeDetails from "../components/homeDetails";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -134,11 +133,7 @@ const Home: React.FC = () => {
     staleTime: 1000 * 60,
   });
 
-  if (
-    userDataRequest.error ||
-    gamesDataRequest.error ||
-    teamsDataRequest.error
-  ) {
+  if (userDataRequest.error || gamesDataRequest.error || teamsDataRequest.error) {
     userDataRequest.error && console.log(userDataRequest.error.message);
     gamesDataRequest.error && console.log(gamesDataRequest.error.message);
     teamsDataRequest.error && console.log(teamsDataRequest.error.message);
@@ -253,13 +248,11 @@ const Home: React.FC = () => {
             paddingLeft: 0,
           }}
         >
-          <SmallTitle
-            style={{ fontFamily: "Inter_500Medium", color: "#a3a3a3" }}
-          >
+          <SmallTitle style={{ fontFamily: "Inter_500Medium", color: "#a3a3a3" }}>
             {"+ New game"}
           </SmallTitle>
         </GameContainer>
-      </PressableContainer>,
+      </PressableContainer>
     );
   }
 
@@ -279,7 +272,7 @@ const Home: React.FC = () => {
           return (
             <PressableContainer
               key={team.id}
-              onPress={() => router.replace(`/team/${team.id}`)}
+              onPress={() => router.push(`/team/${team.id}`)}
             >
               <TeamContainer>
                 <LinearGradient
@@ -327,10 +320,7 @@ const Home: React.FC = () => {
           <TitleWithIndicatiorView>
             <BigTitle>Your games</BigTitle>
             {gamesData === "loading" ? (
-              <ActivityIndicator
-                color="#ffffff"
-                size="small"
-              ></ActivityIndicator>
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
             ) : null}
           </TitleWithIndicatiorView>
           <ListContainer
@@ -351,10 +341,7 @@ const Home: React.FC = () => {
           <TitleWithIndicatiorView>
             <BigTitle>Your teams</BigTitle>
             {teamsData === "loading" ? (
-              <ActivityIndicator
-                color="#ffffff"
-                size="small"
-              ></ActivityIndicator>
+              <ActivityIndicator color="#ffffff" size="small"></ActivityIndicator>
             ) : null}
           </TitleWithIndicatiorView>
           {teamList.length > 0 ? (

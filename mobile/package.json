@@ -43,7 +43,8 @@
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "~3.29.0",
     "react-native-svg": "14.1.0",
-    "react-query": "^3.39.3"
+    "react-query": "^3.39.3",
+    "sharp-cli": "2.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
