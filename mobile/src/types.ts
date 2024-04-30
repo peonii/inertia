@@ -56,14 +56,38 @@ export type ActiveQuest = {
 
 export type Players = {
   name: string;
-  lat: number,
-  lng: number,
-  alt: number,
-  precision: number,
-  heading: number,
-  speed: number,
+  lat: number;
+  lng: number;
+  alt: number;
+  precision: number;
+  heading: number;
+  speed: number;
   user_id: string;
   team_name: string;
   experience: number;
   rank: number;
-}
+};
+
+export type LocationPayload = {
+  loc: {
+    lat: number;
+    lng: number;
+    alt: number;
+    precision: number;
+    heading: number;
+    speed: number;
+    user_id: string;
+  };
+  team: Team;
+  user: User;
+};
+
+export type WsMessage =
+  | {
+      typ: "loc";
+      dat: LocationPayload;
+    }
+  | {
+      typ: "pwp";
+      dat: never; // TODO!
+    };

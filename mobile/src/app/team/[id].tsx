@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, Players, Team } from "../../types";
+import { ActiveQuest, Players, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
 import { ActivityIndicator, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
 
 const FullScreenView = styled.View`
@@ -194,7 +194,9 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
           contentContainerStyle={{ gap: 10 }}
           renderItem={({ item }) => (
             <TeamQuestItemContainer>
-              <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
+              <TeamQuestIcon
+                source={require("./../../../assets/main_task.png")}
+              />
               <TeamQuestCenteredView>
                 <TeamQuestHeader>{item.title}</TeamQuestHeader>
                 <TeamSubheader numberOfLines={1}>
@@ -234,8 +236,73 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () =>
+      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
+
+  const ws = useRef(new WebSocket(ENDPOINTS.ws));
+  // Whether the connection has been established and
+  // auth has been successful
+  const [established, setEstablished] = useState(false);
+
+  async function handleIncomingMsg(msg: WsMessage) {
+    switch (msg.typ) {
+      case "loc":
+        // handle location update
+        // logs location for now (UPDATE THIS!!!!!!)
+        console.log(msg.dat);
+        break;
+      case "pwp":
+        // handle powerup
+        // todo actually write this api
+        break;
+      default:
+        console.error(`unhandled message type! ${msg}`);
+    }
+  }
+
+  useEffect(() => {
+    ws.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      if (data === "ok") {
+        setEstablished(true);
+        console.log(`connection established with ws server at ${ENDPOINTS.ws}`);
+        return;
+      }
+
+      // this is likely a "correct" message, so we can hand it off to the handler
+      handleIncomingMsg(data);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!teamQuery.data?.game_id) return;
+    if (!authContext.accessToken) return;
+    if (established) return;
+
+    ws.current.onopen = () => {
+      ws.current.send(
+        JSON.stringify({
+          name: "join",
+          data: {
+            t: authContext.accessToken,
+            g: teamQuery.data?.game_id,
+          },
+        }),
+      );
+
+      console.log(
+        JSON.stringify({
+          name: "join",
+          data: {
+            t: authContext.accessToken,
+            g: teamQuery.data?.game_id,
+          },
+        }),
+      );
+    };
+  }, [teamQuery.data?.game_id]);
 
   return (
     <FullScreenView>
@@ -256,7 +323,7 @@ const TeamDetailScreen: React.FC = () => {
         {Markers}
       </MapView>
       <BottomSheet
-        snapPoints={[110, "95%"]}
+        snapPoints={[110, "85%"]}
         handleIndicatorStyle={{ opacity: 0 }}
         backgroundStyle={{ backgroundColor: "#252525" }}
         enableOverDrag={true}

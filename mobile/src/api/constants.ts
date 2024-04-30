@@ -22,4 +22,5 @@ export const ENDPOINTS = {
   devices: {
     register: `${BASE_URL}/api/v5/devices`,
   },
+  ws: `${BASE_URL}/ws`,
 };
