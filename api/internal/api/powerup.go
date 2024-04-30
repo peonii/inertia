@@ -14,21 +14,25 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 	var body domain.PowerupCreate
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode powerup")
+		return
 	}
 
 	team, err := a.teamRepo.FindOne(r.Context(), body.CasterID)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
+		return
 	}
 
 	user, err := a.userRepo.FindOne(r.Context(), uid)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to find user")
+		return
 	}
 
 	isMember, err := a.teamRepo.IsTeamMember(r.Context(), team, user)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to check team membership")
+		return
 	}
 
 	if !isMember {
