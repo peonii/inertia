@@ -282,7 +282,7 @@ func (r *PostgresTeamRepository) IsTeamMember(ctx context.Context, t *domain.Tea
 func (r *PostgresTeamRepository) FindMembers(ctx context.Context, teamID string) ([]*domain.User, error) {
 	query := `
 		SELECT
-			u.id, u.name, u.display_name, u.image, u.auth_level, u.created_at
+			u.id, u.name, u.display_name, u.image, u.auth_role, u.created_at
 		FROM users u
 		INNER JOIN teams_users tm ON tm.user_id = u.id
 		WHERE tm.team_id = $1
