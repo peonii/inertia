@@ -116,6 +116,11 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if quest.Complete {
+		a.sendError(w, r, http.StatusBadRequest, nil, "quest is already completed")
+		return
+	}
+
 	team, err := a.teamRepo.FindOne(r.Context(), quest.TeamID)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
