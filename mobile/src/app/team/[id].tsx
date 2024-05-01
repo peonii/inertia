@@ -12,6 +12,8 @@ import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
 import { useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
+import PlayerMarker from "../../components/playerMarker";
+import { useDataContext } from "../../context/DataContext";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -210,27 +212,9 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
   );
 };
 
-const Markers = mockData.locations.map((playerData) => {
-  return (
-    <Marker
-      key={playerData.user_id}
-      coordinate={{
-        latitude: playerData.lat,
-        longitude: playerData.lng,
-      }}
-      calloutAnchor={{ x: 1, y: 0.5 }}
-    >
-      <Callout>
-        <View style={{ width: "100%", backgroundColor: "#212121" }}>
-          <Text>{playerData.name}</Text>
-        </View>
-      </Callout>
-    </Marker>
-  );
-});
-
 const TeamDetailScreen: React.FC = () => {
   const authContext = useAuth();
+  const dataContext = useDataContext();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
@@ -242,8 +226,8 @@ const TeamDetailScreen: React.FC = () => {
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
+          latitude: 51.98825,
+          longitude: 20.8324,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
@@ -253,7 +237,24 @@ const TeamDetailScreen: React.FC = () => {
         userLocationCalloutEnabled={true}
         customMapStyle={customMapTheme}
       >
-        {Markers}
+        {dataContext.userData != "loading" && (
+          <PlayerMarker
+            typ="loc"
+            dat={{
+              loc: {
+                lat: 51.98825,
+                lng: 20.8324,
+                alt: 2,
+                precision: 2,
+                heading: 0,
+                speed: 0,
+                user_id: "123124",
+              },
+              team: teamQuery.data,
+              user: dataContext.userData,
+            }}
+          ></PlayerMarker>
+        )}
       </MapView>
       <BottomSheet
         snapPoints={[110, "95%"]}

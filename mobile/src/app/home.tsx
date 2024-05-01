@@ -114,6 +114,7 @@ const BalanceText = styled.Text`
 const Home: React.FC = () => {
   const authContext = useAuth();
   const dataContext = useDataContext();
+  console.log(authContext.accessToken);
 
   const userDataRequest = useQuery<User>({
     queryKey: ["userData"],

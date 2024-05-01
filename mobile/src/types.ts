@@ -67,3 +67,20 @@ export type Players = {
   experience: number;
   rank: number;
 }
+
+export type SocketResponse = {
+  typ: "loc",
+  dat: {
+    loc: {
+      lat: number,
+      lng: number,
+      alt: number,
+      precision: number,
+      heading: number,
+      speed: number,
+      user_id: string
+    },
+    team: Team,
+    user: User
+  }
+}
