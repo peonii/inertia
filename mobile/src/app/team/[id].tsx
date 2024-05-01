@@ -1,19 +1,21 @@
 import styled from "@emotion/native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, Players, Team } from "../../types";
+import { ActiveQuest, Players, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Button, Pressable, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
 import PlayerMarker from "../../components/playerMarker";
 import { useDataContext } from "../../context/DataContext";
+import { QuestItem } from "../../components/teamDetail/quest";
+import { isVetoPeriodActive } from "../../utilis";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -75,86 +77,51 @@ const TeamQuestContainer = styled.View`
   border-radius: 10px;
 `;
 
-const TeamQuestHeader = styled.Text`
-  font-size: 21px;
+const PowerupsContainer = styled.View`
+  background-color: #323232;
+  border-radius: 10px;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 20px;
+`;
+
+const SideQuestGenerationButton = styled.Pressable`
+  background-color: #3a3a3a;
+  border-radius: 10px;
+  padding: 10px;
+`;
+
+const PowerupContainer = styled.View`
+  border-radius: 10px;
+  padding: 10px;
+  flex: 1;
+  align-items: center;
+`;
+
+const PowerupTitle = styled.Text`
+  font-size: 17px;
   font-family: Inter_700Bold;
   letter-spacing: -1.2px;
   color: #ffffff;
 `;
 
-const TeamQuestItemContainer = styled.View`
-  flex-direction: row;
-  gap: 10px;
-  width: 85%;
+const PowerupPrice = styled.Text`
+  font-size: 17px;
+  font-family: Inter_400Regular;
+  letter-spacing: -1.2px;
+  color: #aaaaaa;
+  opacity: 0.7;
 `;
 
-const TeamQuestIcon = styled.Image`
-  width: 48px;
-  height: 48px;
-`;
-
-const TeamQuestCenteredView = styled.View`
-  justify-content: center;
+const PowerupImage = styled.Image`
+  width: 70px;
+  height: 70px;
+  margin-bottom: 10px;
 `;
 
 const mockData: {
-  quests: ActiveQuest[];
   locations: Players[];
 } = {
-  quests: [
-    {
-      id: "1",
-      quest_id: "1",
-      title: "Kasacja",
-      description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
-      xp: 100,
-      money: 0,
-      quest_type: "main",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-    {
-      id: "2",
-      quest_id: "2",
-      title: "Kasacja 2",
-      description:
-        "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę. Długi tekst długi tekst długi tekst długi tekst długi tekst długi tekst.",
-      xp: 300,
-      money: 0,
-      quest_type: "main",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-    {
-      id: "3",
-      quest_id: "3",
-      title: "Kasacja 3",
-      description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
-      xp: 300,
-      money: 0,
-      quest_type: "main",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-  ],
   locations: [
     {
       name: "Saon",
@@ -172,7 +139,48 @@ const mockData: {
   ],
 };
 
-const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
+const TeamDetailView: React.FC<{
+  team: Team;
+  refetchTeam: () => Promise<void>;
+}> = ({ team, refetchTeam }) => {
+  const authCtx = useAuth();
+
+  const questsQuery = useQuery<ActiveQuest[], Error>({
+    queryKey: ["quests", team.id],
+    queryFn: async () => {
+      const resp = await fetchTypeSafe<ActiveQuest[]>(
+        ENDPOINTS.teams.quests(team.id),
+        authCtx
+      );
+
+      return resp;
+    },
+  });
+
+  const sideQuestMutation = useMutation({
+    mutationFn: async () => {
+      await fetchTypeSafe<null>(ENDPOINTS.teams.generate_side(team.id), authCtx, {
+        method: "POST",
+      });
+    },
+  });
+
+  const completeQuestMutation = useMutation({
+    mutationFn: async (questId: string) => {
+      await fetchTypeSafe<null>(ENDPOINTS.quests.complete(questId), authCtx, {
+        method: "POST",
+      });
+    },
+  });
+
+  const vetoQuestMutation = useMutation({
+    mutationFn: async (questId: string) => {
+      await fetchTypeSafe<null>(ENDPOINTS.quests.veto(questId), authCtx, {
+        method: "POST",
+      });
+    },
+  });
+
   return (
     <TeamDetailContainer>
       <TeamHeaderContainer>
@@ -188,26 +196,101 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
       </TeamHeaderContainer>
       <TeamSectionHeader>TASKS</TeamSectionHeader>
       <TeamQuestContainer>
-        <FlatList
-          data={mockData.quests}
-          overScrollMode="never"
-          scrollEnabled={false}
-          style={{ padding: 10 }}
-          contentContainerStyle={{ gap: 10 }}
-          renderItem={({ item }) => (
-            <TeamQuestItemContainer>
-              <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
-              <TeamQuestCenteredView>
-                <TeamQuestHeader>{item.title}</TeamQuestHeader>
-                <TeamSubheader numberOfLines={1}>
-                  {item.money > 0 ? `$${item.money}` : `${item.xp} XP`}
-                </TeamSubheader>
-                <QuestDescription>{item.description}</QuestDescription>
-              </TeamQuestCenteredView>
-            </TeamQuestItemContainer>
+        {questsQuery.isLoading && <Text>Loading...</Text>}
+        {questsQuery.isError && <Text>Error...</Text>}
+        {questsQuery.data && (
+          <FlatList
+            data={questsQuery.data.filter((q) => !q.complete)}
+            overScrollMode="never"
+            scrollEnabled={false}
+            style={{ padding: 10 }}
+            contentContainerStyle={{ gap: 10 }}
+            renderItem={({ item }) => (
+              <QuestItem
+                quest={item}
+                isAbleToComplete={team.is_runner}
+                completeFn={async () => {
+                  await completeQuestMutation.mutateAsync(item.id);
+                  questsQuery.refetch();
+                  refetchTeam();
+                }}
+                vetoFn={async () => {
+                  await vetoQuestMutation.mutateAsync(item.id);
+                  questsQuery.refetch();
+                  refetchTeam();
+                }}
+              />
+            )}
+          />
+        )}
+
+        {questsQuery.data &&
+          !isVetoPeriodActive(team.veto_period_end) &&
+          team.is_runner &&
+          questsQuery.data.filter((q) => !q.complete && q.quest_type === "side")
+            .length === 0 && (
+            <SideQuestGenerationButton
+              onPress={async () => {
+                await sideQuestMutation.mutateAsync();
+                await questsQuery.refetch();
+              }}
+            >
+              <TeamSubheader>+ Generate side quest</TeamSubheader>
+            </SideQuestGenerationButton>
           )}
-        />
       </TeamQuestContainer>
+      <TeamSectionHeader style={{ paddingTop: 50 }}>POWERUPS</TeamSectionHeader>
+      <PowerupsContainer>
+        {team.is_runner ? (
+          <>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_reveal.png")}
+              />
+              <PowerupTitle>Reveal</PowerupTitle>
+              <PowerupPrice>$400</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_freeze.png")}
+              />
+              <PowerupTitle>Freeze</PowerupTitle>
+              <PowerupPrice>$1000</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hide.png")}
+              />
+              <PowerupTitle>Hide</PowerupTitle>
+              <PowerupPrice>$600</PowerupPrice>
+            </PowerupContainer>
+          </>
+        ) : (
+          <>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hunt.png")}
+              />
+              <PowerupTitle>Hunt</PowerupTitle>
+              <PowerupPrice>$200</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_freeze.png")}
+              />
+              <PowerupTitle>Freeze</PowerupTitle>
+              <PowerupPrice>$1000</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hide.png")}
+              />
+              <PowerupTitle>Blacklist</PowerupTitle>
+              <PowerupPrice>$600</PowerupPrice>
+            </PowerupContainer>
+          </>
+        )}
+      </PowerupsContainer>
     </TeamDetailContainer>
   );
 };
@@ -220,6 +303,70 @@ const TeamDetailScreen: React.FC = () => {
     queryKey: ["team", id],
     queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
+
+  const ws = useRef(new WebSocket(ENDPOINTS.ws));
+  // Whether the connection has been established and
+  // auth has been successful
+  const [established, setEstablished] = useState(false);
+
+  async function handleIncomingMsg(msg: WsMessage) {
+    switch (msg.typ) {
+      case "loc":
+        // handle location update
+        // logs location for now (UPDATE THIS!!!!!!)
+        console.log(msg.dat);
+        break;
+      case "pwp":
+        // handle powerup
+        // todo actually write this api
+        break;
+      default:
+        console.error(`unhandled message type! ${msg}`);
+    }
+  }
+
+  useEffect(() => {
+    ws.current.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log(data);
+      if (data === "ok") {
+        setEstablished(true);
+        console.log(`connection established with ws server at ${ENDPOINTS.ws}`);
+        return;
+      }
+
+      // this is likely a "correct" message, so we can hand it off to the handler
+      handleIncomingMsg(data);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!teamQuery.data?.game_id) return;
+    if (!authContext.accessToken) return;
+    if (established) return;
+
+    ws.current.onopen = () => {
+      ws.current.send(
+        JSON.stringify({
+          name: "join",
+          data: {
+            t: authContext.accessToken,
+            g: teamQuery.data?.game_id,
+          },
+        })
+      );
+
+      console.log(
+        JSON.stringify({
+          name: "join",
+          data: {
+            t: authContext.accessToken,
+            g: teamQuery.data?.game_id,
+          },
+        })
+      );
+    };
+  }, [teamQuery.data?.game_id]);
 
   return (
     <FullScreenView>
@@ -257,7 +404,7 @@ const TeamDetailScreen: React.FC = () => {
         )}
       </MapView>
       <BottomSheet
-        snapPoints={[110, "95%"]}
+        snapPoints={[110, "85%"]}
         handleIndicatorStyle={{ opacity: 0 }}
         backgroundStyle={{ backgroundColor: "#252525" }}
         enableOverDrag={true}
@@ -266,7 +413,14 @@ const TeamDetailScreen: React.FC = () => {
         }}
       >
         {teamQuery.isLoading && <ActivityIndicator />}
-        {teamQuery.data && <TeamDetailView team={teamQuery.data} />}
+        {teamQuery.data && (
+          <TeamDetailView
+            team={teamQuery.data}
+            refetchTeam={async () => {
+              await teamQuery.refetch();
+            }}
+          />
+        )}
       </BottomSheet>
     </FullScreenView>
   );

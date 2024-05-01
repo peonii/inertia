@@ -116,6 +116,11 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if quest.Complete {
+		a.sendError(w, r, http.StatusBadRequest, nil, "quest is already completed")
+		return
+	}
+
 	team, err := a.teamRepo.FindOne(r.Context(), quest.TeamID)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
@@ -261,7 +266,7 @@ func (a *api) vetoQuestHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *api) generateNewSideQuestHandler(w http.ResponseWriter, r *http.Request) {
 	uid := a.session(r)
-	tid := chi.URLParam(r, "team_id")
+	tid := chi.URLParam(r, "id")
 	u, err := a.userRepo.FindOne(r.Context(), uid)
 
 	team, err := a.teamRepo.FindOne(r.Context(), tid)

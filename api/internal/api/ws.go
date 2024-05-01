@@ -26,6 +26,7 @@ type wsHub struct {
 	logger      *zap.Logger
 	powerupRepo repository.PowerupRepository
 	teamRepo    repository.TeamRepository
+  userRepo    repository.UserRepository
 }
 
 type wsMsg struct {
@@ -39,6 +40,12 @@ type wsLocationMsg struct {
 	GameID   string                `json:"gid"`
 }
 
+type wsLocationPayload struct {
+  Location domain.LocationCreate `json:"loc"`
+  Team     *domain.Team           `json:"team"`
+  User     *domain.User           `json:"user"`
+}
+
 func NewWsHub(logger *zap.Logger, db *pgxpool.Pool) *wsHub {
 	return &wsHub{
 		BroadcastLoc: make(chan wsLocationMsg),
@@ -49,6 +56,7 @@ func NewWsHub(logger *zap.Logger, db *pgxpool.Pool) *wsHub {
 		logger:      logger,
 		powerupRepo: repository.MakePostgresPowerupRepository(db),
 		teamRepo:    repository.MakePostgresTeamRepository(db),
+    userRepo:    repository.MakePostgresUserRepository(db),
 	}
 }
 
@@ -67,6 +75,19 @@ func (h *wsHub) Run() {
 		case message := <-h.BroadcastLoc:
 			h.logger.Info("broadcasting location", zap.Any("message", message))
 			var powerupsByGameID map[string][]*domain.Powerup
+
+      sender, err := h.userRepo.FindOne(context.Background(), message.UserID)
+      if err != nil {
+        h.logger.Error("failed to find user", zap.Error(err))
+        return
+      }
+
+      senderTeam, err := h.teamRepo.FindByGameUser(context.Background(), message.GameID, message.UserID)
+      if err != nil {
+        h.logger.Error("failed to find team", zap.Error(err))
+        return
+      }
+
 			for client := range h.Clients {
 				h.logger.Info("sending to client", zap.Any("client", client))
 				if client.gameID != message.GameID {
@@ -92,19 +113,42 @@ func (h *wsHub) Run() {
 					continue
 				}
 
+        override := false
+        neverShow := false
+
 				for _, powerup := range powerups {
 					if powerup.CasterID == team.ID {
-
-					}
+            if powerup.Type == domain.PowerupTypeRevealHunters {
+              override = true
+            }
+					} else if powerup.CasterID == senderTeam.ID {
+            if powerup.Type == domain.PowerupTypeHideTracker {
+              neverShow = true
+            }
+          }
 				}
 
-				if client.isRunner {
+        if neverShow {
+          continue
+        }
+
+				if client.isRunner && !override {
 					continue // only hunters/spectators should receive location updates
 				}
 
+        payload := wsLocationPayload{
+          Location: message.Location,
+          User: sender,
+          Team: senderTeam,
+        }
+
+        h.logger.Info("sending payload",
+          zap.Any("payload", payload),
+        )
+  
 				client.conn.Send(wsMsg{
 					Type: "loc",
-					Data: message,
+					Data: payload,
 				})
 			}
 		}

@@ -43,7 +43,7 @@ type TeamUpdate struct {
 	Name          *string    `json:"name"`
 	Emoji         *string    `json:"emoji"`
 	Color         *string    `json:"color"`
-	Balance       *int       `json:"-"`
-	XP            *int       `json:"-"`
-	VetoPeriodEnd *time.Time `json:"-"`
+	Balance       *int       `json:"balance"`
+	XP            *int       `json:"xp"`
+	VetoPeriodEnd *time.Time `json:"veto_period_end"`
 }

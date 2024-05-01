@@ -17,11 +17,18 @@ func (a *api) updateLocationHandler(w http.ResponseWriter, r *http.Request) {
 	var loc LocationPayload
 	if err := json.NewDecoder(r.Body).Decode(&loc); err != nil {
 		a.sendError(w, r, http.StatusBadRequest, err, "failed to decode location")
+		return
 	}
 
 	loc.Location.UserID = uid
 
-	err := a.locationRepo.Store(r.Context(), &loc.Location)
+	_, err := a.teamRepo.FindByGameUser(r.Context(), loc.GameID, uid)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find team")
+		return
+	}
+
+	err = a.locationRepo.Store(r.Context(), &loc.Location)
 	if err != nil {
 		a.sendError(w, r, http.StatusInternalServerError, err, "failed to update location")
 		return

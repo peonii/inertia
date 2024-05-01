@@ -18,8 +18,16 @@ export const ENDPOINTS = {
   teams: {
     me: `${BASE_URL}/api/v5/users/@me/teams`,
     id: (id: string) => `${BASE_URL}/api/v5/teams/${id}`,
+    quests: (id: string) => `${BASE_URL}/api/v5/teams/${id}/quests`,
+    generate_side: (id: string) =>
+      `${BASE_URL}/api/v5/teams/${id}/generate-side`,
+  },
+  quests: {
+    complete: (id: string) => `${BASE_URL}/api/v5/quests/${id}/complete`,
+    veto: (id: string) => `${BASE_URL}/api/v5/quests/${id}/veto`,
   },
   devices: {
     register: `${BASE_URL}/api/v5/devices`,
   },
+  ws: `${BASE_URL}/ws`,
 };

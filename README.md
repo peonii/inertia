@@ -1,6 +1,8 @@
 # Inertia
 
 This is the mono-repo for Inertia.
+Inertia is a platform for playing IRL, Jet-Lag style games with friends.
+The API/web interface (WIP) is available at [inertia.live](https://inertia.live).
 
 ## Packages
 
@@ -12,4 +14,3 @@ This is the mono-repo for Inertia.
 ## Development
 
 You may test the whole stack locally by following the instructions in each package's README.
-For the API, you may also use the staging server at `WILL BE ADDED LATER`.
