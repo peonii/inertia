@@ -53,10 +53,10 @@ export async function fetchTypeSafe<T>(
     headers: {
       ...init?.headers,
       Authorization: `Bearer ${authContext.accessToken}`,
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
   });
-  console.log(url)
+  console.log(url);
   if (response.status === 401) {
     await refreshToken(authContext);
 
@@ -66,17 +66,18 @@ export async function fetchTypeSafe<T>(
       headers: {
         ...init?.headers,
         Authorization: `Bearer ${authContext.accessToken}`,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
     });
 
     if (!retryResponse.ok) {
-      console.log(await response.json())
+      console.log(await response.json());
       throw new Error("Failed to fetch data");
     }
 
     return retryResponse.json() as Promise<T>;
   } else if (!response.ok) {
+    console.log(await response.text());
     throw new Error("Failed to fetch data");
   }
 

@@ -1,17 +1,18 @@
 import styled from "@emotion/native";
 import BottomSheet from "@gorhom/bottom-sheet";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
 import { ActiveQuest, Players, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Button, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
+import { QuestItem } from "../../components/teamDetail/quest";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -73,28 +74,6 @@ const TeamQuestContainer = styled.View`
   border-radius: 10px;
 `;
 
-const TeamQuestHeader = styled.Text`
-  font-size: 21px;
-  font-family: Inter_700Bold;
-  letter-spacing: -1.2px;
-  color: #ffffff;
-`;
-
-const TeamQuestItemContainer = styled.View`
-  flex-direction: row;
-  gap: 10px;
-  width: 85%;
-`;
-
-const TeamQuestIcon = styled.Image`
-  width: 48px;
-  height: 48px;
-`;
-
-const TeamQuestCenteredView = styled.View`
-  justify-content: center;
-`;
-
 const mockData: {
   quests: ActiveQuest[];
   locations: Players[];
@@ -142,7 +121,7 @@ const mockData: {
       description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
       xp: 300,
       money: 0,
-      quest_type: "main",
+      quest_type: "side",
       group_id: "1",
       lat: 37.78825,
       lng: -122.4324,
@@ -171,6 +150,29 @@ const mockData: {
 };
 
 const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
+  const authCtx = useAuth();
+
+  const questsQuery = useQuery<ActiveQuest[], Error>({
+    queryKey: ["quests", team.id],
+    queryFn: async () => {
+      const resp = await fetchTypeSafe<ActiveQuest[]>(
+        ENDPOINTS.teams.quests(team.id),
+        authCtx,
+      );
+
+      return resp;
+    },
+  });
+
+  const sideQuestMutation = useMutation({
+    mutationFn: async () => {
+      await fetchTypeSafe<null>(
+        ENDPOINTS.teams.generate_side(team.id),
+        authCtx,
+      );
+    },
+  });
+
   return (
     <TeamDetailContainer>
       <TeamHeaderContainer>
@@ -186,26 +188,24 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
       </TeamHeaderContainer>
       <TeamSectionHeader>TASKS</TeamSectionHeader>
       <TeamQuestContainer>
-        <FlatList
-          data={mockData.quests}
-          overScrollMode="never"
-          scrollEnabled={false}
-          style={{ padding: 10 }}
-          contentContainerStyle={{ gap: 10 }}
-          renderItem={({ item }) => (
-            <TeamQuestItemContainer>
-              <TeamQuestIcon
-                source={require("./../../../assets/main_task.png")}
-              />
-              <TeamQuestCenteredView>
-                <TeamQuestHeader>{item.title}</TeamQuestHeader>
-                <TeamSubheader numberOfLines={1}>
-                  {item.money > 0 ? `$${item.money}` : `${item.xp} XP`}
-                </TeamSubheader>
-                <QuestDescription>{item.description}</QuestDescription>
-              </TeamQuestCenteredView>
-            </TeamQuestItemContainer>
-          )}
+        {questsQuery.isLoading && <Text>Loading...</Text>}
+        {questsQuery.isError && <Text>Error...</Text>}
+        {questsQuery.data && (
+          <FlatList
+            data={questsQuery.data.filter((q) => !q.complete)}
+            overScrollMode="never"
+            scrollEnabled={false}
+            style={{ padding: 10 }}
+            contentContainerStyle={{ gap: 10 }}
+            renderItem={({ item }) => <QuestItem quest={item} />}
+          />
+        )}
+
+        <Button
+          onPress={async () => {
+            await sideQuestMutation.mutateAsync();
+          }}
+          title="Generate side"
         />
       </TeamQuestContainer>
     </TeamDetailContainer>
