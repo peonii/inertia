@@ -7,7 +7,7 @@ import { fetchTypeSafe } from "../../api/fetch";
 import { ActiveQuest, Players, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, Button, View } from "react-native";
+import { ActivityIndicator, Button, Pressable, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
 import { useEffect, useRef, useState } from "react";
@@ -74,64 +74,15 @@ const TeamQuestContainer = styled.View`
   border-radius: 10px;
 `;
 
+const SideQuestGenerationButton = styled.Pressable`
+  background-color: #3a3a3a;
+  border-radius: 10px;
+  padding: 10px;
+`;
+
 const mockData: {
-  quests: ActiveQuest[];
   locations: Players[];
 } = {
-  quests: [
-    {
-      id: "1",
-      quest_id: "1",
-      title: "Kasacja",
-      description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
-      xp: 100,
-      money: 0,
-      quest_type: "main",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-    {
-      id: "2",
-      quest_id: "2",
-      title: "Kasacja 2",
-      description:
-        "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę. Długi tekst długi tekst długi tekst długi tekst długi tekst długi tekst.",
-      xp: 300,
-      money: 0,
-      quest_type: "main",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-    {
-      id: "3",
-      quest_id: "3",
-      title: "Kasacja 3",
-      description: "Wykasuj Sploya. Musisz to zrobić w co najmniej minutę.",
-      xp: 300,
-      money: 0,
-      quest_type: "side",
-      group_id: "1",
-      lat: 37.78825,
-      lng: -122.4324,
-      complete: false,
-      game_id: "1",
-      team_id: "1",
-      created_at: "2021-08-01T12:00:00Z",
-      started_at: "2021-08-02T13:22:21Z",
-    },
-  ],
   locations: [
     {
       name: "Saon",
@@ -149,7 +100,10 @@ const mockData: {
   ],
 };
 
-const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
+const TeamDetailView: React.FC<{
+  team: Team;
+  refetchTeam: () => Promise<void>;
+}> = ({ team, refetchTeam }) => {
   const authCtx = useAuth();
 
   const questsQuery = useQuery<ActiveQuest[], Error>({
@@ -169,13 +123,18 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
       await fetchTypeSafe<null>(
         ENDPOINTS.teams.generate_side(team.id),
         authCtx,
+        {
+          method: "POST",
+        },
       );
     },
   });
 
   const completeQuestMutation = useMutation({
     mutationFn: async (questId: string) => {
-      await fetchTypeSafe<null>(ENDPOINTS.quests.complete(questId), authCtx);
+      await fetchTypeSafe<null>(ENDPOINTS.quests.complete(questId), authCtx, {
+        method: "POST",
+      });
     },
   });
 
@@ -209,18 +168,25 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
                 completeFn={async () => {
                   await completeQuestMutation.mutateAsync(item.id);
                   questsQuery.refetch();
+                  refetchTeam();
                 }}
               />
             )}
           />
         )}
 
-        <Button
-          onPress={async () => {
-            await sideQuestMutation.mutateAsync();
-          }}
-          title="Generate side"
-        />
+        {questsQuery.data &&
+          questsQuery.data.filter((q) => !q.complete && q.quest_type === "side")
+            .length === 0 && (
+            <SideQuestGenerationButton
+              onPress={async () => {
+                await sideQuestMutation.mutateAsync();
+                await questsQuery.refetch();
+              }}
+            >
+              <TeamSubheader>+ Generate side quest</TeamSubheader>
+            </SideQuestGenerationButton>
+          )}
       </TeamQuestContainer>
     </TeamDetailContainer>
   );
@@ -346,7 +312,12 @@ const TeamDetailScreen: React.FC = () => {
         }}
       >
         {teamQuery.isLoading && <ActivityIndicator />}
-        {teamQuery.data && <TeamDetailView team={teamQuery.data} />}
+        <TeamDetailView
+          team={teamQuery.data}
+          refetchTeam={async () => {
+            await teamQuery.refetch();
+          }}
+        />
       </BottomSheet>
     </FullScreenView>
   );
