@@ -121,5 +121,7 @@ export function isVetoPeriodActive(vetoPeriod: string) {
   // const differenceFromUTC = currentDate.getTimezoneOffset() / 60;
   // vetoDate.setHours(vetoDate.getHours() + differenceFromUTC);
   // console.log(vetoDate.toTimeString(), currentDate.toTimeString());
+
+  console.log(currentDate.toString(), vetoDate.toString());
   return currentDate < vetoDate;
 }
