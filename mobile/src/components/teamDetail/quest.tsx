@@ -71,8 +71,10 @@ const TeamQuestCenteredView = styled.View`
 
 export const QuestItem: React.FC<{
   quest: ActiveQuest;
+  isAbleToComplete: boolean;
   completeFn: () => Promise<void>;
-}> = ({ quest, completeFn }) => {
+  vetoFn: () => Promise<void>;
+}> = ({ quest, isAbleToComplete, completeFn, vetoFn }) => {
   function showCompletionDialogAlert() {
     Alert.alert(
       "Complete Quest",
@@ -92,6 +94,25 @@ export const QuestItem: React.FC<{
     );
   }
 
+  function showVetoDialogAlert() {
+    Alert.alert(
+      "Veto Quest",
+      `Are you sure you want to veto the quest: ${quest.title}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Veto",
+          onPress: async () => {
+            await vetoFn();
+          },
+        },
+      ],
+    );
+  }
+
   return (
     <TeamQuestItemContainer>
       <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
@@ -102,16 +123,18 @@ export const QuestItem: React.FC<{
         </TeamSubheader>
         <QuestDescription>{quest.description}</QuestDescription>
       </TeamQuestCenteredView>
-      <QuestButtonContainer>
-        {quest.quest_type == "side" && (
-          <CompleteQuestButton>
-            <VetoQuestButtonText>Veto</VetoQuestButtonText>
+      {isAbleToComplete && (
+        <QuestButtonContainer>
+          {quest.quest_type == "side" && (
+            <CompleteQuestButton onPress={showVetoDialogAlert}>
+              <VetoQuestButtonText>Veto</VetoQuestButtonText>
+            </CompleteQuestButton>
+          )}
+          <CompleteQuestButton onPress={showCompletionDialogAlert}>
+            <CompleteQuestButtonText>Complete</CompleteQuestButtonText>
           </CompleteQuestButton>
-        )}
-        <CompleteQuestButton onPress={showCompletionDialogAlert}>
-          <CompleteQuestButtonText>Complete</CompleteQuestButtonText>
-        </CompleteQuestButton>
-      </QuestButtonContainer>
+        </QuestButtonContainer>
+      )}
     </TeamQuestItemContainer>
   );
 };

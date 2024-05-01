@@ -13,6 +13,7 @@ import { FlatList, Image, Text } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
 import { QuestItem } from "../../components/teamDetail/quest";
+import { isVetoPeriodActive } from "../../utilis";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -74,10 +75,46 @@ const TeamQuestContainer = styled.View`
   border-radius: 10px;
 `;
 
+const PowerupsContainer = styled.View`
+  background-color: #323232;
+  border-radius: 10px;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 20px;
+`;
+
 const SideQuestGenerationButton = styled.Pressable`
   background-color: #3a3a3a;
   border-radius: 10px;
   padding: 10px;
+`;
+
+const PowerupContainer = styled.View`
+  border-radius: 10px;
+  padding: 10px;
+  flex: 1;
+  align-items: center;
+`;
+
+const PowerupTitle = styled.Text`
+  font-size: 17px;
+  font-family: Inter_700Bold;
+  letter-spacing: -1.2px;
+  color: #ffffff;
+`;
+
+const PowerupPrice = styled.Text`
+  font-size: 17px;
+  font-family: Inter_400Regular;
+  letter-spacing: -1.2px;
+  color: #aaaaaa;
+  opacity: 0.7;
+`;
+
+const PowerupImage = styled.Image`
+  width: 70px;
+  height: 70px;
+  margin-bottom: 10px;
 `;
 
 const mockData: {
@@ -138,6 +175,14 @@ const TeamDetailView: React.FC<{
     },
   });
 
+  const vetoQuestMutation = useMutation({
+    mutationFn: async (questId: string) => {
+      await fetchTypeSafe<null>(ENDPOINTS.quests.veto(questId), authCtx, {
+        method: "POST",
+      });
+    },
+  });
+
   return (
     <TeamDetailContainer>
       <TeamHeaderContainer>
@@ -165,8 +210,14 @@ const TeamDetailView: React.FC<{
             renderItem={({ item }) => (
               <QuestItem
                 quest={item}
+                isAbleToComplete={team.is_runner}
                 completeFn={async () => {
                   await completeQuestMutation.mutateAsync(item.id);
+                  questsQuery.refetch();
+                  refetchTeam();
+                }}
+                vetoFn={async () => {
+                  await vetoQuestMutation.mutateAsync(item.id);
                   questsQuery.refetch();
                   refetchTeam();
                 }}
@@ -176,6 +227,8 @@ const TeamDetailView: React.FC<{
         )}
 
         {questsQuery.data &&
+          !isVetoPeriodActive(team.veto_period_end) &&
+          team.is_runner &&
           questsQuery.data.filter((q) => !q.complete && q.quest_type === "side")
             .length === 0 && (
             <SideQuestGenerationButton
@@ -188,6 +241,58 @@ const TeamDetailView: React.FC<{
             </SideQuestGenerationButton>
           )}
       </TeamQuestContainer>
+      <TeamSectionHeader style={{ paddingTop: 50 }}>POWERUPS</TeamSectionHeader>
+      <PowerupsContainer>
+        {team.is_runner ? (
+          <>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_reveal.png")}
+              />
+              <PowerupTitle>Reveal</PowerupTitle>
+              <PowerupPrice>$400</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_freeze.png")}
+              />
+              <PowerupTitle>Freeze</PowerupTitle>
+              <PowerupPrice>$1000</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hide.png")}
+              />
+              <PowerupTitle>Hide</PowerupTitle>
+              <PowerupPrice>$600</PowerupPrice>
+            </PowerupContainer>
+          </>
+        ) : (
+          <>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hunt.png")}
+              />
+              <PowerupTitle>Hunt</PowerupTitle>
+              <PowerupPrice>$200</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_freeze.png")}
+              />
+              <PowerupTitle>Freeze</PowerupTitle>
+              <PowerupPrice>$1000</PowerupPrice>
+            </PowerupContainer>
+            <PowerupContainer>
+              <PowerupImage
+                source={require("../../../assets/powerups/powerup_hide.png")}
+              />
+              <PowerupTitle>Blacklist</PowerupTitle>
+              <PowerupPrice>$600</PowerupPrice>
+            </PowerupContainer>
+          </>
+        )}
+      </PowerupsContainer>
     </TeamDetailContainer>
   );
 };
@@ -312,12 +417,14 @@ const TeamDetailScreen: React.FC = () => {
         }}
       >
         {teamQuery.isLoading && <ActivityIndicator />}
-        <TeamDetailView
-          team={teamQuery.data}
-          refetchTeam={async () => {
-            await teamQuery.refetch();
-          }}
-        />
+        {teamQuery.data && (
+          <TeamDetailView
+            team={teamQuery.data}
+            refetchTeam={async () => {
+              await teamQuery.refetch();
+            }}
+          />
+        )}
       </BottomSheet>
     </FullScreenView>
   );

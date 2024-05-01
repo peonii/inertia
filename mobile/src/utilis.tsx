@@ -55,7 +55,8 @@ export function formatDate(dateString: string) {
     date.getHours() <= 12 ? date.getHours() : date.getHours() - 12;
   hour = hour.toString().length === 1 ? "0" + hour : hour;
   const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
-  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+  const minutes =
+    date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
   return `${day} ${month}, ${year}, ${hour}:${minutes} ${idkHowToNameThis}`;
 }
 
@@ -105,10 +106,20 @@ export function formatDateLong(dateString: string) {
     date.getHours() <= 12 ? date.getHours() : date.getHours() - 12;
   hour = hour.toString().length === 1 ? "0" + hour : hour;
   const idkHowToNameThis = date.getHours() < 12 ? "AM" : "PM";
-  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+  const minutes =
+    date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
   return `${day} ${month.substring(0, 3)}, ${year}, ${hour}:${minutes} ${idkHowToNameThis}`;
 }
 
 export const VerticalSpacer: React.FC<{ height: number }> = ({ height }) => {
   return <View style={{ height: height }} />;
 };
+
+export function isVetoPeriodActive(vetoPeriod: string) {
+  const vetoDate = new Date(vetoPeriod);
+  const currentDate = new Date();
+  // const differenceFromUTC = currentDate.getTimezoneOffset() / 60;
+  // vetoDate.setHours(vetoDate.getHours() + differenceFromUTC);
+  // console.log(vetoDate.toTimeString(), currentDate.toTimeString());
+  return currentDate < vetoDate;
+}
