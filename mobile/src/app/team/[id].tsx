@@ -173,6 +173,12 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
     },
   });
 
+  const completeQuestMutation = useMutation({
+    mutationFn: async (questId: string) => {
+      await fetchTypeSafe<null>(ENDPOINTS.quests.complete(questId), authCtx);
+    },
+  });
+
   return (
     <TeamDetailContainer>
       <TeamHeaderContainer>
@@ -197,7 +203,15 @@ const TeamDetailView: React.FC<{ team: Team }> = ({ team }) => {
             scrollEnabled={false}
             style={{ padding: 10 }}
             contentContainerStyle={{ gap: 10 }}
-            renderItem={({ item }) => <QuestItem quest={item} />}
+            renderItem={({ item }) => (
+              <QuestItem
+                quest={item}
+                completeFn={async () => {
+                  await completeQuestMutation.mutateAsync(item.id);
+                  questsQuery.refetch();
+                }}
+              />
+            )}
           />
         )}
 

@@ -22,6 +22,9 @@ export const ENDPOINTS = {
     generate_side: (id: string) =>
       `${BASE_URL}/api/v5/teams/${id}/generate-side`,
   },
+  quests: {
+    complete: (id: string) => `${BASE_URL}/api/v5/quests/${id}/complete`,
+  },
   devices: {
     register: `${BASE_URL}/api/v5/devices`,
   },

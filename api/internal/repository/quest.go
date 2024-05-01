@@ -218,7 +218,7 @@ func (r *PostgresQuestRepository) FindActive(ctx context.Context, id string) (*d
 
 func (r *PostgresQuestRepository) FindActiveByTeamID(ctx context.Context, teamID string) ([]*domain.ActiveQuestFull, error) {
 	query := `
-	SELECT q.id, q.title, q.description, q.money, q.xp, q.quest_type, q.group_id, q.lat, q.lng, q.game_id, q.created_at, aq.complete, aq.created_at
+	SELECT aq.id, q.id, q.title, q.description, q.money, q.xp, q.quest_type, q.group_id, q.lat, q.lng, q.game_id, q.created_at, aq.complete, aq.created_at
 	FROM quests q
 	JOIN active_quests aq ON q.id = aq.quest_id
 	WHERE aq.team_id = $1
@@ -232,7 +232,7 @@ func (r *PostgresQuestRepository) FindActiveByTeamID(ctx context.Context, teamID
 	activeQuests := []*domain.ActiveQuestFull{}
 	for rows.Next() {
 		activeQuest := &domain.ActiveQuestFull{}
-		err = rows.Scan(&activeQuest.ID, &activeQuest.Title, &activeQuest.Description, &activeQuest.Money, &activeQuest.XP, &activeQuest.QuestType, &activeQuest.GroupID, &activeQuest.Lat, &activeQuest.Lng, &activeQuest.GameID, &activeQuest.CreatedAt, &activeQuest.Complete, &activeQuest.StartedAt)
+		err = rows.Scan(&activeQuest.ID, &activeQuest.QuestID, &activeQuest.Title, &activeQuest.Description, &activeQuest.Money, &activeQuest.XP, &activeQuest.QuestType, &activeQuest.GroupID, &activeQuest.Lat, &activeQuest.Lng, &activeQuest.GameID, &activeQuest.CreatedAt, &activeQuest.Complete, &activeQuest.StartedAt)
 		if err != nil {
 			return nil, err
 		}

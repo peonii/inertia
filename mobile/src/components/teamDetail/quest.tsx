@@ -1,5 +1,6 @@
 import styled from "@emotion/native";
 import { ActiveQuest } from "../../types";
+import { Alert } from "react-native";
 
 const TeamSubheader = styled.Text`
   font-size: 17px;
@@ -68,25 +69,49 @@ const TeamQuestCenteredView = styled.View`
   justify-content: center;
 `;
 
-export const QuestItem: React.FC<{ quest: ActiveQuest }> = ({ quest }) => (
-  <TeamQuestItemContainer>
-    <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
-    <TeamQuestCenteredView>
-      <TeamQuestHeader>{quest.title}</TeamQuestHeader>
-      <TeamSubheader numberOfLines={1}>
-        {quest.money > 0 ? `$${quest.money}` : `${quest.xp} XP`}
-      </TeamSubheader>
-      <QuestDescription>{quest.description}</QuestDescription>
-    </TeamQuestCenteredView>
-    <QuestButtonContainer>
-      {quest.quest_type == "side" && (
-        <CompleteQuestButton>
-          <VetoQuestButtonText>Veto</VetoQuestButtonText>
+export const QuestItem: React.FC<{
+  quest: ActiveQuest;
+  completeFn: () => Promise<void>;
+}> = ({ quest, completeFn }) => {
+  function showCompletionDialogAlert() {
+    Alert.alert(
+      "Complete Quest",
+      `Are you sure you want to complete the quest: ${quest.title}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Complete",
+          onPress: async () => {
+            await completeFn();
+          },
+        },
+      ],
+    );
+  }
+
+  return (
+    <TeamQuestItemContainer>
+      <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
+      <TeamQuestCenteredView>
+        <TeamQuestHeader>{quest.title}</TeamQuestHeader>
+        <TeamSubheader numberOfLines={1}>
+          {quest.money > 0 ? `$${quest.money}` : `${quest.xp} XP`}
+        </TeamSubheader>
+        <QuestDescription>{quest.description}</QuestDescription>
+      </TeamQuestCenteredView>
+      <QuestButtonContainer>
+        {quest.quest_type == "side" && (
+          <CompleteQuestButton>
+            <VetoQuestButtonText>Veto</VetoQuestButtonText>
+          </CompleteQuestButton>
+        )}
+        <CompleteQuestButton onPress={showCompletionDialogAlert}>
+          <CompleteQuestButtonText>Complete</CompleteQuestButtonText>
         </CompleteQuestButton>
-      )}
-      <CompleteQuestButton>
-        <CompleteQuestButtonText>Complete</CompleteQuestButtonText>
-      </CompleteQuestButton>
-    </QuestButtonContainer>
-  </TeamQuestItemContainer>
-);
+      </QuestButtonContainer>
+    </TeamQuestItemContainer>
+  );
+};
