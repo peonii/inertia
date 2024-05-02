@@ -179,6 +179,8 @@ func (nc *notificationConsumer) Consume(delivery rmq.Delivery) {
 			Notification: &messaging.Notification{
 				Title: n.Title,
 				Body:  n.Body,
+				// this is a very good idea!
+				ImageURL: "https://raw.githubusercontent.com/peonii/inertia/main/mobile/assets/icon.png",
 			},
 		}
 
