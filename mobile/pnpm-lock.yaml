@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@emotion/native':
     specifier: ^11.11.0
@@ -52,6 +56,9 @@ dependencies:
   expo-linking:
     specifier: ~6.2.2
     version: 6.2.2(expo@50.0.17)
+  expo-location:
+    specifier: ~16.5.5
+    version: 16.5.5(expo@50.0.17)
   expo-notifications:
     specifier: ^0.27.7
     version: 0.27.7(expo@50.0.17)
@@ -64,6 +71,9 @@ dependencies:
   expo-status-bar:
     specifier: ~1.11.1
     version: 1.11.1
+  expo-task-manager:
+    specifier: ~11.7.3
+    version: 11.7.3(expo@50.0.17)
   react:
     specifier: 18.2.0
     version: 18.2.0
@@ -4880,6 +4890,14 @@ packages:
       - supports-color
     dev: false
 
+  /expo-location@16.5.5(expo@50.0.17):
+    resolution: {integrity: sha512-dXEd1HaZgdi6yHVF8R+SMnGlKDYrD+Hkkzd/b9edjMSUBLxF2y824AFSSNUf6BVOM53tJBOFEELneXkU1uj9nA==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
+    dev: false
+
   /expo-manifests@0.13.2(expo@50.0.17):
     resolution: {integrity: sha512-l0Sia1WmLULx8V41K8RzGLsFoTe4qqthPRGpHjItsYn8ZB6lRrdTBM9OYp2McIflgqN1HAimUCQMFIwJyH+UmA==}
     peerDependencies:
@@ -4999,6 +5017,15 @@ packages:
 
   /expo-status-bar@1.11.1:
     resolution: {integrity: sha512-ddQEtCOgYHTLlFUe/yH67dDBIoct5VIULthyT3LRJbEwdpzAgueKsX2FYK02ldh440V87PWKCamh7R9evk1rrg==}
+    dev: false
+
+  /expo-task-manager@11.7.3(expo@50.0.17):
+    resolution: {integrity: sha512-ueIOi638o+gRYeCIb9GHVEbdIIvAKqAmm4AllcjDJIrmqB240uA+5a5YwfHm7WUrSthIqHlIzLMFcnMTFxf/9w==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 50.0.17(@babel/core@7.24.4)(@react-native/babel-preset@0.74.81)
+      unimodules-app-loader: 4.5.1
     dev: false
 
   /expo-updates-interface@0.15.3(expo@50.0.17):
@@ -5371,6 +5398,7 @@ packages:
 
   /glob@6.0.4:
     resolution: {integrity: sha512-MKZeRNyYZAVVVG1oZeLaWie1uweH40m9AZwIwxyPbTSX4hHrVYSzLg0Ro5Z5R7XKkIX+Cc6oD1rqeDJnwsB8/A==}
+    requiresBuild: true
     dependencies:
       inflight: 1.0.6
       inherits: 2.0.4
@@ -6805,6 +6833,7 @@ packages:
   /ncp@2.0.0:
     resolution: {integrity: sha512-zIdGUrPRFTUELUvr3Gmc7KZ2Sw/h1PiVM0Af/oHB6zgnV1ikqSfRk+TOufi79aHYCW3NiOXmr1BP5nWbzojLaA==}
     hasBin: true
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -7881,6 +7910,7 @@ packages:
   /rimraf@2.4.5:
     resolution: {integrity: sha512-J5xnxTyqaiw06JjMftq7L9ouA448dw/E7dKghkP9WpKNuwmARNNg+Gk8/u5ryb9N/Yo2+z3MCwuqFK/+qPOPfQ==}
     hasBin: true
+    requiresBuild: true
     dependencies:
       glob: 6.0.4
     dev: false
@@ -8763,6 +8793,10 @@ packages:
   /unicode-property-aliases-ecmascript@2.1.0:
     resolution: {integrity: sha512-6t3foTQI9qne+OZoVQB/8x8rk2k1eVy1gRXhV3oFQ5T6R1dqQ1xtin3XqSlx3+ATBkliTaR/hHyJBm+LVPNM8w==}
     engines: {node: '>=4'}
+
+  /unimodules-app-loader@4.5.1:
+    resolution: {integrity: sha512-yQAsoL0jsCjld1C/iWS4tB5a6LZTb8+enZ9mpt9t9zHYw7YZgeInmW7yz5QZAgVE93ZMPN3SudZHWiXGuD4Wfg==}
+    dev: false
 
   /unique-filename@1.1.1:
     resolution: {integrity: sha512-Vmp0jIp2ln35UTXuryvjzkjGdRyf9b2lTXuSYUiPmzRcl3FDtYqAwOnTJkAngD9SWhnoJzDbTKwaOrZ+STtxNQ==}

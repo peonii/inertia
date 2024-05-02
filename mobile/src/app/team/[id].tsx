@@ -4,9 +4,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, LocationPayload, Players, Team, WsMessage } from "../../types";
+import { ActiveQuest, LocationPayload, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
-import { useAuth } from "../../context/AuthContext";
+import { AuthContextType, useAuth } from "../../context/AuthContext";
 import {
   ActivityIndicator,
   Button,
@@ -22,6 +22,8 @@ import PlayerMarker from "../../components/playerMarker";
 import { useDataContext } from "../../context/DataContext";
 import { QuestItem } from "../../components/teamDetail/quest";
 import { isVetoPeriodActive } from "../../utilis";
+import * as TaskManager from "expo-task-manager";
+import * as Location from "expo-location";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -125,9 +127,7 @@ const PowerupImage = styled.Image`
   margin-bottom: 10px;
 `;
 
-const mockData: {
-  locations: Players[];
-} = {
+const mockData = {
   locations: [
     {
       name: "Saon",
@@ -144,6 +144,8 @@ const mockData: {
     },
   ],
 };
+
+const LOCATION_TASK_NAME = "inertia-location-task";
 
 const TeamDetailView: React.FC<{
   team: Team;
@@ -301,6 +303,36 @@ const TeamDetailView: React.FC<{
   );
 };
 
+let globalAuthCtx: AuthContextType | null = null;
+let gameId = "";
+
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data: { locations }, error }: { data: { locations: Location.LocationObject[] }, error: any }) => {
+  if (error) return
+  if (!globalAuthCtx) return
+  if (gameId === "") return
+
+  if (locations) {
+    await fetchTypeSafe<null>(
+      ENDPOINTS.locations.publish,
+      globalAuthCtx,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          location: {
+            lat: locations[0].coords.latitude,
+            lng: locations[0].coords.longitude,
+            alt: locations[0].coords.altitude,
+            precision: locations[0].coords.accuracy,
+            heading: locations[0].coords.heading,
+            speed: locations[0].coords.speed
+          },
+          game_id: gameId
+        }),
+      }
+    )
+  }
+})
+
 const TeamDetailScreen: React.FC = () => {
   const authContext = useAuth();
   const dataContext = useDataContext();
@@ -411,6 +443,18 @@ const TeamDetailScreen: React.FC = () => {
       // this is likely a "correct" message, so we can hand it off to the handler
       handleIncomingMsg(data);
     };
+
+    Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      showsBackgroundLocationIndicator: true,
+      deferredUpdatesDistance: 50,
+      deferredUpdatesInterval: 15_000,
+      foregroundService: {
+        killServiceOnDestroy: true,
+        notificationTitle: "Broadcasting location",
+        notificationBody: "Your location is being broadcasted to other players!",
+      },
+      accuracy: Location.Accuracy.BestForNavigation
+    });
   }, []);
 
   useEffect(() => {

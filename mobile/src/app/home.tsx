@@ -20,6 +20,7 @@ import { useDataContext } from "../context/DataContext";
 import ContextMenu from "react-native-context-menu-view";
 import { useEffect, useState } from "react";
 import * as Notifications from "expo-notifications";
+import * as LocationLib from "expo-location";
 
 const RefreshContainer = styled.ScrollView`
   flex: 1;
@@ -181,42 +182,31 @@ const Home: React.FC = () => {
   const teamsData = dataContext.teamsData;
 
   const requestFineLocation = async () => {
-    try {
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: "Inertia location Permission",
-          message: "Jebac zydow" + "Dobrze wiesz ze to potrzebne",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-    } catch (err) {
-      console.warn(err);
-    }
+    const { status } = await LocationLib.requestForegroundPermissionsAsync();
   };
 
   const requestBackgroundLocation = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
-      );
-      return granted;
-    } catch (err) {
-      console.warn(err);
+    const { status } = await LocationLib.requestBackgroundPermissionsAsync();
+    if (status === 'granted') {
+      setWasFullPermissionGranted(true);
     }
-    return null;
   };
 
   useEffect(() => {
     (async () => {
+      const wasPermissionGrantedEarlier = await LocationLib.getBackgroundPermissionsAsync();
+      if (wasPermissionGrantedEarlier.status === "granted") {
+        setWasFullPermissionGranted(true);
+        return
+      }
+
       await requestFineLocation();
-      requestBackgroundLocation();
+      await requestBackgroundLocation();
     })();
   }, []);
 
-  const [navigationShitBlocked, setNavigationShitBlocked] = useState(false);
+  const [navigationBlocked, setNavigationBlocked] = useState(false);
+  const [wasFullPermissionGranted, setWasFullPermissionGranted] = useState(false);
 
   //Turning games's data into a list of views
   const gamesList =
@@ -254,10 +244,10 @@ const Home: React.FC = () => {
                 <PressableContainer
                   onPress={() => {
                     router.replace(`/game/${game.id}`);
-                    setNavigationShitBlocked(true);
-                    setTimeout(() => setNavigationShitBlocked(false), 1000);
+                    setNavigationBlocked(true);
+                    setTimeout(() => setNavigationBlocked(false), 1000);
                   }}
-                  disabled={navigationShitBlocked}
+                  disabled={navigationBlocked}
                 >
                   <GameContainer>
                     <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
@@ -281,10 +271,10 @@ const Home: React.FC = () => {
         key="1"
         onPress={() => {
           router.replace("/gameCreation");
-          setNavigationShitBlocked(true);
-          setTimeout(() => setNavigationShitBlocked(false), 1000);
+          setNavigationBlocked(true);
+          setTimeout(() => setNavigationBlocked(false), 1000);
         }}
-        disabled={navigationShitBlocked}
+        disabled={navigationBlocked}
       >
         <GameContainer
           style={{
@@ -317,10 +307,10 @@ const Home: React.FC = () => {
               key={team.id}
               onPress={() => {
                 router.push(`/team/${team.id}`);
-                setNavigationShitBlocked(true);
-                setTimeout(() => setNavigationShitBlocked(false), 1000);
+                setNavigationBlocked(true);
+                setTimeout(() => setNavigationBlocked(false), 1000);
               }}
-              disabled={navigationShitBlocked}
+              disabled={navigationBlocked || !wasFullPermissionGranted}
             >
               <TeamContainer>
                 <LinearGradient

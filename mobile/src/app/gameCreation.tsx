@@ -1,7 +1,7 @@
 import styled from "@emotion/native";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
 import MapView from "react-native-maps";
 import { useAuth } from "../context/AuthContext";
 import { fetchTypeSafe } from "../api/fetch";
@@ -386,7 +386,7 @@ const GameCreation: React.FC = () => {
     letterSpacing: -1.3,
   };
 
-  const locationPickerRef = useRef<BottomSheet>(null);
+  const locationPickerRef = useRef<BottomSheetModal>(null);
 
   const mapRef = useRef<MapView>(null);
   const [addressText, setAdressText] = useState("");

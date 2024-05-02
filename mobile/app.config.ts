@@ -17,6 +17,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: "dev.nattie.Inertia",
+    infoPlist: {
+      UIBackgroundModes: ["location", "fetch", "remote-notification"],
+    }
   },
   android: {
     adaptiveIcon: {
@@ -30,11 +33,30 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         apiKey: process.env.GOOGLE_MAPS_API_KEY,
       },
     },
+    permissions: [
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "android.permission.ACCESS_BACKGROUND_LOCATION",
+      "android.permission.FOREGROUND_SERVICE",
+      "android.permission.FOREGROUND_SERVICE_LOCATION"
+    ]
   },
   web: {
     favicon: "./assets/favicon.png",
   },
-  plugins: ["expo-router", "expo-font", "expo-secure-store"],
+  plugins: [
+    "expo-router", 
+    "expo-font", 
+    "expo-secure-store",
+    [
+      "expo-location",
+      {
+        locationAlwaysAndWhenInUsePermission: "Allow Inertia to access your location.",
+        isAndroidBackgroundLocationEnabled: true,
+        isIosBackgroundLocationEnabled: true,
+      }
+    ]
+  ],
   scheme: "inertia",
   extra: {
     router: {

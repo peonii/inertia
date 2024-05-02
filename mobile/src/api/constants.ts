@@ -26,6 +26,9 @@ export const ENDPOINTS = {
     complete: (id: string) => `${BASE_URL}/api/v5/quests/${id}/complete`,
     veto: (id: string) => `${BASE_URL}/api/v5/quests/${id}/veto`,
   },
+  locations: {
+    publish: `${BASE_URL}/api/v5/locations`,
+  },
   devices: {
     register: `${BASE_URL}/api/v5/devices`,
   },

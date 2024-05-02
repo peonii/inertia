@@ -115,7 +115,11 @@ export const QuestItem: React.FC<{
 
   return (
     <TeamQuestItemContainer>
-      <TeamQuestIcon source={require("./../../../assets/main_task.png")} />
+      <TeamQuestIcon source={
+        quest.quest_type == "main" ?
+        require("./../../../assets/main_task.png") :
+        require("./../../../assets/side_task.png")
+      } />
       <TeamQuestCenteredView>
         <TeamQuestHeader>{quest.title}</TeamQuestHeader>
         <TeamSubheader numberOfLines={1}>
