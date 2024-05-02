@@ -49,12 +49,12 @@ type wsLocationPayload struct {
 }
 
 type wsPowerupMsg struct {
-	Powerup domain.Powerup `json:"pwp"`
+	Powerup *domain.Powerup `json:"pwp"`
 }
 
 type wsPowerupPayload struct {
-	Powerup domain.Powerup `json:"pwp"`
-	Caster  *domain.Team   `json:"cas"`
+	Powerup *domain.Powerup `json:"pwp"`
+	Caster  *domain.Team    `json:"cas"`
 }
 
 type wsCatchMsg struct {

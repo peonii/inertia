@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -233,13 +234,57 @@ func (a *api) catchTeamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, t := range otherTeams {
-		if t.IsRunner {
+		if t.IsRunner && t.ID != tid {
 			err = a.teamRepo.MakeHunter(r.Context(), t.ID)
 			if err != nil {
 				a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team hunter")
 				return
 			}
 		}
+	}
+
+	go func(a *api) {
+		members, err := a.teamRepo.FindMembers(r.Context(), tid)
+		if err != nil {
+			return
+		}
+
+		users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
+		if err != nil {
+			return
+		}
+
+		// Remove all team members from notified users
+		for _, member := range members {
+			for i, user := range users {
+				if user == member.ID {
+					users = append(users[:i], users[i+1:]...)
+					break
+				}
+			}
+		}
+
+		devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
+		if err != nil {
+			return
+		}
+
+		for _, device := range devices {
+			notif := domain.Notification{
+				Title:    "Team caught",
+				Body:     fmt.Sprintf("The team %s just caught the runners!", team.Name),
+				Priority: 10,
+				DeviceID: device.ID,
+			}
+
+			if err := a.scheduleNotification(&notif); err != nil {
+				continue
+			}
+		}
+	}(a)
+
+	a.WsHub.BroadcastCat <- wsCatchMsg{
+		NewRunnerID: tid,
 	}
 
 	a.sendJson(w, http.StatusOK, nil)

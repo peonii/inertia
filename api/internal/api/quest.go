@@ -158,7 +158,7 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() {
+	go func(a *api) {
 		a.logger.Info("sending notif", zap.Any("quest", quest))
 
 		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
@@ -212,7 +212,7 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 
 			a.userStatsRepo.Update(r.Context(), member.ID, stats)
 		}
-	}()
+	}(a)
 
 	a.sendJson(w, http.StatusOK, nil)
 }

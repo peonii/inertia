@@ -85,13 +85,13 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.powerupRepo.Create(r.Context(), &body)
+	pow, err := a.powerupRepo.Create(r.Context(), &body)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to create powerup")
 		return
 	}
 
-	go func() {
+	go func(a *api) {
 		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
 		if err != nil {
 			return
@@ -129,7 +129,11 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
-	}()
+	}(a)
+
+	a.WsHub.BroadcastPwp <- wsPowerupMsg{
+		Powerup: pow,
+	}
 
 	a.sendJson(w, http.StatusOK, nil)
 }

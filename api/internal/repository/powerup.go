@@ -13,7 +13,7 @@ type PowerupRepository interface {
 	GetByID(ctx context.Context, id string) (*domain.Powerup, error)
 	GetByGameID(ctx context.Context, gameID string) ([]*domain.Powerup, error)
 	GetActiveByGameID(ctx context.Context, gameID string) ([]*domain.Powerup, error)
-	Create(ctx context.Context, powerup *domain.PowerupCreate) error
+	Create(ctx context.Context, powerup *domain.PowerupCreate) (*domain.Powerup, error)
 }
 
 type PostgresPowerupRepository struct {
@@ -118,16 +118,17 @@ func (r *PostgresPowerupRepository) GetActiveByGameID(ctx context.Context, gameI
 	return powerups, nil
 }
 
-func (r *PostgresPowerupRepository) Create(ctx context.Context, powerup *domain.PowerupCreate) error {
+func (r *PostgresPowerupRepository) Create(ctx context.Context, powerup *domain.PowerupCreate) (*domain.Powerup, error) {
 	node, err := snowflake.NewNode(domain.PowerupSnowflakeNode)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	id := node.Generate().String()
 	query := `
 		INSERT INTO powerups (id, type, caster_id, ends_at)
 		VALUES ($1, $2, $3, $4)
+		RETURNING id, type, caster_id, ends_at, created_at
 	`
 
 	endsAt := time.Now()
@@ -146,10 +147,18 @@ func (r *PostgresPowerupRepository) Create(ctx context.Context, powerup *domain.
 		endsAt = endsAt.Add(10 * time.Minute)
 	}
 
-	_, err = r.db.Exec(ctx, query, id, powerup.Type, powerup.CasterID, endsAt)
-	if err != nil {
-		return err
+	var pow domain.Powerup
+
+	row := r.db.QueryRow(ctx, query, id, powerup.Type, powerup.CasterID, endsAt)
+	if err := row.Scan(
+		&pow.ID,
+		&pow.Type,
+		&pow.CasterID,
+		&pow.EndsAt,
+		&pow.CreatedAt,
+	); err != nil {
+		return nil, err
 	}
 
-	return nil
+	return &pow, nil
 }
