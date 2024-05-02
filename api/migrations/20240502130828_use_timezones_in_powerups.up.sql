@@ -1,0 +1,1 @@
+alter table powerups alter column ends_at type timestamptz using ends_at at time zone 'UTC';

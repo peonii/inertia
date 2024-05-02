@@ -376,6 +376,20 @@ func (a *api) makeRouter(ctx context.Context) *chi.Mux {
 									},
 								},
 							},
+							"/{id}/powerups": chioas.Path{
+								Methods: chioas.Methods{
+									http.MethodGet: chioas.Method{
+										Description: "Get active powerups in a game",
+										Handler:     a.getPowerupsForGameHandler,
+										Responses: chioas.Responses{
+											http.StatusOK: chioas.Response{
+												Schema:  domain.Powerup{},
+												IsArray: true,
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 					"/teams": chioas.Path{

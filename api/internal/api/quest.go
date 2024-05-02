@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/peonii/inertia/internal/domain"
+	"go.uber.org/zap"
 )
 
 func (a *api) teamQuestsHandler(w http.ResponseWriter, r *http.Request) {
@@ -158,6 +159,8 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
+		a.logger.Info("sending notif", zap.Any("quest", quest))
+
 		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
 		if err != nil {
 			return
@@ -167,6 +170,8 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
+
+		a.logger.Info("team users", zap.Any("users", users))
 
 		// Remove all team members from notified users
 		for _, member := range members {
