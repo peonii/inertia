@@ -84,8 +84,8 @@ export type WsMessage =
   | {
       typ: "pwp";
       dat: {
-        powerup: Powerup;
-        caster: Team;
+        pwp: Powerup;
+        cas: Team;
       };
     }
   | {

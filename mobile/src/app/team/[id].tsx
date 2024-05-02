@@ -470,8 +470,7 @@ const TeamDetailScreen: React.FC = () => {
 
         break;
       case "pwp":
-        // handle powerup
-        // todo actually write this api
+        console.log(msg.dat);
         break;
       case "cat":
         // handle catching

@@ -168,6 +168,39 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		g, err := a.gameRepo.Create(r.Context(), &domain.GameCreate{
+			Name:   "Test Game",
+			HostID: user.ID,
+
+			TimeStart: time.Now(),
+			TimeEnd:   time.Now().Add(1 * time.Hour),
+
+			LocLat: 0,
+			LocLng: 0,
+		})
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create game")
+			return
+		}
+
+		t, err := a.teamRepo.Create(r.Context(), &domain.TeamCreate{
+			Name:       "Test Team",
+			GameID:     g.ID,
+			Color:      "#ff0000",
+			Emoji:      "🔴",
+			GameInvite: "",
+		})
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create team")
+			return
+		}
+
+		err = a.teamRepo.AddTeamMember(r.Context(), t.ID, user.ID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to add team member")
+			return
+		}
+
 		oauthCode, err := a.oauthCodeRepo.CreateOAuthCode(r.Context(), user.ID)
 		if err != nil {
 			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create oauth code")
