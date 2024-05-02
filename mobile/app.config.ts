@@ -19,6 +19,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: "dev.nattie.Inertia",
     infoPlist: {
       UIBackgroundModes: ["location", "fetch", "remote-notification"],
+    },
+    config: {
+      usesNonExemptEncryption: false
     }
   },
   android: {

@@ -120,8 +120,64 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 		)
 
 		http.Redirect(w, r, discordEndpoint, http.StatusFound)
+	} else if provider == "test" {
+		randomName := make([]byte, 16)
+		if _, err := rand.Read(randomName); err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to generate random name")
+			return
+		}
+
+		randomNameEnc := base64.URLEncoding.EncodeToString(randomName)
+
+		userCreate := &domain.UserCreate{
+			Name:        randomNameEnc,
+			DisplayName: randomNameEnc,
+			Image:       "",
+
+			AuthRole: domain.UserAuthRoleBasic,
+		}
+
+		a.logger.Info("creating user",
+			zap.Any("user", userCreate),
+		)
+
+		user, err := a.userRepo.Create(r.Context(), userCreate)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create user")
+			return
+		}
+
+		accountCreate := &domain.AccountCreate{
+			UserID:       user.ID,
+			AccountType:  "test",
+			AccountID:    randomNameEnc,
+			Email:        randomNameEnc + "-test",
+			AccessToken:  "",
+			RefreshToken: "",
+		}
+
+		_, err = a.accountRepo.Create(r.Context(), accountCreate)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create account")
+			return
+		}
+
+		err = a.userStatsRepo.Init(r.Context(), user.ID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to init stats")
+			return
+		}
+
+		oauthCode, err := a.oauthCodeRepo.CreateOAuthCode(r.Context(), user.ID)
+		if err != nil {
+			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create oauth code")
+			return
+		}
+
+		// Redirect to redirect_uri with code
+		http.Redirect(w, r, fmt.Sprintf("%s?code=%s&state=%s", redirectUri, oauthCode.Code, csrfState), http.StatusFound)
 	} else {
-		a.sendError(w, r, http.StatusBadRequest, nil, "invalid provider - must be \"discord\"")
+		a.sendError(w, r, http.StatusBadRequest, nil, "invalid provider - must be \"discord\" or \"email\"")
 		return
 	}
 }

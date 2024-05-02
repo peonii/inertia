@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
-import React from "react";
+import React, { useState } from "react";
 import { Alert } from "react-native";
 import { ENDPOINTS } from "../api/constants";
 
@@ -42,11 +42,18 @@ const SubTitle = styled.Text`
   top: 353px;
 `;
 
-const LoginButtonContainer = styled.View`
+const DcLoginButtonContainer = styled.View`
   justify-content: center;
   align-items: center;
   position: absolute;
-  bottom: 200px;
+  bottom: 250px;
+`;
+
+const EmailLoginButtonContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  bottom: 170px;
 `;
 
 const LoginButton = styled.Pressable`
@@ -74,6 +81,7 @@ const discovery = {
 
 const Login: React.FC = () => {
   const authContext = useAuth();
+  const [provider, setProvider] = useState("discord")
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: "Inertia_mobile_app",
@@ -81,7 +89,7 @@ const Login: React.FC = () => {
       redirectUri: AuthSession.makeRedirectUri({
         scheme: "inertia",
       }),
-      extraParams: { provider: "discord" },
+      extraParams: { provider },
     },
     discovery,
   );
@@ -128,9 +136,10 @@ const Login: React.FC = () => {
       <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
       <Title>Inertia</Title>
       <SubTitle>5.0</SubTitle>
-      <LoginButtonContainer>
+      <DcLoginButtonContainer>
         <LoginButton
           onPress={() => {
+            setProvider("discord");
             promptAsync();
             //router.replace("/home");
           }}
@@ -139,7 +148,20 @@ const Login: React.FC = () => {
             Log in with Discord
           </LoginButtonText>
         </LoginButton>
-      </LoginButtonContainer>
+      </DcLoginButtonContainer>
+      <EmailLoginButtonContainer>
+        <LoginButton
+          onPress={() => {
+            setProvider("test");
+            promptAsync();
+            //router.replace("/home");
+          }}
+        >
+          <LoginButtonText disabled={!request}>
+            Use a test account
+          </LoginButtonText>
+        </LoginButton>
+      </EmailLoginButtonContainer>
     </CenteredView>
   );
 };
