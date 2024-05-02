@@ -159,6 +159,8 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go func() {
+		a.logger.Info("sending notif", zap.Any("quest", quest))
+
 		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
 		if err != nil {
 			return
