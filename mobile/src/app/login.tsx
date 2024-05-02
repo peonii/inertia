@@ -81,7 +81,6 @@ const discovery = {
 
 const Login: React.FC = () => {
   const authContext = useAuth();
-  const [provider, setProvider] = useState("discord")
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: "Inertia_mobile_app",
@@ -89,7 +88,19 @@ const Login: React.FC = () => {
       redirectUri: AuthSession.makeRedirectUri({
         scheme: "inertia",
       }),
-      extraParams: { provider },
+      extraParams: { provider: "discord" },
+    },
+    discovery,
+  );
+
+  const [testRequest, testResponse, testPromptAsync] = useAuthRequest(
+    {
+      clientId: "Inertia_mobile_app",
+      usePKCE: false,
+      redirectUri: AuthSession.makeRedirectUri({
+        scheme: "inertia",
+      }),
+      extraParams: { provider: "test" },
     },
     discovery,
   );
@@ -131,6 +142,22 @@ const Login: React.FC = () => {
     }
   }, [response]);
 
+  React.useEffect(() => {
+    if (testResponse?.type === "success") {
+      const { code } = testResponse.params;
+      (async () => {
+        try {
+          await login(code);
+        } catch (error) {
+          console.error(error);
+          Alert.alert("Error", "An error occurred while logging in.");
+        }
+      })();
+    } else if (testResponse?.type === "error") {
+      Alert.alert("Error", "An error occurred while logging in.");
+    }
+  }, [testResponse]);
+
   return (
     <CenteredView>
       <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
@@ -139,7 +166,6 @@ const Login: React.FC = () => {
       <DcLoginButtonContainer>
         <LoginButton
           onPress={() => {
-            setProvider("discord");
             promptAsync();
             //router.replace("/home");
           }}
@@ -152,8 +178,7 @@ const Login: React.FC = () => {
       <EmailLoginButtonContainer>
         <LoginButton
           onPress={() => {
-            setProvider("test");
-            promptAsync();
+            testPromptAsync();
             //router.replace("/home");
           }}
         >

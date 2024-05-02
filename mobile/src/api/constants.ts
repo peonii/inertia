@@ -21,6 +21,7 @@ export const ENDPOINTS = {
     quests: (id: string) => `${BASE_URL}/api/v5/teams/${id}/quests`,
     generate_side: (id: string) =>
       `${BASE_URL}/api/v5/teams/${id}/generate-side`,
+    catch: (id: string) => `${BASE_URL}/api/v5/teams/${id}/catch-team`,
   },
   quests: {
     complete: (id: string) => `${BASE_URL}/api/v5/quests/${id}/complete`,

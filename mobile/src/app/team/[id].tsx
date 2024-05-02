@@ -128,6 +128,19 @@ const PowerupImage = styled.Image`
   margin-bottom: 10px;
 `;
 
+const CatchButton = styled.Pressable`
+  background-color: #4a4a4a;
+  border-radius: 10px;
+  padding: 10px;
+`;
+
+const CatchButtonText = styled.Text`
+  font-size: 17px;
+  font-family: Inter_700Bold;
+  letter-spacing: -1.2px;
+  color: #ffffff;
+`;
+
 const mockData = {
   locations: [
     {
@@ -202,6 +215,14 @@ const TeamDetailView: React.FC<{
           type: powerupType,
           caster_id: team.id,
         }),
+      });
+    },
+  });
+
+  const catchTeamMutation = useMutation({
+    mutationFn: async () => {
+      await fetchTypeSafe<null>(ENDPOINTS.teams.catch(team.id), authCtx, {
+        method: "POST",
       });
     },
   });
@@ -374,6 +395,33 @@ const TeamDetailView: React.FC<{
           </>
         )}
       </PowerupsContainer>
+      {!team.is_runner && (
+        <CatchButton
+          style={{ marginTop: 20 }}
+          onPress={async () => {
+            Alert.alert(
+              "Catch runner",
+              "Are you sure you want to catch this runner?",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Catch",
+                  onPress: async () => {
+                    await catchTeamMutation.mutateAsync();
+                    refetchTeam();
+                  },
+                  style: "destructive",
+                },
+              ],
+            );
+          }}
+        >
+          <CatchButtonText>Catch runner</CatchButtonText>
+        </CatchButton>
+      )}
     </TeamDetailContainer>
   );
 };
