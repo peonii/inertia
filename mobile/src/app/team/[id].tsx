@@ -4,13 +4,19 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, Players, Team, WsMessage } from "../../types";
+import { ActiveQuest, LocationPayload, Players, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, Button, Pressable, View } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  PermissionsAndroid,
+  Pressable,
+  View,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Image, Text } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
 import PlayerMarker from "../../components/playerMarker";
 import { useDataContext } from "../../context/DataContext";
@@ -304,6 +310,71 @@ const TeamDetailScreen: React.FC = () => {
     queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
+  const [visiblePlayers, setVisiblePlayers] = useState([] as LocationPayload[]);
+  const [selectedPlayerId, setSelectedPlayerId] = useState("0");
+
+  const memoVisiblePlayers = useMemo(() => visiblePlayers, [visiblePlayers]);
+
+  const updateMarker = useCallback((data: LocationPayload) => {
+    setVisiblePlayers((prevPlayers) => {
+      const newValue = [] as LocationPayload[];
+      let inserted = false;
+
+      // Replaces the one or creates a new
+      prevPlayers.forEach((player) => {
+        if (player.loc.user_id === data.loc.user_id) {
+          newValue.push(data);
+          inserted = true;
+        } else {
+          newValue.push(player);
+        }
+      });
+      if (!inserted) {
+        newValue.push(data);
+      }
+      return newValue;
+    });
+  }, []);
+
+  // ! This is for test only
+  useEffect(() => {
+    if (dataContext.userData === "loading" || !teamQuery.data) return;
+
+    setVisiblePlayers([
+      {
+        loc: {
+          lat: 51.98825,
+          lng: 20.8324,
+          alt: 2,
+          precision: 2,
+          heading: 0,
+          speed: 0,
+          user_id: "123124",
+        },
+        team: teamQuery.data,
+        user: dataContext.userData,
+      },
+      {
+        loc: {
+          lat: 51.98825,
+          lng: 20.5324,
+          alt: 2,
+          precision: 2,
+          heading: 0,
+          speed: 0,
+          user_id: "123125",
+        },
+        team: teamQuery.data,
+        user: dataContext.userData,
+      },
+    ]);
+  }, [dataContext, teamQuery.data]);
+
+  function onPlayerMarkerPress(playerId: string) {
+    // If this player is selected set selected to none
+    setSelectedPlayerId(selectedPlayerId === playerId ? "0" : playerId);
+  }
+
   const ws = useRef(new WebSocket(ENDPOINTS.ws));
   // Whether the connection has been established and
   // auth has been successful
@@ -315,6 +386,8 @@ const TeamDetailScreen: React.FC = () => {
         // handle location update
         // logs location for now (UPDATE THIS!!!!!!)
         console.log(msg.dat);
+        updateMarker(msg.dat);
+
         break;
       case "pwp":
         // handle powerup
@@ -371,37 +444,35 @@ const TeamDetailScreen: React.FC = () => {
   return (
     <FullScreenView>
       <MapView
-        style={{ flex: 1 }}
+        style={{ flex: 1, paddingTop: 100 }}
         initialRegion={{
           latitude: 51.98825,
           longitude: 20.8324,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
+        showsCompass={false}
         showsUserLocation={true}
-        compassOffset={{ x: 1, y: 1 }}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false}
         userLocationCalloutEnabled={true}
         customMapStyle={customMapTheme}
+        onPress={() => {
+          setSelectedPlayerId("0");
+        }}
+        moveOnMarkerPress={false}
       >
-        {dataContext.userData != "loading" && (
-          <PlayerMarker
-            typ="loc"
-            dat={{
-              loc: {
-                lat: 51.98825,
-                lng: 20.8324,
-                alt: 2,
-                precision: 2,
-                heading: 0,
-                speed: 0,
-                user_id: "123124",
-              },
-              team: teamQuery.data,
-              user: dataContext.userData,
-            }}
-          ></PlayerMarker>
-        )}
+        {memoVisiblePlayers.map((payload) => {
+          return (
+            <PlayerMarker
+              key={payload.loc.user_id}
+              dat={payload}
+              selected={selectedPlayerId === payload.loc.user_id}
+              onPress={() => {
+                onPlayerMarkerPress(payload.loc.user_id);
+              }}
+            ></PlayerMarker>
+          );
+        })}
       </MapView>
       <BottomSheet
         snapPoints={[110, "85%"]}

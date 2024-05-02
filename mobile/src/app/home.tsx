@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { Game, Team, User } from "../types";
 import {
   ActivityIndicator,
+  PermissionsAndroid,
   RefreshControl,
   useWindowDimensions,
   View,
@@ -17,7 +18,7 @@ import { fetchTypeSafe } from "../api/fetch";
 import { useAuth } from "../context/AuthContext";
 import { useDataContext } from "../context/DataContext";
 import ContextMenu from "react-native-context-menu-view";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Notifications from "expo-notifications";
 
 const RefreshContainer = styled.ScrollView`
@@ -114,7 +115,6 @@ const BalanceText = styled.Text`
 const Home: React.FC = () => {
   const authContext = useAuth();
   const dataContext = useDataContext();
-  console.log(authContext.accessToken);
 
   const userDataRequest = useQuery<User>({
     queryKey: ["userData"],
@@ -180,6 +180,44 @@ const Home: React.FC = () => {
   const gamesData = dataContext.gamesData;
   const teamsData = dataContext.teamsData;
 
+  const requestFineLocation = async () => {
+    try {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Inertia location Permission",
+          message: "Jebac zydow" + "Dobrze wiesz ze to potrzebne",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const requestBackgroundLocation = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
+      );
+      return granted;
+    } catch (err) {
+      console.warn(err);
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    (async () => {
+      await requestFineLocation();
+      requestBackgroundLocation();
+    })();
+  }, []);
+
+  const [navigationShitBlocked, setNavigationShitBlocked] = useState(false);
+
   //Turning games's data into a list of views
   const gamesList =
     gamesData === "loading"
@@ -216,7 +254,10 @@ const Home: React.FC = () => {
                 <PressableContainer
                   onPress={() => {
                     router.replace(`/game/${game.id}`);
+                    setNavigationShitBlocked(true);
+                    setTimeout(() => setNavigationShitBlocked(false), 1000);
                   }}
+                  disabled={navigationShitBlocked}
                 >
                   <GameContainer>
                     <MediumTitle numberOfLines={1}>{game.name}</MediumTitle>
@@ -240,7 +281,10 @@ const Home: React.FC = () => {
         key="1"
         onPress={() => {
           router.replace("/gameCreation");
+          setNavigationShitBlocked(true);
+          setTimeout(() => setNavigationShitBlocked(false), 1000);
         }}
+        disabled={navigationShitBlocked}
       >
         <GameContainer
           style={{
@@ -262,18 +306,21 @@ const Home: React.FC = () => {
     teamsData === "loading"
       ? // Is loading
         [
-          <PressableContainer key={0} onPress={() => {}}>
-            <TeamContainer>
-              <LoadingGlyph></LoadingGlyph>
-            </TeamContainer>
-          </PressableContainer>,
+          <TeamContainer key={0}>
+            <LoadingGlyph></LoadingGlyph>
+          </TeamContainer>,
         ]
       : // Loaded
         teamsData.map((team) => {
           return (
             <PressableContainer
               key={team.id}
-              onPress={() => router.push(`/team/${team.id}`)}
+              onPress={() => {
+                router.push(`/team/${team.id}`);
+                setNavigationShitBlocked(true);
+                setTimeout(() => setNavigationShitBlocked(false), 1000);
+              }}
+              disabled={navigationShitBlocked}
             >
               <TeamContainer>
                 <LinearGradient

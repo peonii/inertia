@@ -54,8 +54,6 @@ export type ActiveQuest = {
   started_at: string;
 };
 
-
-
 export type LocationPayload = {
   loc: {
     lat: number;

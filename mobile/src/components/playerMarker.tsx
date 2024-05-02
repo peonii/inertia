@@ -1,9 +1,8 @@
 import styled from "@emotion/native";
 import { Marker } from "react-native-maps";
-import { SocketResponse } from "../types";
+import { LocationPayload } from "../types";
 import { useEffect, useRef, useState } from "react";
-import { Animated } from "react-native";
-import { callMicrotasks } from "react-native-reanimated/lib/typescript/reanimated2/threads";
+import { Animated, Easing } from "react-native";
 
 const Container = styled.View`
   width: 155px;
@@ -31,51 +30,70 @@ const CustomCalloutBackground = styled.Image`
   width: 100%;
   position: absolute;
 `;
-const CallOut = styled.View``;
 
 const Title = styled.Text`
-  font-size: 16px;
+  font-size: 20px;
   font-family: Inter_700Bold;
   padding-left: 18px;
   padding-top: 6px;
+  letter-spacing: -1.6px;
   color: #fff;
 `;
 
-const PlayerMarker: React.FC<SocketResponse> = ({ typ, dat }) => {
+const GrayText = styled.Text`
+  font-size: 13px;
+  font-family: Inter_400Regular;
+  padding-left: 18px;
+  letter-spacing: -0.8px;
+  color: #fff;
+  opacity: 0.5;
+`;
+
+type PlayerMarkerProps = {
+  dat: LocationPayload;
+  onPress: () => void;
+  selected: boolean;
+};
+
+const PlayerMarker: React.FC<PlayerMarkerProps> = ({ dat, onPress, selected }) => {
   const [callOutVisible, setCallOutVisible] = useState(false);
+  const [shallTrackChanges, setShallTrackChanges] = useState(false);
   const callOutScale = useRef(new Animated.Value(0)).current;
 
-  callOutScale.addListener((value) => {
-    if (callOutVisible && value.value == 0) setCallOutVisible(false);
-  });
-
-  function toggleCallOut() {
-    console.log("kutas");
+  // 1 - visible, 0 - not visible
+  function toggleCallOut(value: number) {
     if (!callOutVisible) setCallOutVisible(true);
     Animated.timing(callOutScale, {
-      toValue: callOutVisible ? 0 : 1,
+      toValue: value,
       useNativeDriver: false,
-      duration: 300,
-    }).start();
+      duration: 350,
+      easing: Easing.exp,
+    }).start(() => {
+      setTimeout(() => {
+        if (value === 0) setCallOutVisible(false);
+        setShallTrackChanges(false);
+      }, 350);
+    });
   }
+
+  useEffect(() => {
+    setShallTrackChanges(true);
+    toggleCallOut(selected ? 1 : 0);
+  }, [selected]);
 
   if (dat.loc == undefined || dat.team == undefined || dat.user == undefined) return;
 
   return (
     <Marker
       coordinate={{ latitude: dat.loc.lat, longitude: dat.loc.lng }}
-      anchor={callOutVisible ? { x: 0.1, y: 0.5 } : { x: 0.5, y: 0.5 }}
-      onPress={toggleCallOut}
+      anchor={{ x: callOutVisible ? 0.1 : 0.5, y: 0.5 }}
+      onPress={onPress}
+      tracksViewChanges={shallTrackChanges}
     >
       <Container
-        style={{ width: callOutVisible ? 155 : 31, height: callOutVisible ? 94 : 31 }}
+        style={callOutVisible ? { width: 155, height: 94 } : { width: 31, height: 31 }}
       >
-        <ImageContainer
-          style={{ backgroundColor: dat.team.color }}
-          onPress={() => {
-            console.log("bruh");
-          }}
-        >
+        <ImageContainer style={{ backgroundColor: dat.team.color }} onPress={() => {}}>
           <ProfilePicture
             source={{ uri: `${dat.user.image}?size=32px` }}
           ></ProfilePicture>
@@ -97,7 +115,12 @@ const PlayerMarker: React.FC<SocketResponse> = ({ typ, dat }) => {
             <CustomCalloutBackground
               source={require("./../../assets/calloutBackground.png")}
             />
-            <Title>{dat.user.name}</Title>
+            <Title numberOfLines={1}>{dat.user.name}</Title>
+            <GrayText numberOfLines={1}>{dat.team.name}</GrayText>
+            <GrayText style={{ paddingTop: 15 }}>
+              {dat.team.xp}
+              XP{"  "}•{"  "}#1
+            </GrayText>
           </Animated.View>
         )}
       </Container>
