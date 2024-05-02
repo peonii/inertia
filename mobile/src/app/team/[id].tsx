@@ -306,16 +306,21 @@ const TeamDetailView: React.FC<{
 let globalAuthCtx: AuthContextType | null = null;
 let gameId = "";
 
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data: { locations }, error }: { data: { locations: Location.LocationObject[] }, error: any }) => {
-  if (error) return
-  if (!globalAuthCtx) return
-  if (gameId === "") return
+TaskManager.defineTask(
+  LOCATION_TASK_NAME,
+  async ({
+    data: { locations },
+    error,
+  }: {
+    data: { locations: Location.LocationObject[] };
+    error: any;
+  }) => {
+    if (error) return;
+    if (!globalAuthCtx) return;
+    if (gameId === "") return;
 
-  if (locations) {
-    await fetchTypeSafe<null>(
-      ENDPOINTS.locations.publish,
-      globalAuthCtx,
-      {
+    if (locations) {
+      await fetchTypeSafe<null>(ENDPOINTS.locations.publish, globalAuthCtx, {
         method: "POST",
         body: JSON.stringify({
           location: {
@@ -324,14 +329,14 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data: { locations }, error }
             alt: locations[0].coords.altitude,
             precision: locations[0].coords.accuracy,
             heading: locations[0].coords.heading,
-            speed: locations[0].coords.speed
+            speed: locations[0].coords.speed,
           },
-          game_id: gameId
+          game_id: gameId,
         }),
-      }
-    )
+      });
+    }
   }
-})
+);
 
 const TeamDetailScreen: React.FC = () => {
   const authContext = useAuth();
@@ -392,6 +397,10 @@ const TeamDetailScreen: React.FC = () => {
         // handle powerup
         // todo actually write this api
         break;
+      case "cat":
+        // handle catching
+        setVisiblePlayers([]);
+        break;
       default:
         console.error(`unhandled message type! ${msg}`);
     }
@@ -410,9 +419,6 @@ const TeamDetailScreen: React.FC = () => {
       // this is likely a "correct" message, so we can hand it off to the handler
       handleIncomingMsg(data);
     };
-
-
-
   }, []);
 
   useEffect(() => {
@@ -455,9 +461,9 @@ const TeamDetailScreen: React.FC = () => {
           notificationTitle: "Broadcasting location",
           notificationBody: "Your location is being broadcasted to other players!",
         },
-        accuracy: Location.Accuracy.BestForNavigation
+        accuracy: Location.Accuracy.BestForNavigation,
       });
-      
+
       setHasStarted(true);
     }
   }, [teamQuery.data?.game_id]);

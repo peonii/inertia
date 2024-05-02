@@ -76,4 +76,8 @@ export type WsMessage =
   | {
     typ: "pwp";
     dat: never; // TODO!
-  };
+  }
+  | {
+    typ: "cat";
+    dat: never;
+  }
