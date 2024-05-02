@@ -5,8 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/peonii/inertia/internal/domain"
 )
+
+func (a *api) getPowerupsForGameHandler(w http.ResponseWriter, r *http.Request) {
+	gameID := chi.URLParam(r, "id")
+
+	powerups, err := a.powerupRepo.GetActiveByGameID(r.Context(), gameID)
+	if err != nil {
+		a.sendError(w, r, http.StatusNotFound, err, "failed to find powerups")
+		return
+	}
+
+	a.sendJson(w, http.StatusOK, powerups)
+}
 
 func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 	uid := a.session(r)
