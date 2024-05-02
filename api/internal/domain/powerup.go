@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"time"
+)
+
 const (
 	PowerupTypeFreezeHunters = "freeze_hunters"
 	PowerupTypeRevealHunters = "reveal_hunters"
