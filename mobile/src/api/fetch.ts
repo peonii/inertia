@@ -48,6 +48,8 @@ export async function fetchTypeSafe<T>(
   authContext: AuthContextType,
   init?: RequestInit,
 ): Promise<T> {
+  console.log("Fetching with token", authContext.accessToken);
+
   const response = await fetch(url, {
     ...init,
     headers: {

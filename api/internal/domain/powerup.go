@@ -16,9 +16,9 @@ type Powerup struct {
 	Type string `json:"type"`
 
 	CasterID string `json:"caster_id"`
-	EndsAt   string `json:"ends_at"`
+	EndsAt   time.Time `json:"ends_at"`
 
-	CreatedAt string `json:"created_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type PowerupCreate struct {

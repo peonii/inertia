@@ -9,6 +9,7 @@ import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
 import {
   ActivityIndicator,
+  Alert,
   Button,
   PermissionsAndroid,
   Pressable,
@@ -99,7 +100,7 @@ const SideQuestGenerationButton = styled.Pressable`
   padding: 10px;
 `;
 
-const PowerupContainer = styled.View`
+const PowerupContainer = styled.Pressable`
   border-radius: 10px;
   padding: 10px;
   flex: 1;
@@ -158,7 +159,7 @@ const TeamDetailView: React.FC<{
     queryFn: async () => {
       const resp = await fetchTypeSafe<ActiveQuest[]>(
         ENDPOINTS.teams.quests(team.id),
-        authCtx
+        authCtx,
       );
 
       return resp;
@@ -167,9 +168,13 @@ const TeamDetailView: React.FC<{
 
   const sideQuestMutation = useMutation({
     mutationFn: async () => {
-      await fetchTypeSafe<null>(ENDPOINTS.teams.generate_side(team.id), authCtx, {
-        method: "POST",
-      });
+      await fetchTypeSafe<null>(
+        ENDPOINTS.teams.generate_side(team.id),
+        authCtx,
+        {
+          method: "POST",
+        },
+      );
     },
   });
 
@@ -188,6 +193,52 @@ const TeamDetailView: React.FC<{
       });
     },
   });
+
+  const buyPowerupMutation = useMutation({
+    mutationFn: async (powerupType: string) => {
+      await fetchTypeSafe<null>(ENDPOINTS.powerups.buy, authCtx, {
+        method: "POST",
+        body: JSON.stringify({
+          type: powerupType,
+          caster_id: team.id,
+        }),
+      });
+    },
+  });
+
+  const prices = {
+    reveal_hunters: 400,
+    freeze_hunters: 1000,
+    hide_tracker: 500,
+
+    freeze_runners: 1000,
+    hunt: 200,
+    blacklist: 600,
+  };
+
+  async function handleBuyingPowerup(powerupType: string) {
+    if (prices[powerupType] > team.balance) {
+      Alert.alert(
+        "Not enough money",
+        "You don't have enough money to buy this powerup.",
+      );
+      return;
+    }
+
+    Alert.alert("Powerup", "Are you sure you want to buy this powerup?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Buy",
+        onPress: async () => {
+          await buyPowerupMutation.mutateAsync(powerupType);
+          await refetchTeam();
+        },
+      },
+    ]);
+  }
 
   return (
     <TeamDetailContainer>
@@ -251,45 +302,69 @@ const TeamDetailView: React.FC<{
       <PowerupsContainer>
         {team.is_runner ? (
           <>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("reveal_hunters");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_reveal.png")}
               />
               <PowerupTitle>Reveal</PowerupTitle>
               <PowerupPrice>$400</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("freeze_hunters");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_freeze.png")}
               />
               <PowerupTitle>Freeze</PowerupTitle>
               <PowerupPrice>$1000</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("hide_tracker");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hide.png")}
               />
               <PowerupTitle>Hide</PowerupTitle>
-              <PowerupPrice>$600</PowerupPrice>
+              <PowerupPrice>$500</PowerupPrice>
             </PowerupContainer>
           </>
         ) : (
           <>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("hunt");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hunt.png")}
               />
               <PowerupTitle>Hunt</PowerupTitle>
               <PowerupPrice>$200</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("freeze_runners");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_freeze.png")}
               />
               <PowerupTitle>Freeze</PowerupTitle>
               <PowerupPrice>$1000</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer
+              onPress={async () => {
+                await handleBuyingPowerup("blacklist");
+              }}
+            >
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hide.png")}
               />
@@ -335,7 +410,7 @@ TaskManager.defineTask(
         }),
       });
     }
-  }
+  },
 );
 
 const TeamDetailScreen: React.FC = () => {
@@ -344,7 +419,8 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () =>
+      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
   const [visiblePlayers, setVisiblePlayers] = useState([] as LocationPayload[]);
@@ -434,7 +510,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        })
+        }),
       );
 
       console.log(
@@ -444,7 +520,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        })
+        }),
       );
     };
 
@@ -459,7 +535,8 @@ const TeamDetailScreen: React.FC = () => {
         foregroundService: {
           killServiceOnDestroy: true,
           notificationTitle: "Broadcasting location",
-          notificationBody: "Your location is being broadcasted to other players!",
+          notificationBody:
+            "Your location is being broadcasted to other players!",
         },
         accuracy: Location.Accuracy.BestForNavigation,
       });

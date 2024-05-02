@@ -68,16 +68,27 @@ export type LocationPayload = {
   user: User;
 };
 
+export type Powerup = {
+  id: string;
+  type: string;
+  caster_id: string;
+  ends_at: string;
+  created_at: string;
+};
+
 export type WsMessage =
   | {
-    typ: "loc";
-    dat: LocationPayload;
-  }
+      typ: "loc";
+      dat: LocationPayload;
+    }
   | {
-    typ: "pwp";
-    dat: never; // TODO!
-  }
+      typ: "pwp";
+      dat: {
+        powerup: Powerup;
+        caster: Team;
+      };
+    }
   | {
-    typ: "cat";
-    dat: never;
-  }
+      typ: "cat";
+      dat: never;
+    };
