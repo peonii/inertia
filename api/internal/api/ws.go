@@ -68,6 +68,8 @@ type wsCatchPayload struct {
 func NewWsHub(logger *zap.Logger, db *pgxpool.Pool) *wsHub {
 	return &wsHub{
 		BroadcastLoc: make(chan wsLocationMsg),
+		BroadcastPwp: make(chan wsPowerupMsg),
+		BroadcastCat: make(chan wsCatchMsg),
 		Register:     make(chan *wsClient),
 		Unregister:   make(chan *wsClient),
 		Clients:      make(map[*wsClient]bool),
