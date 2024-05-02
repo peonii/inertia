@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/peonii/inertia/internal/domain"
+	"go.uber.org/zap"
 )
 
 func (a *api) teamsByGameIDHandler(w http.ResponseWriter, r *http.Request) {
@@ -230,6 +231,9 @@ func (a *api) catchTeamHandler(w http.ResponseWriter, r *http.Request) {
 	hasEncountered := false
 
 	for _, t := range otherTeams {
+		a.logger.Info("trying to update team",
+			zap.Any("team", t),
+		)
 		if t.IsRunner {
 			err = a.teamRepo.MakeHunter(r.Context(), t.ID)
 			if err != nil {
