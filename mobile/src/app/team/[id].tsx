@@ -368,40 +368,6 @@ const TeamDetailScreen: React.FC = () => {
     });
   }, []);
 
-  // ! This is for test only
-  useEffect(() => {
-    if (dataContext.userData === "loading" || !teamQuery.data) return;
-
-    setVisiblePlayers([
-      {
-        loc: {
-          lat: 51.98825,
-          lng: 20.8324,
-          alt: 2,
-          precision: 2,
-          heading: 0,
-          speed: 0,
-          user_id: "123124",
-        },
-        team: teamQuery.data,
-        user: dataContext.userData,
-      },
-      {
-        loc: {
-          lat: 51.98825,
-          lng: 20.5324,
-          alt: 2,
-          precision: 2,
-          heading: 0,
-          speed: 0,
-          user_id: "123125",
-        },
-        team: teamQuery.data,
-        user: dataContext.userData,
-      },
-    ]);
-  }, [dataContext, teamQuery.data]);
-
   function onPlayerMarkerPress(playerId: string) {
     // If this player is selected set selected to none
     setSelectedPlayerId(selectedPlayerId === playerId ? "0" : playerId);
