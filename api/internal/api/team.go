@@ -221,26 +221,35 @@ func (a *api) catchTeamHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.teamRepo.MakeRunner(r.Context(), tid)
-	if err != nil {
-		a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team runner")
-		return
-	}
-
 	otherTeams, err := a.teamRepo.FindByGameID(r.Context(), team.GameID)
 	if err != nil {
 		a.sendError(w, r, http.StatusNotFound, err, "failed to find teams")
 		return
 	}
 
+	hasEncountered := false
+
 	for _, t := range otherTeams {
-		if t.IsRunner && t.ID != tid {
+		if t.IsRunner {
 			err = a.teamRepo.MakeHunter(r.Context(), t.ID)
 			if err != nil {
 				a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team hunter")
 				return
 			}
+
+			hasEncountered = true
 		}
+	}
+
+	if !hasEncountered {
+		a.sendError(w, r, http.StatusUnauthorized, errors.New("no runners found"), "can't catch runner if already runner")
+		return
+	}
+
+	err = a.teamRepo.MakeRunner(r.Context(), tid)
+	if err != nil {
+		a.sendError(w, r, http.StatusInternalServerError, err, "failed to make team runner")
+		return
 	}
 
 	a.WsHub.BroadcastCat <- wsCatchMsg{
