@@ -411,6 +411,7 @@ const TeamDetailScreen: React.FC = () => {
   // Whether the connection has been established and
   // auth has been successful
   const [established, setEstablished] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
 
   async function handleIncomingMsg(msg: WsMessage) {
     switch (msg.typ) {
@@ -444,17 +445,8 @@ const TeamDetailScreen: React.FC = () => {
       handleIncomingMsg(data);
     };
 
-    Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-      showsBackgroundLocationIndicator: true,
-      deferredUpdatesDistance: 50,
-      deferredUpdatesInterval: 15_000,
-      foregroundService: {
-        killServiceOnDestroy: true,
-        notificationTitle: "Broadcasting location",
-        notificationBody: "Your location is being broadcasted to other players!",
-      },
-      accuracy: Location.Accuracy.BestForNavigation
-    });
+
+
   }, []);
 
   useEffect(() => {
@@ -483,6 +475,25 @@ const TeamDetailScreen: React.FC = () => {
         })
       );
     };
+
+    if (!hasStarted) {
+      globalAuthCtx = authContext;
+      gameId = teamQuery.data?.game_id;
+
+      Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+        showsBackgroundLocationIndicator: true,
+        deferredUpdatesDistance: 50,
+        deferredUpdatesInterval: 15_000,
+        foregroundService: {
+          killServiceOnDestroy: true,
+          notificationTitle: "Broadcasting location",
+          notificationBody: "Your location is being broadcasted to other players!",
+        },
+        accuracy: Location.Accuracy.BestForNavigation
+      });
+      
+      setHasStarted(true);
+    }
   }, [teamQuery.data?.game_id]);
 
   return (
