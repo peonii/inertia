@@ -91,49 +91,47 @@ func (a *api) usePowerupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func(a *api) {
-		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
-		if err != nil {
-			return
-		}
-
-		users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
-		if err != nil {
-			return
-		}
-
-		// Remove all team members from notified users
-		for _, member := range members {
-			for i, user := range users {
-				if user == member.ID {
-					users = append(users[:i], users[i+1:]...)
-					break
-				}
-			}
-		}
-
-		devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
-		if err != nil {
-			return
-		}
-
-		for _, device := range devices {
-			notif := domain.Notification{
-				Title:    "Quest completed",
-				Body:     fmt.Sprintf("The team %s used a powerup!", team.Name),
-				Priority: 10,
-				DeviceID: device.ID,
-			}
-
-			if err := a.scheduleNotification(&notif); err != nil {
-				continue
-			}
-		}
-	}(a)
-
 	a.WsHub.BroadcastPwp <- wsPowerupMsg{
 		Powerup: pow,
 	}
 
 	a.sendJson(w, http.StatusOK, nil)
+
+	members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
+	if err != nil {
+		return
+	}
+
+	users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
+	if err != nil {
+		return
+	}
+
+	// Remove all team members from notified users
+	for _, member := range members {
+		for i, user := range users {
+			if user == member.ID {
+				users = append(users[:i], users[i+1:]...)
+				break
+			}
+		}
+	}
+
+	devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
+	if err != nil {
+		return
+	}
+
+	for _, device := range devices {
+		notif := domain.Notification{
+			Title:    "Quest completed",
+			Body:     fmt.Sprintf("The team %s used a powerup!", team.Name),
+			Priority: 10,
+			DeviceID: device.ID,
+		}
+
+		if err := a.scheduleNotification(&notif); err != nil {
+			continue
+		}
+	}
 }

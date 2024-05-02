@@ -158,63 +158,62 @@ func (a *api) completeQuestHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func(a *api) {
-		a.logger.Info("sending notif", zap.Any("quest", quest))
-
-		members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
-		if err != nil {
-			return
-		}
-
-		users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
-		if err != nil {
-			return
-		}
-
-		a.logger.Info("team users", zap.Any("users", users))
-
-		// Remove all team members from notified users
-		for _, member := range members {
-			for i, user := range users {
-				if user == member.ID {
-					users = append(users[:i], users[i+1:]...)
-					break
-				}
-			}
-		}
-
-		devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
-		if err != nil {
-			return
-		}
-
-		for _, device := range devices {
-			notif := domain.Notification{
-				Title:    "Quest completed",
-				Body:     fmt.Sprintf("The team %s completed the quest %s", team.Name, quest.Title),
-				Priority: 10,
-				DeviceID: device.ID,
-			}
-
-			if err := a.scheduleNotification(&notif); err != nil {
-				continue
-			}
-		}
-
-		for _, member := range members {
-			stats, err := a.userStatsRepo.Get(r.Context(), member.ID)
-			if err != nil {
-				continue
-			}
-
-			stats.XP += int64(quest.XP)
-			stats.Quests += 1
-
-			a.userStatsRepo.Update(r.Context(), member.ID, stats)
-		}
-	}(a)
-
 	a.sendJson(w, http.StatusOK, nil)
+
+	a.logger.Info("sending notif", zap.Any("quest", quest))
+
+	members, err := a.teamRepo.FindMembers(r.Context(), team.ID)
+	if err != nil {
+		return
+	}
+
+	users, err := a.gameRepo.FindAllUsersIDs(r.Context(), team.GameID)
+	if err != nil {
+		return
+	}
+
+	a.logger.Info("team users", zap.Any("users", users))
+
+	// Remove all team members from notified users
+	for _, member := range members {
+		for i, user := range users {
+			if user == member.ID {
+				users = append(users[:i], users[i+1:]...)
+				break
+			}
+		}
+	}
+
+	devices, err := a.notifRepo.GetDevicesForUsers(r.Context(), users)
+	if err != nil {
+		return
+	}
+
+	for _, device := range devices {
+		notif := domain.Notification{
+			Title:    "Quest completed",
+			Body:     fmt.Sprintf("The team %s completed the quest %s", team.Name, quest.Title),
+			Priority: 10,
+			DeviceID: device.ID,
+		}
+
+		if err := a.scheduleNotification(&notif); err != nil {
+			continue
+		}
+	}
+
+	for _, member := range members {
+		stats, err := a.userStatsRepo.Get(r.Context(), member.ID)
+		if err != nil {
+			continue
+		}
+
+		stats.XP += int64(quest.XP)
+		stats.Quests += 1
+
+		a.userStatsRepo.Update(r.Context(), member.ID, stats)
+	}
+
 }
 
 func (a *api) vetoQuestHandler(w http.ResponseWriter, r *http.Request) {
