@@ -13,7 +13,8 @@ export const ENDPOINTS = {
     all: `${BASE_URL}/api/v5/games`,
     me: `${BASE_URL}/api/v5/users/@me/games`,
     create: `${BASE_URL}/api/v5/games`,
-    update: (id: string) => `{${BASE_URL}/api/v5/games/${id}`,
+    update: (id: string) => `${BASE_URL}/api/v5/games/${id}`,
+    powerups: (id: string) => `${BASE_URL}/api/v5/games/${id}/powerups`,
   },
   teams: {
     me: `${BASE_URL}/api/v5/users/@me/teams`,

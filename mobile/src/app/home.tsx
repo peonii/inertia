@@ -187,17 +187,18 @@ const Home: React.FC = () => {
 
   const requestBackgroundLocation = async () => {
     const { status } = await LocationLib.requestBackgroundPermissionsAsync();
-    if (status === 'granted') {
+    if (status === "granted") {
       setWasFullPermissionGranted(true);
     }
   };
 
   useEffect(() => {
     (async () => {
-      const wasPermissionGrantedEarlier = await LocationLib.getBackgroundPermissionsAsync();
+      const wasPermissionGrantedEarlier =
+        await LocationLib.getBackgroundPermissionsAsync();
       if (wasPermissionGrantedEarlier.status === "granted") {
         setWasFullPermissionGranted(true);
-        return
+        return;
       }
 
       await requestFineLocation();

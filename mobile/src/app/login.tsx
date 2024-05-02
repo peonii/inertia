@@ -90,7 +90,7 @@ const Login: React.FC = () => {
       }),
       extraParams: { provider: "discord" },
     },
-    discovery,
+    discovery
   );
 
   const [testRequest, testResponse, testPromptAsync] = useAuthRequest(
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
       }),
       extraParams: { provider: "test" },
     },
-    discovery,
+    discovery
   );
 
   async function login(code: string) {
@@ -170,23 +170,9 @@ const Login: React.FC = () => {
             //router.replace("/home");
           }}
         >
-          <LoginButtonText disabled={!request}>
-            Log in with Discord
-          </LoginButtonText>
+          <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
         </LoginButton>
       </DcLoginButtonContainer>
-      <EmailLoginButtonContainer>
-        <LoginButton
-          onPress={() => {
-            testPromptAsync();
-            //router.replace("/home");
-          }}
-        >
-          <LoginButtonText disabled={!request}>
-            Use a test account
-          </LoginButtonText>
-        </LoginButton>
-      </EmailLoginButtonContainer>
     </CenteredView>
   );
 };

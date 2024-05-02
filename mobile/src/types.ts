@@ -70,7 +70,7 @@ export type LocationPayload = {
 
 export type Powerup = {
   id: string;
-  type: string;
+  type: "freeze_hunters" | "reveal_hunters" | "hide_tracker" | "hunt" | "freeze_runners" | "blacklist";
   caster_id: string;
   ends_at: string;
   created_at: string;
@@ -78,17 +78,17 @@ export type Powerup = {
 
 export type WsMessage =
   | {
-      typ: "loc";
-      dat: LocationPayload;
-    }
+    typ: "loc";
+    dat: LocationPayload;
+  }
   | {
-      typ: "pwp";
-      dat: {
-        pwp: Powerup;
-        cas: Team;
-      };
-    }
-  | {
-      typ: "cat";
-      dat: never;
+    typ: "pwp";
+    dat: {
+      pwp: Powerup;
+      cas: Team;
     };
+  }
+  | {
+    typ: "cat";
+    dat: never;
+  };
