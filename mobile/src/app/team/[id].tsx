@@ -4,7 +4,13 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import { ActiveQuest, LocationPayload, Powerup, Team, WsMessage } from "../../types";
+import {
+  ActiveQuest,
+  LocationPayload,
+  Powerup,
+  Team,
+  WsMessage,
+} from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
 import {
@@ -138,24 +144,6 @@ const PowerupIndicatorsContainer = styled.View`
   width: 100%;
 `;
 
-const mockData = {
-  locations: [
-    {
-      name: "Saon",
-      lat: 52.139509,
-      lng: 20.802601,
-      alt: 0,
-      precision: 2,
-      heading: 2,
-      speed: 1,
-      user_id: "1778678293780758528",
-      team_name: "Wielorybnia",
-      experience: 500,
-      rank: 1,
-    },
-  ],
-};
-
 const LOCATION_TASK_NAME = "inertia-location-task";
 
 const TeamDetailView: React.FC<{
@@ -169,7 +157,7 @@ const TeamDetailView: React.FC<{
     queryFn: async () => {
       const resp = await fetchTypeSafe<ActiveQuest[]>(
         ENDPOINTS.teams.quests(team.id),
-        authCtx
+        authCtx,
       );
 
       return resp;
@@ -178,9 +166,13 @@ const TeamDetailView: React.FC<{
 
   const sideQuestMutation = useMutation({
     mutationFn: async () => {
-      await fetchTypeSafe<null>(ENDPOINTS.teams.generate_side(team.id), authCtx, {
-        method: "POST",
-      });
+      await fetchTypeSafe<null>(
+        ENDPOINTS.teams.generate_side(team.id),
+        authCtx,
+        {
+          method: "POST",
+        },
+      );
     },
   });
 
@@ -346,7 +338,7 @@ TaskManager.defineTask(
         }),
       });
     }
-  }
+  },
 );
 
 const TeamDetailScreen: React.FC = () => {
@@ -355,32 +347,23 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () =>
+      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
-  let powerupsQuery = { data: null, error: null };
-
   useEffect(() => {
-    if (!teamQuery.data) return;
-    powerupsQuery = useQuery({
-      queryKey: ["powerups"],
-      queryFn: async () =>
-        fetchTypeSafe<Powerup[]>(
-          ENDPOINTS.games.powerups(teamQuery.data.game_id),
-          authContext
-        ),
-    });
+    (async () => {
+      if (!teamQuery.data) return;
+      console.log(ENDPOINTS.games.powerups(teamQuery.data.game_id));
+
+      const powerupData = await fetchTypeSafe<Powerup[]>(
+        ENDPOINTS.games.powerups(teamQuery.data.game_id),
+        authContext,
+      );
+
+      setActivePowerups(powerupData);
+    })();
   }, [teamQuery.data]);
-
-  useEffect(() => {
-    if (powerupsQuery.error) {
-      console.log(powerupsQuery.error);
-      return;
-    }
-    if (!powerupsQuery.data) return;
-
-    setActivePowerups(powerupsQuery.data);
-  });
 
   const [visiblePlayers, setVisiblePlayers] = useState([] as LocationPayload[]);
   const [selectedPlayerId, setSelectedPlayerId] = useState("0");
@@ -476,7 +459,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        })
+        }),
       );
 
       console.log(
@@ -486,7 +469,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        })
+        }),
       );
     };
 
@@ -501,7 +484,8 @@ const TeamDetailScreen: React.FC = () => {
         foregroundService: {
           killServiceOnDestroy: true,
           notificationTitle: "Broadcasting location",
-          notificationBody: "Your location is being broadcasted to other players!",
+          notificationBody:
+            "Your location is being broadcasted to other players!",
         },
         accuracy: Location.Accuracy.BestForNavigation,
       });

@@ -121,96 +121,98 @@ func (a *api) authorizeHandler(w http.ResponseWriter, r *http.Request) {
 
 		http.Redirect(w, r, discordEndpoint, http.StatusFound)
 	} else if provider == "test" {
-		randomName := make([]byte, 16)
-		if _, err := rand.Read(randomName); err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to generate random name")
-			return
-		}
+		// randomName := make([]byte, 16)
+		// if _, err := rand.Read(randomName); err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to generate random name")
+		// 	return
+		// }
 
-		randomNameEnc := base64.URLEncoding.EncodeToString(randomName)
+		// randomNameEnc := base64.URLEncoding.EncodeToString(randomName)
 
-		userCreate := &domain.UserCreate{
-			Name:        randomNameEnc,
-			DisplayName: randomNameEnc,
-			Image:       "",
+		// userCreate := &domain.UserCreate{
+		// 	Name:        randomNameEnc,
+		// 	DisplayName: randomNameEnc,
+		// 	Image:       "",
 
-			AuthRole: domain.UserAuthRoleBasic,
-		}
+		// 	AuthRole: domain.UserAuthRoleBasic,
+		// }
 
-		a.logger.Info("creating user",
-			zap.Any("user", userCreate),
-		)
+		// a.logger.Info("creating user",
+		// 	zap.Any("user", userCreate),
+		// )
 
-		user, err := a.userRepo.Create(r.Context(), userCreate)
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create user")
-			return
-		}
+		// user, err := a.userRepo.Create(r.Context(), userCreate)
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to create user")
+		// 	return
+		// }
 
-		accountCreate := &domain.AccountCreate{
-			UserID:       user.ID,
-			AccountType:  "test",
-			AccountID:    randomNameEnc,
-			Email:        randomNameEnc + "-test",
-			AccessToken:  "",
-			RefreshToken: "",
-		}
+		// accountCreate := &domain.AccountCreate{
+		// 	UserID:       user.ID,
+		// 	AccountType:  "test",
+		// 	AccountID:    randomNameEnc,
+		// 	Email:        randomNameEnc + "-test",
+		// 	AccessToken:  "",
+		// 	RefreshToken: "",
+		// }
 
-		_, err = a.accountRepo.Create(r.Context(), accountCreate)
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create account")
-			return
-		}
+		// _, err = a.accountRepo.Create(r.Context(), accountCreate)
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to create account")
+		// 	return
+		// }
 
-		err = a.userStatsRepo.Init(r.Context(), user.ID)
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to init stats")
-			return
-		}
+		// err = a.userStatsRepo.Init(r.Context(), user.ID)
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to init stats")
+		// 	return
+		// }
 
-		g, err := a.gameRepo.Create(r.Context(), &domain.GameCreate{
-			Name:   "Test Game",
-			HostID: user.ID,
+		// g, err := a.gameRepo.Create(r.Context(), &domain.GameCreate{
+		// 	Name:   "Test Game",
+		// 	HostID: user.ID,
 
-			TimeStart: time.Now(),
-			TimeEnd:   time.Now().Add(1 * time.Hour),
+		// 	TimeStart: time.Now(),
+		// 	TimeEnd:   time.Now().Add(1 * time.Hour),
 
-			LocLat: 0,
-			LocLng: 0,
-		})
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create game")
-			return
-		}
+		// 	LocLat: 0,
+		// 	LocLng: 0,
+		// })
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to create game")
+		// 	return
+		// }
 
-		t, err := a.teamRepo.Create(r.Context(), &domain.TeamCreate{
-			Name:       "Test Team",
-			GameID:     g.ID,
-			Color:      "#ff0000",
-			Emoji:      "🔴",
-			GameInvite: "",
-		})
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create team")
-			return
-		}
+		// t, err := a.teamRepo.Create(r.Context(), &domain.TeamCreate{
+		// 	Name:       "Test Team",
+		// 	GameID:     g.ID,
+		// 	Color:      "#ff0000",
+		// 	Emoji:      "🔴",
+		// 	GameInvite: "",
+		// })
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to create team")
+		// 	return
+		// }
 
-		err = a.teamRepo.AddTeamMember(r.Context(), t.ID, user.ID)
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to add team member")
-			return
-		}
+		// err = a.teamRepo.AddTeamMember(r.Context(), t.ID, user.ID)
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to add team member")
+		// 	return
+		// }
 
-		oauthCode, err := a.oauthCodeRepo.CreateOAuthCode(r.Context(), user.ID)
-		if err != nil {
-			a.sendError(w, r, http.StatusInternalServerError, err, "failed to create oauth code")
-			return
-		}
+		// oauthCode, err := a.oauthCodeRepo.CreateOAuthCode(r.Context(), user.ID)
+		// if err != nil {
+		// 	a.sendError(w, r, http.StatusInternalServerError, err, "failed to create oauth code")
+		// 	return
+		// }
 
-		// Redirect to redirect_uri with code
-		http.Redirect(w, r, fmt.Sprintf("%s?code=%s&state=%s", redirectUri, oauthCode.Code, csrfState), http.StatusFound)
+		// // Redirect to redirect_uri with code
+		// http.Redirect(w, r, fmt.Sprintf("%s?code=%s&state=%s", redirectUri, oauthCode.Code, csrfState), http.StatusFound)
+		a.sendError(w, r, http.StatusNotImplemented, nil, "test provider not implemented")
+		return
 	} else {
-		a.sendError(w, r, http.StatusBadRequest, nil, "invalid provider - must be \"discord\" or \"email\"")
+		a.sendError(w, r, http.StatusBadRequest, nil, "invalid provider - must be \"discord\"")
 		return
 	}
 }

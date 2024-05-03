@@ -52,7 +52,7 @@ func (r *PostgresPowerupRepository) GetByID(ctx context.Context, id string) (*do
 func (r *PostgresPowerupRepository) GetByGameID(ctx context.Context, gameID string) ([]*domain.Powerup, error) {
 	query := `
 		SELECT
-			id, type, caster_id, ends_at, created_at
+			powerups.id, powerups.type, powerups.caster_id, powerups.ends_at, powerups.created_at
 		FROM powerups
 		JOIN teams ON powerups.caster_id = teams.id
 		WHERE teams.game_id = $1
