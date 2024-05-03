@@ -358,6 +358,30 @@ const TeamDetailScreen: React.FC = () => {
     queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
 
+  let powerupsQuery = { data: null, error: null };
+
+  useEffect(() => {
+    if (!teamQuery.data) return;
+    powerupsQuery = useQuery({
+      queryKey: ["powerups"],
+      queryFn: async () =>
+        fetchTypeSafe<Powerup[]>(
+          ENDPOINTS.games.powerups(teamQuery.data.game_id),
+          authContext
+        ),
+    });
+  }, [teamQuery.data]);
+
+  useEffect(() => {
+    if (powerupsQuery.error) {
+      console.log(powerupsQuery.error);
+      return;
+    }
+    if (!powerupsQuery.data) return;
+
+    setActivePowerups(powerupsQuery.data);
+  });
+
   const [visiblePlayers, setVisiblePlayers] = useState([] as LocationPayload[]);
   const [selectedPlayerId, setSelectedPlayerId] = useState("0");
 
