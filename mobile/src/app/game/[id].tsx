@@ -317,7 +317,7 @@ const GameDetailScreen: React.FC = () => {
       {location ? (
         <PressableContainer
           onPress={() => {
-            sheetRef.current.present();
+            sheetRef.current.expand();
             sheetRef.current.snapToIndex(0);
 
             // mapRef.current.animateToRegion(

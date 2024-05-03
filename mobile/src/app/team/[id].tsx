@@ -387,6 +387,7 @@ const TeamDetailScreen: React.FC = () => {
     queryFn: async () =>
       fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
     (async () => {
@@ -476,6 +477,16 @@ const TeamDetailScreen: React.FC = () => {
       // this is likely a "correct" message, so we can hand it off to the handler
       handleIncomingMsg(data);
     };
+
+    (async () => {
+      const location = await Location.getLastKnownPositionAsync();
+
+      mapRef.current.animateToRegion({
+        ...location.coords,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
   }, []);
 
   useEffect(() => {
@@ -530,12 +541,6 @@ const TeamDetailScreen: React.FC = () => {
     <FullScreenView>
       <MapView
         style={{ flex: 1 }}
-        initialRegion={{
-          latitude: 51.98825,
-          longitude: 20.8324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
         showsCompass={false}
         showsUserLocation={true}
         showsMyLocationButton={false}
@@ -545,6 +550,7 @@ const TeamDetailScreen: React.FC = () => {
           setSelectedPlayerId("0");
         }}
         moveOnMarkerPress={false}
+        ref={mapRef}
       >
         {memoVisiblePlayers.map((payload) => {
           return (

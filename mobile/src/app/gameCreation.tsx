@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Keyboard } from "react-native";
 import { router } from "expo-router";
 import { useDataContext } from "../context/DataContext";
+import * as Location from "expo-location";
 
 type formStatus = "active" | "done" | "undone";
 

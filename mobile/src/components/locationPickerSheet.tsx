@@ -1,8 +1,14 @@
 import styled from "@emotion/native";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+} from "@gorhom/bottom-sheet";
+import {
+  BottomSheetMethods,
+  BottomSheetModalMethods,
+} from "@gorhom/bottom-sheet/lib/typescript/types";
 import { router } from "expo-router";
-import { LegacyRef, useEffect, useState } from "react";
+import { LegacyRef, useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, useWindowDimensions } from "react-native";
 import MapView from "react-native-maps";
 
@@ -53,13 +59,6 @@ const MapContainer = styled.View`
   justify-content: center;
 `;
 
-const DarkFilter = styled.View`
-  opacity: 0.4;
-  background-color: #000000;
-  width: 100%;
-  height: 100%;
-`;
-
 const Crosshair = styled.Image`
   position: absolute;
   width: 100px;
@@ -83,7 +82,7 @@ const MediumTitle = styled.Text`
 `;
 
 type LocationPickerProps = {
-  sheetRef: React.Ref<BottomSheetModalMethods>;
+  sheetRef: React.Ref<BottomSheetMethods>;
   onCancel: () => void;
   onAccept: () => Promise<void>;
   mapRef: LegacyRef<MapView>;
@@ -97,13 +96,7 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
   mapRef,
   initialRegion,
 }) => {
-  const [isActive, setIsActive] = useState(false);
   const [isMapActivity, setIsMapActivity] = useState(false);
-
-  useEffect(() => {
-    if (isActive) router.setParams({ dark: "yes" });
-    else router.setParams({ dark: null });
-  }, [isActive]);
 
   // {isActive ? (
   //   <PressableContainer onPress={onCancel}>
@@ -113,19 +106,34 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
   //   ""
   // )}
 
+  const renderBackdrop = useCallback(
+    (props) => (
+      <BottomSheetBackdrop
+        {...props}
+        enableTouchThrough={true}
+        pressBehavior="close"
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+      />
+    ),
+    [],
+  );
+
   return (
-    <BottomSheetModal
+    <BottomSheet
       snapPoints={["84%"]}
       ref={sheetRef}
       enablePanDownToClose={!isMapActivity}
       index={-1}
+      backgroundComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: "#252525" }}
+      backdropComponent={renderBackdrop}
       handleIndicatorStyle={{ backgroundColor: "#fff" }}
-      onAnimate={(_, toIndex) => {
-        setIsActive(toIndex > -1);
+      onAnimate={() => {
         //@ts-expect-error idk
         mapRef.current.setCamera({ zoom: 12 });
       }}
+      style={{ zIndex: 1000 }}
     >
       <Container
         style={{
@@ -142,7 +150,6 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
             onCancel();
             //@ts-expect-error chuj wie again
             sheetRef.current.close();
-            setIsActive(false);
           }}
         >
           <ExitButton>
@@ -202,9 +209,6 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
               });
             }}
           ></MapView>
-          {isMapActivity && (
-            <DarkFilter style={{ position: "absolute" }}></DarkFilter>
-          )}
           {isMapActivity ? (
             <ActivityIndicator
               style={{ position: "absolute" }}
@@ -233,7 +237,7 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
           </NextButtonView>
         </PressableContainer>
       </Container>
-    </BottomSheetModal>
+    </BottomSheet>
   );
 };
 
