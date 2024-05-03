@@ -51,7 +51,7 @@ const IndexScreen: React.FC = () => {
   // TODO: Add a splash screen here with a loading spinner
   return (
     <CenteredView>
-      <MyzImage source={require("./../../assets/myz.png")} />
+      <MyzImage source={require("./../../assets/splash.png")} />
       <ActivityIndicator animating size="large" color="#ffffff" />
     </CenteredView>
   );

@@ -21,8 +21,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       UIBackgroundModes: ["location", "fetch", "remote-notification"],
     },
     config: {
-      usesNonExemptEncryption: false
-    }
+      usesNonExemptEncryption: false,
+    },
   },
   android: {
     adaptiveIcon: {
@@ -41,24 +41,25 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "android.permission.ACCESS_FINE_LOCATION",
       "android.permission.ACCESS_BACKGROUND_LOCATION",
       "android.permission.FOREGROUND_SERVICE",
-      "android.permission.FOREGROUND_SERVICE_LOCATION"
-    ]
+      "android.permission.FOREGROUND_SERVICE_LOCATION",
+    ],
   },
   web: {
     favicon: "./assets/favicon.png",
   },
   plugins: [
-    "expo-router", 
-    "expo-font", 
+    "expo-router",
+    "expo-font",
     "expo-secure-store",
     [
       "expo-location",
       {
-        locationAlwaysAndWhenInUsePermission: "Allow Inertia to access your location.",
+        locationAlwaysAndWhenInUsePermission:
+          "Allow Inertia to access your location. This is required to participate in games.",
         isAndroidBackgroundLocationEnabled: true,
         isIosBackgroundLocationEnabled: true,
-      }
-    ]
+      },
+    ],
   ],
   scheme: "inertia",
   extra: {
