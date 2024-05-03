@@ -1,7 +1,7 @@
 import styled from "@emotion/native";
 import { useForm, Controller } from "react-hook-form";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import MapView from "react-native-maps";
 import { useAuth } from "../context/AuthContext";
 import { fetchTypeSafe } from "../api/fetch";
@@ -190,7 +190,9 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ statusArray }) => {
     <ProgressTrackerContainer>
       <StatusDotsContainer>{statusList}</StatusDotsContainer>
       <StatusProgressText>
-        {done > statusList.length ? "All done!" : `${done}/${statusArray.length}`}
+        {done > statusList.length
+          ? "All done!"
+          : `${done}/${statusArray.length}`}
       </StatusProgressText>
     </ProgressTrackerContainer>
   );
@@ -279,14 +281,23 @@ const GameCreation: React.FC = () => {
     }
   }, [statusArray]);
 
-  const slideInValues = useRef([new Animated.Value(0), new Animated.Value(0)]).current;
+  const slideInValues = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
 
   function scale(index: number) {
-    return slideInValues[index].interpolate({ inputRange: [0, 1], outputRange: [30, 0] });
+    return slideInValues[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [30, 0],
+    });
   }
 
   function reverse(index: number) {
-    return slideInValues[index].interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
+    return slideInValues[index].interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0],
+    });
   }
 
   function reverseScale(index: number) {
@@ -359,7 +370,8 @@ const GameCreation: React.FC = () => {
       router.replace("/home");
       return;
     }
-    if (statusArray.indexOf("active") < 2) slide(statusArray.indexOf("active"), "in");
+    if (statusArray.indexOf("active") < 2)
+      slide(statusArray.indexOf("active"), "in");
     else {
       slide(0, "out");
       slide(1, "out");
@@ -397,7 +409,8 @@ const GameCreation: React.FC = () => {
       longitude: locationForm.getValues("location").lng,
     });
     console.log(adress);
-    if (adress.thoroughfare) setAdressText(`${adress.thoroughfare}, ${adress.locality}`);
+    if (adress.thoroughfare)
+      setAdressText(`${adress.thoroughfare}, ${adress.locality}`);
     else if (adress.subLocality)
       setAdressText(`${adress.subLocality}, ${adress.locality}`);
     else setAdressText(adress.locality);
@@ -415,12 +428,18 @@ const GameCreation: React.FC = () => {
 
       <CurrentDetails>
         <Animated.Text
-          style={[[animTextStyle], { opacity: slideInValues[0], marginTop: scale(0) }]}
+          style={[
+            [animTextStyle],
+            { opacity: slideInValues[0], marginTop: scale(0) },
+          ]}
         >
           {nameForm.getValues("name")}
         </Animated.Text>
         <Animated.Text
-          style={[[animTextStyle], { opacity: slideInValues[1], marginTop: scale(1) }]}
+          style={[
+            [animTextStyle],
+            { opacity: slideInValues[1], marginTop: scale(1) },
+          ]}
         >
           Starts @ {formatDateShort(dateForm.getValues("startDate"))}
         </Animated.Text>
@@ -459,7 +478,8 @@ const GameCreation: React.FC = () => {
             name="name"
           ></Controller>
           <ErrorMessage>
-            {nameForm.formState.errors.name && nameForm.formState.errors.name.message}
+            {nameForm.formState.errors.name &&
+              nameForm.formState.errors.name.message}
           </ErrorMessage>
         </FieldPage>
 
@@ -482,7 +502,9 @@ const GameCreation: React.FC = () => {
               >
                 <MediumGrayTitle>Start date</MediumGrayTitle>
                 <MediumTitle>{formatDate(value)}</MediumTitle>
-                <MediumGrayTitle style={{ color: "#7c7c7c" }}>Edit</MediumGrayTitle>
+                <MediumGrayTitle style={{ color: "#7c7c7c" }}>
+                  Edit
+                </MediumGrayTitle>
                 {startDatePickerVisible && (
                   <DateTimePicker
                     themeVariant="dark"
@@ -507,7 +529,9 @@ const GameCreation: React.FC = () => {
                         }
                         setStartDatePickerVisible(false);
                       } else {
-                        tempDate.current = new Date(event.nativeEvent.timestamp);
+                        tempDate.current = new Date(
+                          event.nativeEvent.timestamp,
+                        );
                         setIsPickingTime(true);
                       }
                     }}
@@ -534,7 +558,9 @@ const GameCreation: React.FC = () => {
               >
                 <MediumGrayTitle>End date</MediumGrayTitle>
                 <MediumTitle>{formatDate(value)}</MediumTitle>
-                <MediumGrayTitle style={{ color: "#7c7c7c" }}>Edit</MediumGrayTitle>
+                <MediumGrayTitle style={{ color: "#7c7c7c" }}>
+                  Edit
+                </MediumGrayTitle>
                 {endDatePickerVisible && (
                   <DateTimePicker
                     themeVariant="dark"
@@ -559,7 +585,9 @@ const GameCreation: React.FC = () => {
                         }
                         setEndDatePickerVisible(false);
                       } else {
-                        tempDate.current = new Date(event.nativeEvent.timestamp);
+                        tempDate.current = new Date(
+                          event.nativeEvent.timestamp,
+                        );
                         setIsPickingTime(true);
                       }
                     }}
@@ -584,7 +612,7 @@ const GameCreation: React.FC = () => {
                   latitudeDelta: 0.1383,
                   longitudeDelta: 0.06315,
                 },
-                0
+                0,
               );
               locationPickerRef.current.expand();
             }}
@@ -599,9 +627,15 @@ const GameCreation: React.FC = () => {
         <FieldPage>
           <SmallGrayTitle>Does this look right?</SmallGrayTitle>
           <Animated.View
-            style={{ opacity: reverse(0), top: reverseScale(0), paddingTop: 70 }}
+            style={{
+              opacity: reverse(0),
+              top: reverseScale(0),
+              paddingTop: 70,
+            }}
           >
-            <MediumTitle style={{ fontFamily: "Inter_700Bold", paddingBottom: 15 }}>
+            <MediumTitle
+              style={{ fontFamily: "Inter_700Bold", paddingBottom: 15 }}
+            >
               {nameForm.getValues("name")}
             </MediumTitle>
             <SmallGrayTitle style={{ color: "#a5a5a5" }}>
@@ -610,7 +644,9 @@ const GameCreation: React.FC = () => {
             <SmallGrayTitle style={{ color: "#a5a5a5", paddingBottom: 15 }}>
               Ends @ {formatDateLong(dateForm.getValues("endDate"))}
             </SmallGrayTitle>
-            <SmallGrayTitle style={{ color: "#a5a5a5" }}>{addressText}</SmallGrayTitle>
+            <SmallGrayTitle style={{ color: "#a5a5a5" }}>
+              {addressText}
+            </SmallGrayTitle>
           </Animated.View>
         </FieldPage>
       </Animated.View>

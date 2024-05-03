@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import { Powerup } from "../../types";
 import { CircularProgressBase } from "react-native-circular-progress-indicator";
 import { useEffect, useMemo, useState } from "react";

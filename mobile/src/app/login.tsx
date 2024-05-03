@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../context/AuthContext";
 import * as SecureStore from "expo-secure-store";
-import React, { useState } from "react";
+import React from "react";
 import { Alert } from "react-native";
 import { ENDPOINTS } from "../api/constants";
 
@@ -49,13 +49,6 @@ const DcLoginButtonContainer = styled.View`
   bottom: 250px;
 `;
 
-const EmailLoginButtonContainer = styled.View`
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  bottom: 170px;
-`;
-
 const LoginButton = styled.Pressable`
   background-color: #3d3d3d;
   width: 244px;
@@ -90,19 +83,7 @@ const Login: React.FC = () => {
       }),
       extraParams: { provider: "discord" },
     },
-    discovery
-  );
-
-  const [testRequest, testResponse, testPromptAsync] = useAuthRequest(
-    {
-      clientId: "Inertia_mobile_app",
-      usePKCE: false,
-      redirectUri: AuthSession.makeRedirectUri({
-        scheme: "inertia",
-      }),
-      extraParams: { provider: "test" },
-    },
-    discovery
+    discovery,
   );
 
   async function login(code: string) {
@@ -142,22 +123,6 @@ const Login: React.FC = () => {
     }
   }, [response]);
 
-  React.useEffect(() => {
-    if (testResponse?.type === "success") {
-      const { code } = testResponse.params;
-      (async () => {
-        try {
-          await login(code);
-        } catch (error) {
-          console.error(error);
-          Alert.alert("Error", "An error occurred while logging in.");
-        }
-      })();
-    } else if (testResponse?.type === "error") {
-      Alert.alert("Error", "An error occurred while logging in.");
-    }
-  }, [testResponse]);
-
   return (
     <CenteredView>
       <InertiaLogo source={require("./../../assets/inertia-icon.png")} />
@@ -170,7 +135,9 @@ const Login: React.FC = () => {
             //router.replace("/home");
           }}
         >
-          <LoginButtonText disabled={!request}>Log in with Discord</LoginButtonText>
+          <LoginButtonText disabled={!request}>
+            Log in with Discord
+          </LoginButtonText>
         </LoginButton>
       </DcLoginButtonContainer>
     </CenteredView>

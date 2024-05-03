@@ -1,16 +1,9 @@
 import styled from "@emotion/native";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-} from "@gorhom/bottom-sheet";
-import { Dimensions, View } from "react-native";
-import { useCallback, useEffect, useState } from "react";
-import {
-  BottomSheetMethods,
-  BottomSheetModalMethods,
-} from "@gorhom/bottom-sheet/lib/typescript/types";
+import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useCallback, useEffect } from "react";
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import LoadingGlyph from "./loadingGlyph";
 import { useDataContext } from "../context/DataContext";
 import { useQuery } from "@tanstack/react-query";
@@ -99,33 +92,11 @@ const LogoutButtonText = styled.Text`
   letter-spacing: -1.2px;
 `;
 
-const PressableContainer = styled.Pressable`
-  align-items: center;
-  justify-content: center;
-`;
-
-const DarkFilter = styled.View`
-  opacity: 0.4;
-  background-color: #000000;
-  width: 100%;
-  height: 100%;
-`;
-
 type HomeDetailsProps = {
   bottomSheetRef: React.Ref<BottomSheetModalMethods>;
 };
 
-const screenSize = {
-  width: Dimensions.get("screen").width,
-  height: Dimensions.get("screen").height,
-  position: "absolute" as "absolute" | "relative",
-  bottom: 0,
-  left: 0,
-  Zindex: 10,
-};
-
 const HomeDetails: React.FC<HomeDetailsProps> = ({ bottomSheetRef }) => {
-  const [isActive, setIsActive] = useState(false);
   const DataContext = useDataContext();
   const userData = DataContext.userData;
   const authContext = useAuth();

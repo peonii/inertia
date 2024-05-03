@@ -15,7 +15,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { useState, useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthContext } from "../context/AuthContext";
-import BottomSheet, {
+import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
@@ -24,7 +24,6 @@ import HomeDetails from "../components/homeDetails";
 import { DataContext } from "../context/DataContext";
 import { Game, Team, User } from "../types";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import * as Notifications from "expo-notifications";
 
 const Layout: React.FC = () => {

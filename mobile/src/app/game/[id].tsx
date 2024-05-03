@@ -1,5 +1,5 @@
 import styled from "@emotion/native";
-import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState, useRef, useEffect } from "react";
@@ -109,7 +109,8 @@ const GameDetailScreen: React.FC = () => {
 
   const { data, error } = useQuery({
     queryKey: [`game ${id}`],
-    queryFn: () => fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
+    queryFn: () =>
+      fetchTypeSafe<Game>(ENDPOINTS.games.all + `/${id}`, authContext),
     staleTime: 1000 * 60,
   });
 
@@ -124,8 +125,10 @@ const GameDetailScreen: React.FC = () => {
       latitude: gameForm.getValues("lat"),
       longitude: gameForm.getValues("lng"),
     });
-    if (adress.thoroughfare) setLocation(`${adress.thoroughfare}, ${adress.locality}`);
-    else if (adress.subLocality) setLocation(`${adress.subLocality}, ${adress.locality}`);
+    if (adress.thoroughfare)
+      setLocation(`${adress.thoroughfare}, ${adress.locality}`);
+    else if (adress.subLocality)
+      setLocation(`${adress.subLocality}, ${adress.locality}`);
     else setLocation(adress.locality);
   }
 
@@ -340,15 +343,19 @@ const GameDetailScreen: React.FC = () => {
         <PressableContainer
           onPress={async () => {
             if (!compareGameForms()) {
-              await fetchTypeSafe<null>(ENDPOINTS.games.update(id), authContext, {
-                method: "PATCH",
-                body: JSON.stringify({
-                  time_start: gameForm.getValues("start"),
-                  time_end: gameForm.getValues("end"),
-                  loc_lat: gameForm.getValues("lat"),
-                  loc_lng: gameForm.getValues("lng"),
-                }),
-              });
+              await fetchTypeSafe<null>(
+                ENDPOINTS.games.update(id),
+                authContext,
+                {
+                  method: "PATCH",
+                  body: JSON.stringify({
+                    time_start: gameForm.getValues("start"),
+                    time_end: gameForm.getValues("end"),
+                    loc_lat: gameForm.getValues("lat"),
+                    loc_lng: gameForm.getValues("lng"),
+                  }),
+                },
+              );
               router.replace("/home");
               // TODO: Api to apply changes
             } else {

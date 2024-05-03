@@ -2,7 +2,7 @@ import styled from "@emotion/native";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
-import MapView, { Callout, MapMarker, Marker } from "react-native-maps";
+import MapView from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
 import {
   ActiveQuest,
@@ -13,20 +13,12 @@ import {
 } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
-import {
-  ActivityIndicator,
-  Alert,
-  Button,
-  PermissionsAndroid,
-  Pressable,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, View } from "react-native";
 import * as Haptics from "expo-haptics";
-import { FlatList, Image, Text } from "react-native";
+import { FlatList, Text } from "react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import customMapTheme from "../../context/customMap";
 import PlayerMarker from "../../components/playerMarker";
-import { useDataContext } from "../../context/DataContext";
 import { QuestItem } from "../../components/teamDetail/quest";
 import { isVetoPeriodActive } from "../../utilis";
 import * as TaskManager from "expo-task-manager";
@@ -70,14 +62,6 @@ const TeamSubheader = styled.Text`
   letter-spacing: -1.2px;
   color: #ffffff;
   opacity: 0.5;
-`;
-
-const QuestDescription = styled.Text`
-  font-size: 17px;
-  font-family: Inter_400Regular;
-  letter-spacing: -1.2px;
-  color: #ffffff;
-  opacity: 0.7;
 `;
 
 const TeamSectionHeader = styled.Text`
@@ -370,7 +354,7 @@ TaskManager.defineTask(
     error,
   }: {
     data: { locations: Location.LocationObject[] };
-    error: any;
+    error: unknown;
   }) => {
     if (error) return;
     if (!globalAuthCtx) return;
@@ -397,7 +381,6 @@ TaskManager.defineTask(
 
 const TeamDetailScreen: React.FC = () => {
   const authContext = useAuth();
-  const dataContext = useDataContext();
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],

@@ -1,12 +1,9 @@
 import styled from "@emotion/native";
-import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
-import {
-  BottomSheetMethods,
-  BottomSheetModalMethods,
-} from "@gorhom/bottom-sheet/lib/typescript/types";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { router } from "expo-router";
 import { LegacyRef, useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, View, useWindowDimensions } from "react-native";
+import { ActivityIndicator, useWindowDimensions } from "react-native";
 import MapView from "react-native-maps";
 
 const Container = styled.View`
@@ -108,15 +105,6 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
     else router.setParams({ dark: null });
   }, [isActive]);
 
-  const screenSize = {
-    width: Dimensions.get("screen").width,
-    height: Dimensions.get("screen").height,
-    position: "absolute" as "absolute" | "relative",
-    bottom: 0,
-    left: 0,
-    Zindex: 100,
-  };
-
   // {isActive ? (
   //   <PressableContainer onPress={onCancel}>
   //     <DarkFilter></DarkFilter>
@@ -185,31 +173,47 @@ const LocationPickerSheet: React.FC<LocationPickerProps> = ({
                 switch (camera.zoom) {
                   case 12:
                     //@ts-expect-error zjebane to
-                    mapRef.current.animateCamera({ zoom: 14 }, { duration: 500 });
+                    mapRef.current.animateCamera(
+                      { zoom: 14 },
+                      { duration: 500 },
+                    );
                     break;
                   case 14:
                     //@ts-expect-error zjebane to
-                    mapRef.current.animateCamera({ zoom: 16 }, { duration: 500 });
+                    mapRef.current.animateCamera(
+                      { zoom: 16 },
+                      { duration: 500 },
+                    );
                     break;
                   case 16:
                     //@ts-expect-error zjebane to
-                    mapRef.current.animateCamera({ zoom: 18 }, { duration: 500 });
+                    mapRef.current.animateCamera(
+                      { zoom: 18 },
+                      { duration: 500 },
+                    );
                     break;
                   default:
                     //@ts-expect-error zjebane to
-                    mapRef.current.animateCamera({ zoom: 12 }, { duration: 500 });
+                    mapRef.current.animateCamera(
+                      { zoom: 12 },
+                      { duration: 500 },
+                    );
                 }
               });
             }}
           ></MapView>
-          {isMapActivity && <DarkFilter style={{ position: "absolute" }}></DarkFilter>}
+          {isMapActivity && (
+            <DarkFilter style={{ position: "absolute" }}></DarkFilter>
+          )}
           {isMapActivity ? (
             <ActivityIndicator
               style={{ position: "absolute" }}
               size={"large"}
             ></ActivityIndicator>
           ) : (
-            <Crosshair source={require("../../assets/map-crosshair.png")}></Crosshair>
+            <Crosshair
+              source={require("../../assets/map-crosshair.png")}
+            ></Crosshair>
           )}
         </MapContainer>
         <PressableContainer
