@@ -44,3 +44,5 @@ yarn-error.*
 # this shouldn't be the case, but fsr i have to gitignore prebuild directories!
 android/
 ios/
+
+build-*.ipa
