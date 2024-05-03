@@ -15,6 +15,7 @@ import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
 import {
   ActivityIndicator,
+  Alert,
   Button,
   PermissionsAndroid,
   Pressable,
@@ -106,7 +107,7 @@ const SideQuestGenerationButton = styled.Pressable`
   padding: 10px;
 `;
 
-const PowerupContainer = styled.View`
+const PowerupContainer = styled.Pressable`
   border-radius: 10px;
   padding: 10px;
   flex: 1;
@@ -145,6 +146,26 @@ const PowerupIndicatorsContainer = styled.View`
 `;
 
 const LOCATION_TASK_NAME = "inertia-location-task";
+const POWERUP_DATA = {
+  freeze_hunters: {
+    price: 1000,
+  },
+  reveal_hunters: {
+    price: 400,
+  },
+  hide_tracker: {
+    price: 500,
+  },
+  hunt: {
+    price: 200,
+  },
+  freeze_runners: {
+    price: 1000,
+  },
+  blacklist: {
+    price: 600,
+  },
+};
 
 const TeamDetailView: React.FC<{
   team: Team;
@@ -191,6 +212,39 @@ const TeamDetailView: React.FC<{
       });
     },
   });
+
+  function buyPowerup(type: string) {
+    const powerup = POWERUP_DATA[type];
+
+    if (team.balance < powerup.price) {
+      Alert.alert(
+        "Not enough balance",
+        "You don't have enough balance to buy this powerup.",
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Buy Powerup",
+      `Are you sure you want to buy this powerup for $${powerup.price}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Buy",
+          onPress: async () => {
+            await fetchTypeSafe<null>(ENDPOINTS.powerups.buy, authCtx, {
+              method: "POST",
+              body: JSON.stringify({ type, caster_id: team.id }),
+            });
+            refetchTeam();
+          },
+        },
+      ],
+    );
+  }
 
   return (
     <TeamDetailContainer>
@@ -254,21 +308,21 @@ const TeamDetailView: React.FC<{
       <PowerupsContainer>
         {team.is_runner ? (
           <>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("reveal_hunters")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_reveal.png")}
               />
               <PowerupTitle>Reveal</PowerupTitle>
               <PowerupPrice>$400</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("freeze_hunters")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_freeze.png")}
               />
               <PowerupTitle>Freeze</PowerupTitle>
               <PowerupPrice>$1000</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("hide_tracker")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hide.png")}
               />
@@ -278,21 +332,21 @@ const TeamDetailView: React.FC<{
           </>
         ) : (
           <>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("hunt")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hunt.png")}
               />
               <PowerupTitle>Hunt</PowerupTitle>
               <PowerupPrice>$200</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("freeze_runners")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_freeze.png")}
               />
               <PowerupTitle>Freeze</PowerupTitle>
               <PowerupPrice>$1000</PowerupPrice>
             </PowerupContainer>
-            <PowerupContainer>
+            <PowerupContainer onPress={() => buyPowerup("blacklist")}>
               <PowerupImage
                 source={require("../../../assets/powerups/powerup_hide.png")}
               />
@@ -361,7 +415,7 @@ const TeamDetailScreen: React.FC = () => {
         authContext,
       );
 
-      setActivePowerups(powerupData);
+      setActivePowerups(powerupData ? powerupData : []);
     })();
   }, [teamQuery.data]);
 
@@ -397,7 +451,6 @@ const TeamDetailScreen: React.FC = () => {
   }
 
   const [activePowerups, setActivePowerups] = useState([] as Powerup[]);
-  const memoActivePowerups = useMemo(() => activePowerups, [activePowerups]);
 
   const ws = useRef(new WebSocket(ENDPOINTS.ws));
   // Whether the connection has been established and
@@ -416,11 +469,7 @@ const TeamDetailScreen: React.FC = () => {
         break;
       case "pwp":
         // add some additional shit idk
-        setActivePowerups((value) => {
-          const newValue = [] as Powerup[];
-          newValue.push(...value);
-          newValue.push(msg.dat.pwp);
-        });
+        setActivePowerups([...activePowerups, msg.dat.pwp]);
         break;
       case "cat":
         // handle catching
@@ -529,16 +578,17 @@ const TeamDetailScreen: React.FC = () => {
       </MapView>
 
       <PowerupIndicatorsContainer style={{}}>
-        <PowerupIndicator
-          powerup={{
-            id: "123",
-            type: "freeze_hunters",
-            caster_id: "123",
-            ends_at: "2024-05-02T23:18:00.212Z",
-            created_at: "2024-05-02T23:16:00.212Z",
-          }}
-          destroySelf={() => {}}
-        ></PowerupIndicator>
+        {activePowerups.map((powerup) => (
+          <PowerupIndicator
+            key={powerup.id}
+            powerup={powerup}
+            destroySelf={() => {
+              setActivePowerups((value) => {
+                return value.filter((p) => p.id !== powerup.id);
+              });
+            }}
+          />
+        ))}
       </PowerupIndicatorsContainer>
       <BottomSheet
         snapPoints={[110, "85%"]}
