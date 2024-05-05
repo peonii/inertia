@@ -4,13 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView from "react-native-maps";
 import { fetchTypeSafe } from "../../api/fetch";
-import {
-  ActiveQuest,
-  LocationPayload,
-  Powerup,
-  Team,
-  WsMessage,
-} from "../../types";
+import { ActiveQuest, LocationPayload, Powerup, Team, WsMessage } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
 import { ActivityIndicator, Alert, View } from "react-native";
@@ -29,7 +23,7 @@ const FullScreenView = styled.View`
   flex: 1;
 `;
 
-const TeamDetailContainer = styled.View`
+const TeamDetailContainer = styled.ScrollView`
   padding-left: 20px;
   padding-right: 20px;
 `;
@@ -129,6 +123,24 @@ const PowerupIndicatorsContainer = styled.View`
   width: 100%;
 `;
 
+const CatchButton = styled.Pressable`
+  align-self: center;
+  width: 195px;
+  height: 60px;
+  margin-top: 50px;
+  background-color: #3a3a3a;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const CatchButtonText = styled.Text`
+  font-size: 24px;
+  font-family: Inter_700Bold;
+  letter-spacing: -1.2px;
+  color: #ffffff;
+`;
+
 const LOCATION_TASK_NAME = "inertia-location-task";
 const POWERUP_DATA = {
   freeze_hunters: {
@@ -162,7 +174,7 @@ const TeamDetailView: React.FC<{
     queryFn: async () => {
       const resp = await fetchTypeSafe<ActiveQuest[]>(
         ENDPOINTS.teams.quests(team.id),
-        authCtx,
+        authCtx
       );
 
       return resp;
@@ -171,13 +183,9 @@ const TeamDetailView: React.FC<{
 
   const sideQuestMutation = useMutation({
     mutationFn: async () => {
-      await fetchTypeSafe<null>(
-        ENDPOINTS.teams.generate_side(team.id),
-        authCtx,
-        {
-          method: "POST",
-        },
-      );
+      await fetchTypeSafe<null>(ENDPOINTS.teams.generate_side(team.id), authCtx, {
+        method: "POST",
+      });
     },
   });
 
@@ -203,7 +211,7 @@ const TeamDetailView: React.FC<{
     if (team.balance < powerup.price) {
       Alert.alert(
         "Not enough balance",
-        "You don't have enough balance to buy this powerup.",
+        "You don't have enough balance to buy this powerup."
       );
       return;
     }
@@ -226,7 +234,7 @@ const TeamDetailView: React.FC<{
             refetchTeam();
           },
         },
-      ],
+      ]
     );
   }
 
@@ -340,6 +348,15 @@ const TeamDetailView: React.FC<{
           </>
         )}
       </PowerupsContainer>
+      <CatchButton
+        onPress={() => {
+          fetchTypeSafe<null>(ENDPOINTS.teams.catch(team.id), authCtx, {
+            method: "POST",
+          });
+        }}
+      >
+        <CatchButtonText>Catch runners</CatchButtonText>
+      </CatchButton>
     </TeamDetailContainer>
   );
 };
@@ -376,7 +393,7 @@ TaskManager.defineTask(
         }),
       });
     }
-  },
+  }
 );
 
 const TeamDetailScreen: React.FC = () => {
@@ -384,8 +401,7 @@ const TeamDetailScreen: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const teamQuery = useQuery({
     queryKey: ["team", id],
-    queryFn: async () =>
-      fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
+    queryFn: async () => fetchTypeSafe<Team>(ENDPOINTS.teams.id(id), authContext),
   });
   const mapRef = useRef<MapView>(null);
 
@@ -396,7 +412,7 @@ const TeamDetailScreen: React.FC = () => {
 
       const powerupData = await fetchTypeSafe<Powerup[]>(
         ENDPOINTS.games.powerups(teamQuery.data.game_id),
-        authContext,
+        authContext
       );
 
       setActivePowerups(powerupData ? powerupData : []);
@@ -502,7 +518,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        }),
+        })
       );
 
       console.log(
@@ -512,7 +528,7 @@ const TeamDetailScreen: React.FC = () => {
             t: authContext.accessToken,
             g: teamQuery.data?.game_id,
           },
-        }),
+        })
       );
     };
 
@@ -527,8 +543,7 @@ const TeamDetailScreen: React.FC = () => {
         foregroundService: {
           killServiceOnDestroy: true,
           notificationTitle: "Broadcasting location",
-          notificationBody:
-            "Your location is being broadcasted to other players!",
+          notificationBody: "Your location is being broadcasted to other players!",
         },
         accuracy: Location.Accuracy.BestForNavigation,
       });
