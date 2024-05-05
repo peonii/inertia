@@ -284,24 +284,30 @@ const TeamDetailView: React.FC<{
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <TeamBalance>${team.balance}</TeamBalance>
-          <Pressable
-            style={{ padding: 6, backgroundColor: "#3a3a3a", borderRadius: 10 }}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setIsBuyingTickets((t) => !t);
-            }}
-          >
-            <Text
+          {team.is_runner && (
+            <Pressable
               style={{
-                fontFamily: "Inter_400Regular",
-                color: "#ffffff",
-                fontSize: 14,
-                letterSpacing: -0.6,
+                padding: 6,
+                backgroundColor: "#3a3a3a",
+                borderRadius: 10,
+              }}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setIsBuyingTickets((t) => !t);
               }}
             >
-              Tickets
-            </Text>
-          </Pressable>
+              <Text
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "#ffffff",
+                  fontSize: 14,
+                  letterSpacing: -0.6,
+                }}
+              >
+                Tickets
+              </Text>
+            </Pressable>
+          )}
         </View>
       </TeamHeaderContainer>
       {isBuyingTickets ? (
@@ -507,15 +513,17 @@ const TeamDetailView: React.FC<{
               </>
             )}
           </PowerupsContainer>
-          <CatchButton
-            onPress={() => {
-              fetchTypeSafe<null>(ENDPOINTS.teams.catch(team.id), authCtx, {
-                method: "POST",
-              });
-            }}
-          >
-            <CatchButtonText>Catch runners</CatchButtonText>
-          </CatchButton>
+          {!team.is_runner && (
+            <CatchButton
+              onPress={() => {
+                fetchTypeSafe<null>(ENDPOINTS.teams.catch(team.id), authCtx, {
+                  method: "POST",
+                });
+              }}
+            >
+              <CatchButtonText>Catch runners</CatchButtonText>
+            </CatchButton>
+          )}
         </>
       )}
     </TeamDetailContainer>
