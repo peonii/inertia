@@ -16,6 +16,7 @@ import { AuthContextType, useAuth } from "../../context/AuthContext";
 import {
   ActivityIndicator,
   Alert,
+  Keyboard,
   Pressable,
   TextInput,
   View,
@@ -159,6 +160,14 @@ const POWERUP_DATA = {
 };
 
 type TicketType = "bus" | "tram" | "m1" | "m2" | "km" | "wkd";
+const prices: Record<TicketType, number> = {
+  bus: 20,
+  tram: 30,
+  m1: 70,
+  m2: 60,
+  km: 70,
+  wkd: 40,
+};
 
 const TeamDetailView: React.FC<{
   team: Team;
@@ -269,6 +278,7 @@ const TeamDetailView: React.FC<{
                 fontFamily: "Inter_400Regular",
                 color: "#ffffff",
                 fontSize: 14,
+                letterSpacing: -0.6,
               }}
             >
               Tickets
@@ -277,7 +287,11 @@ const TeamDetailView: React.FC<{
         </View>
       </TeamHeaderContainer>
       {isBuyingTickets ? (
-        <>
+        <Pressable
+          onPress={() => {
+            Keyboard.dismiss();
+          }}
+        >
           <TeamSectionHeader>TICKETS</TeamSectionHeader>
           <TextInput
             style={{
@@ -293,9 +307,13 @@ const TeamDetailView: React.FC<{
             value={ticketAmount.toString()}
             onChangeText={(text) => {
               if (text === "") {
-                setTicketAmount(0);
+                setTicketAmount(1);
               } else {
-                setTicketAmount(parseInt(text));
+                if (parseInt(text) > 0) {
+                  setTicketAmount(parseInt(text));
+                } else {
+                  setTicketAmount(1);
+                }
               }
             }}
           />
@@ -310,15 +328,65 @@ const TeamDetailView: React.FC<{
               marginBottom: 10,
               fontSize: 18,
             }}
+            itemStyle={{ color: "#ffffff" }}
           >
-            <Picker.Item label="Bus" value="bus" />
-            <Picker.Item label="Tram" value="tram" />
-            <Picker.Item label="M1" value="m1" />
-            <Picker.Item label="M2" value="m2" />
-            <Picker.Item label="KM" value="km" />
-            <Picker.Item label="WKD" value="wkd" />
+            <Picker.Item style={{ color: "#ffffff" }} label="Bus" value="bus" />
+            <Picker.Item
+              style={{ color: "#ffffff" }}
+              label="Tram"
+              value="tram"
+            />
+            <Picker.Item style={{ color: "#ffffff" }} label="M1" value="m1" />
+            <Picker.Item style={{ color: "#ffffff" }} label="M2" value="m2" />
+            <Picker.Item style={{ color: "#ffffff" }} label="KM" value="km" />
+            <Picker.Item style={{ color: "#ffffff" }} label="WKD" value="wkd" />
           </Picker>
-        </>
+
+          <Pressable
+            style={{
+              padding: 10,
+              backgroundColor: "#3a3a3a",
+              borderRadius: 10,
+              marginBottom: 10,
+            }}
+            onPress={async () => {
+              await fetchTypeSafe<null>(
+                ENDPOINTS.teams.buy_ticket(team.id),
+                authCtx,
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    amount: ticketAmount,
+                    type: ticketType,
+                  }),
+                },
+              );
+              refetchTeam();
+              setIsBuyingTickets(false);
+              setTicketAmount(1);
+              setTicketType("bus");
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+            }}
+            disabled={ticketAmount * prices[ticketType] > team.balance}
+          >
+            <Text
+              style={{
+                fontFamily: "Inter_700Bold",
+                color:
+                  ticketAmount * prices[ticketType] <= team.balance
+                    ? "#ffffff"
+                    : "#888888",
+                fontSize: 24,
+                letterSpacing: -1,
+                textAlign: "center",
+              }}
+            >
+              Purchase (${ticketAmount * prices[ticketType]})
+            </Text>
+          </Pressable>
+        </Pressable>
       ) : (
         <>
           <TeamSectionHeader>TASKS</TeamSectionHeader>

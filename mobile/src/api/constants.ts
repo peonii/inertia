@@ -23,6 +23,7 @@ export const ENDPOINTS = {
     generate_side: (id: string) =>
       `${BASE_URL}/api/v5/teams/${id}/generate-side`,
     catch: (id: string) => `${BASE_URL}/api/v5/teams/${id}/catch-team`,
+    buy_ticket: (id: string) => `${BASE_URL}/api/v5/teams/${id}/buy-ticket`,
   },
   quests: {
     complete: (id: string) => `${BASE_URL}/api/v5/quests/${id}/complete`,
