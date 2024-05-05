@@ -7,8 +7,9 @@
 
 import Foundation
 
-struct ActiveQuest {
+struct ActiveQuest: Codable, Identifiable {
     var id: String
+    var questId: String
     var gameId: String
     var title: String
     var description: String
@@ -23,6 +24,7 @@ struct ActiveQuest {
     
     enum CodingKeys: String, CodingKey {
         case id = "id"
+        case questId = "quest_id"
         case gameId = "game_id"
         case title = "title"
         case description = "description"
@@ -37,6 +39,6 @@ struct ActiveQuest {
     }
     
     static func mock() -> Self {
-        return ActiveQuest(id: "123", gameId: "123", title: "Wykasuj Sploya", description: "Wykasuj Sploya. Zrób to, zanim cię zje, tylko szybko! Nie chcesz aby cię dopadł Witecki. On jest głodny.", questType: "main", money: 0, xp: 300, groupId: "123", createdAt: "asdf", complete: false)
+        return ActiveQuest(id: "123", questId: "123", gameId: "123", title: "Wykasuj Sploya", description: "Wykasuj Sploya. Zrób to, zanim cię zje, tylko szybko! Nie chcesz aby cię dopadł Witecki. On jest głodny.", questType: "main", money: 0, xp: 300, groupId: "123", createdAt: "asdf", complete: false)
     }
 }

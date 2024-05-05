@@ -17,7 +17,7 @@ struct ExpandedTeamList: View {
             
             List(teamService.joinedTeams, id: \.id) { team in
                 NavigationLink {
-                    TeamPlayWrapper(team: team)
+                    TeamDetailScreen(team: team)
                         .ignoresSafeArea()
                 } label: {
                     HStack {

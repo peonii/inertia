@@ -13,7 +13,13 @@ import {
 } from "../../types";
 import { ENDPOINTS } from "../../api/constants";
 import { AuthContextType, useAuth } from "../../context/AuthContext";
-import { ActivityIndicator, Alert, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  TextInput,
+  View,
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import { FlatList, Text } from "react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,6 +30,7 @@ import { isVetoPeriodActive } from "../../utilis";
 import * as TaskManager from "expo-task-manager";
 import * as Location from "expo-location";
 import PowerupIndicator from "../../components/teamDetail/powerupIndicator";
+import { Picker } from "@react-native-picker/picker";
 
 const FullScreenView = styled.View`
   flex: 1;
@@ -151,11 +158,18 @@ const POWERUP_DATA = {
   },
 };
 
+type TicketType = "bus" | "tram" | "m1" | "m2" | "km" | "wkd";
+
 const TeamDetailView: React.FC<{
   team: Team;
   refetchTeam: () => Promise<void>;
 }> = ({ team, refetchTeam }) => {
   const authCtx = useAuth();
+
+  // this is a GREAT way to handle this
+  const [isBuyingTickets, setIsBuyingTickets] = useState(false);
+  const [ticketAmount, setTicketAmount] = useState(1);
+  const [ticketType, setTicketType] = useState<TicketType>("bus");
 
   const questsQuery = useQuery<ActiveQuest[], Error>({
     queryKey: ["quests", team.id],
@@ -232,7 +246,7 @@ const TeamDetailView: React.FC<{
 
   return (
     <TeamDetailContainer>
-      <TeamHeaderContainer>
+      <TeamHeaderContainer style={{ alignItems: "flex-start" }}>
         <View>
           <TeamHeader>{team.name}</TeamHeader>
           <TeamSubheader>
@@ -241,105 +255,174 @@ const TeamDetailView: React.FC<{
             {team.xp}XP
           </TeamSubheader>
         </View>
-        <TeamBalance>${team.balance}</TeamBalance>
-      </TeamHeaderContainer>
-      <TeamSectionHeader>TASKS</TeamSectionHeader>
-      <TeamQuestContainer>
-        {questsQuery.isLoading && <Text>Loading...</Text>}
-        {questsQuery.isError && <Text>Error...</Text>}
-        {questsQuery.data && (
-          <FlatList
-            data={questsQuery.data.filter((q) => !q.complete)}
-            overScrollMode="never"
-            scrollEnabled={false}
-            style={{ padding: 10 }}
-            contentContainerStyle={{ gap: 10 }}
-            renderItem={({ item }) => (
-              <QuestItem
-                quest={item}
-                isAbleToComplete={team.is_runner}
-                completeFn={async () => {
-                  await completeQuestMutation.mutateAsync(item.id);
-                  questsQuery.refetch();
-                  refetchTeam();
-                }}
-                vetoFn={async () => {
-                  await vetoQuestMutation.mutateAsync(item.id);
-                  questsQuery.refetch();
-                  refetchTeam();
-                }}
-              />
-            )}
-          />
-        )}
-
-        {questsQuery.data &&
-          !isVetoPeriodActive(team.veto_period_end) &&
-          team.is_runner &&
-          questsQuery.data.filter((q) => !q.complete && q.quest_type === "side")
-            .length === 0 && (
-            <SideQuestGenerationButton
-              onPress={async () => {
-                await sideQuestMutation.mutateAsync();
-                await questsQuery.refetch();
+        <View style={{ alignItems: "flex-end" }}>
+          <TeamBalance>${team.balance}</TeamBalance>
+          <Pressable
+            style={{ padding: 6, backgroundColor: "#3a3a3a", borderRadius: 10 }}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setIsBuyingTickets((t) => !t);
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Inter_400Regular",
+                color: "#ffffff",
+                fontSize: 14,
               }}
             >
-              <TeamSubheader>+ Generate side quest</TeamSubheader>
-            </SideQuestGenerationButton>
-          )}
-      </TeamQuestContainer>
-      <TeamSectionHeader style={{ paddingTop: 50 }}>POWERUPS</TeamSectionHeader>
-      <PowerupsContainer>
-        {team.is_runner ? (
-          <>
-            <PowerupContainer onPress={() => buyPowerup("reveal_hunters")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_reveal.png")}
+              Tickets
+            </Text>
+          </Pressable>
+        </View>
+      </TeamHeaderContainer>
+      {isBuyingTickets ? (
+        <>
+          <TeamSectionHeader>TICKETS</TeamSectionHeader>
+          <TextInput
+            style={{
+              backgroundColor: "#3a3a3a",
+              color: "#ffffff",
+              padding: 10,
+              borderRadius: 10,
+              marginBottom: 10,
+              fontSize: 18,
+            }}
+            placeholder="Amount"
+            keyboardType="number-pad"
+            value={ticketAmount.toString()}
+            onChangeText={(text) => {
+              if (text === "") {
+                setTicketAmount(0);
+              } else {
+                setTicketAmount(parseInt(text));
+              }
+            }}
+          />
+          <Picker
+            selectedValue={ticketType}
+            onValueChange={(itemValue) => setTicketType(itemValue)}
+            style={{
+              backgroundColor: "#3a3a3a",
+              color: "#ffffff",
+              padding: 10,
+              borderRadius: 10,
+              marginBottom: 10,
+              fontSize: 18,
+            }}
+          >
+            <Picker.Item label="Bus" value="bus" />
+            <Picker.Item label="Tram" value="tram" />
+            <Picker.Item label="M1" value="m1" />
+            <Picker.Item label="M2" value="m2" />
+            <Picker.Item label="KM" value="km" />
+            <Picker.Item label="WKD" value="wkd" />
+          </Picker>
+        </>
+      ) : (
+        <>
+          <TeamSectionHeader>TASKS</TeamSectionHeader>
+          <TeamQuestContainer>
+            {questsQuery.isLoading && <Text>Loading...</Text>}
+            {questsQuery.isError && <Text>Error...</Text>}
+            {questsQuery.data && (
+              <FlatList
+                data={questsQuery.data.filter((q) => !q.complete)}
+                overScrollMode="never"
+                scrollEnabled={false}
+                style={{ padding: 10 }}
+                contentContainerStyle={{ gap: 10 }}
+                renderItem={({ item }) => (
+                  <QuestItem
+                    quest={item}
+                    isAbleToComplete={team.is_runner}
+                    completeFn={async () => {
+                      await completeQuestMutation.mutateAsync(item.id);
+                      questsQuery.refetch();
+                      refetchTeam();
+                    }}
+                    vetoFn={async () => {
+                      await vetoQuestMutation.mutateAsync(item.id);
+                      questsQuery.refetch();
+                      refetchTeam();
+                    }}
+                  />
+                )}
               />
-              <PowerupTitle>Reveal</PowerupTitle>
-              <PowerupPrice>$400</PowerupPrice>
-            </PowerupContainer>
-            <PowerupContainer onPress={() => buyPowerup("freeze_hunters")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_freeze.png")}
-              />
-              <PowerupTitle>Freeze</PowerupTitle>
-              <PowerupPrice>$1000</PowerupPrice>
-            </PowerupContainer>
-            <PowerupContainer onPress={() => buyPowerup("hide_tracker")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_hide.png")}
-              />
-              <PowerupTitle>Hide</PowerupTitle>
-              <PowerupPrice>$600</PowerupPrice>
-            </PowerupContainer>
-          </>
-        ) : (
-          <>
-            <PowerupContainer onPress={() => buyPowerup("hunt")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_hunt.png")}
-              />
-              <PowerupTitle>Hunt</PowerupTitle>
-              <PowerupPrice>$200</PowerupPrice>
-            </PowerupContainer>
-            <PowerupContainer onPress={() => buyPowerup("freeze_runners")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_freeze.png")}
-              />
-              <PowerupTitle>Freeze</PowerupTitle>
-              <PowerupPrice>$1000</PowerupPrice>
-            </PowerupContainer>
-            <PowerupContainer onPress={() => buyPowerup("blacklist")}>
-              <PowerupImage
-                source={require("../../../assets/powerups/powerup_hide.png")}
-              />
-              <PowerupTitle>Blacklist</PowerupTitle>
-              <PowerupPrice>$600</PowerupPrice>
-            </PowerupContainer>
-          </>
-        )}
-      </PowerupsContainer>
+            )}
+
+            {questsQuery.data &&
+              !isVetoPeriodActive(team.veto_period_end) &&
+              team.is_runner &&
+              questsQuery.data.filter(
+                (q) => !q.complete && q.quest_type === "side",
+              ).length === 0 && (
+                <SideQuestGenerationButton
+                  onPress={async () => {
+                    await sideQuestMutation.mutateAsync();
+                    await questsQuery.refetch();
+                  }}
+                >
+                  <TeamSubheader>+ Generate side quest</TeamSubheader>
+                </SideQuestGenerationButton>
+              )}
+          </TeamQuestContainer>
+          <TeamSectionHeader style={{ paddingTop: 50 }}>
+            POWERUPS
+          </TeamSectionHeader>
+          <PowerupsContainer>
+            {team.is_runner ? (
+              <>
+                <PowerupContainer onPress={() => buyPowerup("reveal_hunters")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_reveal.png")}
+                  />
+                  <PowerupTitle>Reveal</PowerupTitle>
+                  <PowerupPrice>$400</PowerupPrice>
+                </PowerupContainer>
+                <PowerupContainer onPress={() => buyPowerup("freeze_hunters")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_freeze.png")}
+                  />
+                  <PowerupTitle>Freeze</PowerupTitle>
+                  <PowerupPrice>$1000</PowerupPrice>
+                </PowerupContainer>
+                <PowerupContainer onPress={() => buyPowerup("hide_tracker")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_hide.png")}
+                  />
+                  <PowerupTitle>Hide</PowerupTitle>
+                  <PowerupPrice>$600</PowerupPrice>
+                </PowerupContainer>
+              </>
+            ) : (
+              <>
+                <PowerupContainer onPress={() => buyPowerup("hunt")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_hunt.png")}
+                  />
+                  <PowerupTitle>Hunt</PowerupTitle>
+                  <PowerupPrice>$200</PowerupPrice>
+                </PowerupContainer>
+                <PowerupContainer onPress={() => buyPowerup("freeze_runners")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_freeze.png")}
+                  />
+                  <PowerupTitle>Freeze</PowerupTitle>
+                  <PowerupPrice>$1000</PowerupPrice>
+                </PowerupContainer>
+                <PowerupContainer onPress={() => buyPowerup("blacklist")}>
+                  <PowerupImage
+                    source={require("../../../assets/powerups/powerup_hide.png")}
+                  />
+                  <PowerupTitle>Blacklist</PowerupTitle>
+                  <PowerupPrice>$600</PowerupPrice>
+                </PowerupContainer>
+              </>
+            )}
+          </PowerupsContainer>
+        </>
+      )}
     </TeamDetailContainer>
   );
 };

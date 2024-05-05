@@ -17,7 +17,7 @@ struct TeamItem: View {
     
     var body: some View {
         NavigationLink {
-            TeamPlayWrapper(team: team)
+            TeamDetailScreen(team: team)
                 .ignoresSafeArea()
         } label: {
             VStack(alignment: .leading, spacing: 0) {

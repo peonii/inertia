@@ -12,6 +12,7 @@ struct HomeScreen: View {
     
     @StateObject var gameService = GameService()
     @StateObject var teamService = TeamService()
+    @StateObject var questService = QuestService()
     
     var body: some View {
         NavigationStack {
@@ -35,6 +36,7 @@ struct HomeScreen: View {
         .scrollContentBackground(.hidden)
         .environmentObject(gameService)
         .environmentObject(teamService)
+        .environmentObject(questService)
         .task {
             LocationManager.shared.startUpdatingLocation()
             

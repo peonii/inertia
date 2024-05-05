@@ -31,11 +31,11 @@
 		B007755E2BB9B66D00DD393C /* TeamItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007755D2BB9B66D00DD393C /* TeamItem.swift */; };
 		B00775602BB9BBC000DD393C /* TeamList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007755F2BB9BBC000DD393C /* TeamList.swift */; };
 		B00775622BB9CE0500DD393C /* GameCreateScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775612BB9CE0400DD393C /* GameCreateScreen.swift */; };
-		B00775652BBD2E2200DD393C /* TeamPlayWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */; };
-		B00775672BBD357600DD393C /* TeamPlayMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775662BBD357600DD393C /* TeamPlayMenuController.swift */; };
-		B00775692BBD459400DD393C /* TeamPlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00775682BBD459400DD393C /* TeamPlayController.swift */; };
 		B007756B2BBD573100DD393C /* UILabel+addCharacterSpacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007756A2BBD573100DD393C /* UILabel+addCharacterSpacing.swift */; };
 		B007756D2BC3C59900DD393C /* ExpandedTeamList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B007756C2BC3C59900DD393C /* ExpandedTeamList.swift */; };
+		B00CD6692BE5944000072B79 /* TeamDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00CD6682BE5944000072B79 /* TeamDetailScreen.swift */; };
+		B00CD66B2BE5955800072B79 /* TeamDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00CD66A2BE5955800072B79 /* TeamDetailView.swift */; };
+		B00CD66D2BE599CF00072B79 /* QuestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00CD66C2BE599CF00072B79 /* QuestService.swift */; };
 		B0523EAD2BC5234A00657990 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EAC2BC5234A00657990 /* LocationManager.swift */; };
 		B0523ECB2BC6815000657990 /* Quest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523ECA2BC6815000657990 /* Quest.swift */; };
 		B0523ED32BC6B05000657990 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0523ED22BC6B05000657990 /* WidgetKit.framework */; };
@@ -49,7 +49,7 @@
 		B0523EEB2BC6B6A300657990 /* ActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0523EEA2BC6B6A300657990 /* ActivityManager.swift */; };
 		B09FD1CB2BC3EA590016BB4A /* LocationPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */; };
 		B09FD1D02BC40AD50016BB4A /* ExpandedGameList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */; };
-		B0D63DE82BDE60B0005D05ED /* TicketBuyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */; };
+		B0D63DE82BDE60B0005D05ED /* TicketBuyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D63DE72BDE60B0005D05ED /* TicketBuyView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,11 +102,11 @@
 		B007755D2BB9B66D00DD393C /* TeamItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamItem.swift; sourceTree = "<group>"; };
 		B007755F2BB9BBC000DD393C /* TeamList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamList.swift; sourceTree = "<group>"; };
 		B00775612BB9CE0400DD393C /* GameCreateScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameCreateScreen.swift; sourceTree = "<group>"; };
-		B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayWrapper.swift; sourceTree = "<group>"; };
-		B00775662BBD357600DD393C /* TeamPlayMenuController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayMenuController.swift; sourceTree = "<group>"; };
-		B00775682BBD459400DD393C /* TeamPlayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamPlayController.swift; sourceTree = "<group>"; };
 		B007756A2BBD573100DD393C /* UILabel+addCharacterSpacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+addCharacterSpacing.swift"; sourceTree = "<group>"; };
 		B007756C2BC3C59900DD393C /* ExpandedTeamList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedTeamList.swift; sourceTree = "<group>"; };
+		B00CD6682BE5944000072B79 /* TeamDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamDetailScreen.swift; sourceTree = "<group>"; };
+		B00CD66A2BE5955800072B79 /* TeamDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamDetailView.swift; sourceTree = "<group>"; };
+		B00CD66C2BE599CF00072B79 /* QuestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestService.swift; sourceTree = "<group>"; };
 		B0523EAC2BC5234A00657990 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		B0523ECA2BC6815000657990 /* Quest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quest.swift; sourceTree = "<group>"; };
 		B0523ED02BC6B05000657990 /* InertiaWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = InertiaWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -122,7 +122,7 @@
 		B0523EEC2BC6BCA800657990 /* Inertia.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Inertia.entitlements; sourceTree = "<group>"; };
 		B09FD1CA2BC3EA590016BB4A /* LocationPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPicker.swift; sourceTree = "<group>"; };
 		B09FD1CF2BC40AD50016BB4A /* ExpandedGameList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpandedGameList.swift; sourceTree = "<group>"; };
-		B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketBuyController.swift; sourceTree = "<group>"; };
+		B0D63DE72BDE60B0005D05ED /* TicketBuyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TicketBuyView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +205,7 @@
 				B00775372BB8A8FD00DD393C /* AuthService.swift */,
 				B00775542BB96CC400DD393C /* GameService.swift */,
 				B007755B2BB9B40200DD393C /* TeamService.swift */,
+				B00CD66C2BE599CF00072B79 /* QuestService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -269,10 +270,9 @@
 		B00775632BBD2DE000DD393C /* Play */ = {
 			isa = PBXGroup;
 			children = (
-				B00775642BBD2E2200DD393C /* TeamPlayWrapper.swift */,
-				B00775662BBD357600DD393C /* TeamPlayMenuController.swift */,
-				B00775682BBD459400DD393C /* TeamPlayController.swift */,
-				B0D63DE72BDE60B0005D05ED /* TicketBuyController.swift */,
+				B0D63DE72BDE60B0005D05ED /* TicketBuyView.swift */,
+				B00CD6682BE5944000072B79 /* TeamDetailScreen.swift */,
+				B00CD66A2BE5955800072B79 /* TeamDetailView.swift */,
 			);
 			path = Play;
 			sourceTree = "<group>";
@@ -437,29 +437,29 @@
 				B00775602BB9BBC000DD393C /* TeamList.swift in Sources */,
 				B007754E2BB93B6E00DD393C /* Haptics.swift in Sources */,
 				B007754C2BB9358400DD393C /* TopBarMenu.swift in Sources */,
-				B00775672BBD357600DD393C /* TeamPlayMenuController.swift in Sources */,
 				B007753A2BB8A92800DD393C /* User.swift in Sources */,
 				B00775502BB96B2B00DD393C /* Game.swift in Sources */,
 				B0523EAD2BC5234A00657990 /* LocationManager.swift in Sources */,
+				B00CD66D2BE599CF00072B79 /* QuestService.swift in Sources */,
 				B00775532BB96CBA00DD393C /* GameItem.swift in Sources */,
 				B00021A72BCD1B6600DAB66B /* AppDelegate.swift in Sources */,
 				B00775432BB8B10500DD393C /* LoginScreen.swift in Sources */,
 				B09FD1CB2BC3EA590016BB4A /* LocationPicker.swift in Sources */,
 				B0523ECB2BC6815000657990 /* Quest.swift in Sources */,
 				B0523EEB2BC6B6A300657990 /* ActivityManager.swift in Sources */,
+				B00CD66B2BE5955800072B79 /* TeamDetailView.swift in Sources */,
 				B00775382BB8A8FD00DD393C /* AuthService.swift in Sources */,
-				B00775652BBD2E2200DD393C /* TeamPlayWrapper.swift in Sources */,
 				B00775412BB8ABF600DD393C /* Endpoints.swift in Sources */,
 				B007756D2BC3C59900DD393C /* ExpandedTeamList.swift in Sources */,
 				B00775622BB9CE0500DD393C /* GameCreateScreen.swift in Sources */,
 				B007756B2BBD573100DD393C /* UILabel+addCharacterSpacing.swift in Sources */,
-				B00775692BBD459400DD393C /* TeamPlayController.swift in Sources */,
 				B09FD1D02BC40AD50016BB4A /* ExpandedGameList.swift in Sources */,
 				B007755A2BB9B12600DD393C /* Team.swift in Sources */,
+				B00CD6692BE5944000072B79 /* TeamDetailScreen.swift in Sources */,
 				B00775462BB8B22300DD393C /* HomeScreen.swift in Sources */,
 				B00775292BB8A52300DD393C /* RootScreen.swift in Sources */,
 				B007755E2BB9B66D00DD393C /* TeamItem.swift in Sources */,
-				B0D63DE82BDE60B0005D05ED /* TicketBuyController.swift in Sources */,
+				B0D63DE82BDE60B0005D05ED /* TicketBuyView.swift in Sources */,
 				B00775272BB8A52300DD393C /* InertiaApp.swift in Sources */,
 				B007753F2BB8AB9500DD393C /* Constants.swift in Sources */,
 				B00775552BB96CC400DD393C /* GameService.swift in Sources */,

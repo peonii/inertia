@@ -1,12 +1,11 @@
 //
-//  TicketBuyController.swift
+//  TicketBuyView.swift
 //  Inertia
 //
 //  Created by peony on 28/04/2024.
 //
 
 import Foundation
-import UIKit
 import SwiftUI
 
 enum TicketType: String, CaseIterable {
@@ -14,7 +13,7 @@ enum TicketType: String, CaseIterable {
 }
 
 struct TicketBuyView: View {
-    var team: Team?
+    var team: Team
     @State private var selectedTicketType: TicketType = .bus
     @State private var numberTickets = 1
     @EnvironmentObject private var authService: AuthService
@@ -33,7 +32,7 @@ struct TicketBuyView: View {
                     .font(.system(size: 24))
                     .fontWeight(.bold)
                 
-                Text("\(team?.balance ?? 0)")
+                Text("\(team.balance)")
                     .tracking(-1)
                     .font(.system(size: 32))
                     .fontWeight(.bold)
@@ -58,7 +57,7 @@ struct TicketBuyView: View {
             
             Button("Buy") {
                 Task {
-                    try? await teamService.buyTickets(for: authService, id: team?.id ?? "", amount: numberTickets, type: selectedTicketType.rawValue)
+                    try? await teamService.buyTickets(for: authService, id: team.id, amount: numberTickets, type: selectedTicketType.rawValue)
                     try? await teamService.fetchJoinedTeams(for: authService)
                 }
             }
@@ -72,35 +71,4 @@ struct TicketBuyView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
     }
-}
-
-class TicketBuyController: UIViewController {
-    var team: Team?
-    var authService: AuthService?
-    var teamService: TeamService?
-    
-    let hvc = UIHostingController(rootView: TicketBuyView())
-    
-    override func viewDidLoad() {
-        view.backgroundColor = UIColor(Color.bg)
-        
-        hvc.view.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(hvc.view)
-        
-        hvc.rootView.team = team
-        
-        NSLayoutConstraint.activate([
-            hvc.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hvc.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hvc.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            hvc.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-}
-
-#Preview {
-    let tvc = TicketBuyController()
-    tvc.team = .mock()
-    
-    return tvc
 }

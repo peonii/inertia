@@ -16,6 +16,7 @@
     "@expo/config-plugins": "~7.2.5",
     "@expo/vector-icons": "^13.0.0",
     "@react-native-community/datetimepicker": "^7.7.0",
+    "@react-native-picker/picker": "2.6.1",
     "@tanstack/react-query": "^5.32.0",
     "expo": "~50.0.17",
     "expo-auth-session": "~5.4.0",

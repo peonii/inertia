@@ -26,6 +26,9 @@ importers:
       '@react-native-community/datetimepicker':
         specifier: ^7.7.0
         version: 7.7.0
+      '@react-native-picker/picker':
+        specifier: 2.6.1
+        version: 2.6.1(react-native@0.73.6(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react@18.2.0))(react@18.2.0)
       '@tanstack/react-query':
         specifier: ^5.32.0
         version: 5.32.0(react@18.2.0)
@@ -1272,6 +1275,12 @@ packages:
 
   '@react-native-community/datetimepicker@7.7.0':
     resolution: {integrity: sha512-nYzZy4DQLRFUzKJShWzRleCaebmCJfZ1lIcFmZgMXJoiVuGJNw3OIGHSWmHhPETh3OhP1RO3to882d7WmDIyrA==}
+
+  '@react-native-picker/picker@2.6.1':
+    resolution: {integrity: sha512-oJftvmLOj6Y6/bF4kPcK6L83yNBALGmqNYugf94BzP0FQGpHBwimVN2ygqkQ2Sn2ZU3pGUZMs0jV6+Gku2GyYg==}
+    peerDependencies:
+      react: '>=16'
+      react-native: '>=0.57'
 
   '@react-native/assets-registry@0.73.1':
     resolution: {integrity: sha512-2FgAbU7uKM5SbbW9QptPPZx8N9Ke2L7bsHb+EhAanZjFZunA9PaYtyjUQ1s7HD+zDVqOQIvjkpXSv7Kejd2tqg==}
@@ -6739,6 +6748,11 @@ snapshots:
   '@react-native-community/datetimepicker@7.7.0':
     dependencies:
       invariant: 2.2.4
+
+  '@react-native-picker/picker@2.6.1(react-native@0.73.6(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-native: 0.73.6(@babel/core@7.24.4)(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react@18.2.0)
 
   '@react-native/assets-registry@0.73.1': {}
 
