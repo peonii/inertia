@@ -37,7 +37,7 @@ const FullScreenView = styled.View`
   flex: 1;
 `;
 
-const TeamDetailContainer = styled.View`
+const TeamDetailContainer = styled.ScrollView`
   padding-left: 20px;
   padding-right: 20px;
 `;
@@ -135,6 +135,24 @@ const PowerupIndicatorsContainer = styled.View`
   top: 40px;
   padding: 0 50px;
   width: 100%;
+`;
+
+const CatchButton = styled.Pressable`
+  align-self: center;
+  width: 195px;
+  height: 60px;
+  margin-top: 50px;
+  background-color: #3a3a3a;
+  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+`;
+
+const CatchButtonText = styled.Text`
+  font-size: 24px;
+  font-family: Inter_700Bold;
+  letter-spacing: -1.2px;
+  color: #ffffff;
 `;
 
 const LOCATION_TASK_NAME = "inertia-location-task";
@@ -489,6 +507,15 @@ const TeamDetailView: React.FC<{
               </>
             )}
           </PowerupsContainer>
+          <CatchButton
+            onPress={() => {
+              fetchTypeSafe<null>(ENDPOINTS.teams.catch(team.id), authCtx, {
+                method: "POST",
+              });
+            }}
+          >
+            <CatchButtonText>Catch runners</CatchButtonText>
+          </CatchButton>
         </>
       )}
     </TeamDetailContainer>
