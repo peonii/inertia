@@ -121,7 +121,7 @@ func (h *wsHub) Run() {
 
 				if powerupsByGameID == nil {
 					powerupsByGameID = make(map[string][]*domain.Powerup)
-					powerups, _ := h.powerupRepo.GetByGameID(context.Background(), message.GameID)
+					powerups, _ := h.powerupRepo.GetActiveByGameID(context.Background(), message.GameID)
 					for _, powerup := range powerups {
 						powerupsByGameID[client.gameID] = append(powerupsByGameID[client.gameID], powerup)
 					}
