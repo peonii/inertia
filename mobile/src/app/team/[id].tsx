@@ -1,5 +1,5 @@
 import styled from "@emotion/native";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import MapView from "react-native-maps";
@@ -37,7 +37,7 @@ const FullScreenView = styled.View`
   flex: 1;
 `;
 
-const TeamDetailContainer = styled.ScrollView`
+const TeamDetailContainer = styled.View`
   padding-left: 20px;
   padding-right: 20px;
 `;
@@ -328,16 +328,11 @@ const TeamDetailView: React.FC<{
             }}
             placeholder="Amount"
             keyboardType="number-pad"
-            value={ticketAmount.toString()}
             onChangeText={(text) => {
-              if (text === "") {
-                setTicketAmount(1);
+              if (parseInt(text)) {
+                setTicketAmount(parseInt(text));
               } else {
-                if (parseInt(text) > 0) {
-                  setTicketAmount(parseInt(text));
-                } else {
-                  setTicketAmount(1);
-                }
+                setTicketAmount(0);
               }
             }}
           />
@@ -374,6 +369,14 @@ const TeamDetailView: React.FC<{
               marginBottom: 10,
             }}
             onPress={async () => {
+              if (ticketAmount < 1) {
+                Alert.alert(
+                  "Invalid amount",
+                  "You must buy at least 1 ticket.",
+                );
+                return;
+              }
+
               await fetchTypeSafe<null>(
                 ENDPOINTS.teams.buy_ticket(team.id),
                 authCtx,
@@ -774,15 +777,17 @@ const TeamDetailScreen: React.FC = () => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }}
       >
-        {teamQuery.isLoading && <ActivityIndicator />}
-        {teamQuery.data && (
-          <TeamDetailView
-            team={teamQuery.data}
-            refetchTeam={async () => {
-              await teamQuery.refetch();
-            }}
-          />
-        )}
+        <BottomSheetScrollView>
+          {teamQuery.isLoading && <ActivityIndicator />}
+          {teamQuery.data && (
+            <TeamDetailView
+              team={teamQuery.data}
+              refetchTeam={async () => {
+                await teamQuery.refetch();
+              }}
+            />
+          )}
+        </BottomSheetScrollView>
       </BottomSheet>
     </FullScreenView>
   );
