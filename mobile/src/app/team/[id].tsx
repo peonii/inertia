@@ -647,6 +647,7 @@ const TeamDetailScreen: React.FC = () => {
       case "cat":
         // handle catching
         setVisiblePlayers([]);
+        await teamQuery.refetch();
         break;
       default:
         console.error(`unhandled message type! ${msg}`);
