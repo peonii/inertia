@@ -1,0 +1,33 @@
+services:
+  db:
+    container_name: inertia-db
+    image: scylladb/scylla
+    ports:
+      - "9042:9042"
+    networks:
+      - internal
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    volumes:
+      - scylla-data:/var/lib/scylla
+      - ./scylla.yaml:/etc/scylla/scylla.yaml
+  db-migrator:
+    container_name: inertia-db-migrator
+    image: scylladb/scylla
+    networks:
+      - internal
+    volumes:
+      - ./migrations:/migrations
+      - ./migrate.sh:/migrate.sh
+    entrypoint: ["bash", "/migrate.sh"]
+
+volumes:
+  scylla-data:
+
+networks:
+  internal:
+    driver: bridge
