@@ -9,7 +9,7 @@ async fn graphiql() -> impl IntoResponse {
 }
 
 pub async fn start(port: u16) {
-    let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription).finish();
+    let schema = Schema::build(QueryRoot::default(), EmptyMutation, EmptySubscription).finish();
 
     let app = Route::new()
         .at("/gql", post(GraphQL::new(schema)))

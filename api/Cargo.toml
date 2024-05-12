@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["inertia-api-core", "inertia-api-resolvers"]
+members = ["inertia-api-core", "inertia-api-resolvers", "inertia-api-domain", "inertia-api-services"]
 
 [dependencies]
 inertia-api-core = { path = "inertia-api-core" }

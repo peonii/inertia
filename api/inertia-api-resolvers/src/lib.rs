@@ -1,10 +1,9 @@
-use async_graphql::Object;
+use async_graphql::MergedObject;
+use health::HealthQuery;
+use user::UserQuery;
 
-pub struct QueryRoot;
+pub mod health;
+pub mod user;
 
-#[Object]
-impl QueryRoot {
-    async fn health(&self) -> bool {
-        true
-    }
-}
+#[derive(MergedObject, Default)]
+pub struct QueryRoot(HealthQuery, UserQuery);

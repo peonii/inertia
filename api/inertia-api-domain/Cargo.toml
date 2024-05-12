@@ -1,12 +1,13 @@
 [package]
-name = "inertia-api-resolvers"
+name = "inertia-api-domain"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.83"
 async-graphql = { version = "7.0.5", features = ["time"] }
-tokio = { version = "1.37.0", features = ["full"] }
-inertia-api-domain = { path = "../inertia-api-domain" }
+async-trait = "0.1.80"
+serde = { version = "1.0.201", features = ["derive"] }
 time = { version = "0.3.36", features = ["serde"] }
