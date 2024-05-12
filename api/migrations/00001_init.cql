@@ -1,6 +1,6 @@
 CREATE KEYSPACE inertia
   WITH REPLICATION = {
     'class': 'SimpleStrategy', -- We may have to migrate to NetworkTopologyStrategy if scaling up
-    'replication_factor': 3
+    'replication_factor': 1
   }
   AND DURABLE_WRITES = true;

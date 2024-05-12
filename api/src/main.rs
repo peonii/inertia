@@ -1,4 +1,6 @@
 #[tokio::main]
 async fn main() {
-    inertia_api_core::start(3001).await;
+    let port: u16 = std::env::var("PORT").unwrap_or("3001".to_string()).parse().unwrap();
+
+    inertia_api_core::start(port).await;
 }

@@ -1,5 +1,4 @@
 #!/bin/bash
-sleep 25
 
 echo "Checking for connection..."
 while ! cqlsh inertia-db -e 'describe cluster'; do

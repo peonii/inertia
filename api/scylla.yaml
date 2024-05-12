@@ -614,3 +614,4 @@ maintenance_socket: ignore
 # replication_strategy_warn_list:
 #  - SimpleStrategy
 # replication_strategy_fail_list:
+force_schema_commit_log: true

@@ -1,4 +1,26 @@
 services:
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+    hostname: api
+    container_name: inertia-api
+    image: inertia-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - internal
+    ports:
+      - 3001:3001
+    deploy:
+      restart_policy:
+        condition: on-failure
+    links:
+      - "db:db"
+    environment:
+      - SCYLLA_URL=db:9042
+      - PORT=3001
   db:
     container_name: inertia-db
     image: scylladb/scylla
@@ -15,8 +37,17 @@ services:
     volumes:
       - scylla-data:/var/lib/scylla
       - ./scylla.yaml:/etc/scylla/scylla.yaml
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "DESCRIBE KEYSPACES"]
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
   db-migrator:
     container_name: inertia-db-migrator
+    depends_on:
+      db:
+        condition: service_healthy
     image: scylladb/scylla
     networks:
       - internal

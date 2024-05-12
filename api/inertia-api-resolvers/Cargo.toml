@@ -10,3 +10,4 @@ async-graphql = { version = "7.0.5", features = ["time"] }
 tokio = { version = "1.37.0", features = ["full"] }
 inertia-api-domain = { path = "../inertia-api-domain" }
 time = { version = "0.3.36", features = ["serde"] }
+inertia-api-services = { path = "../inertia-api-services" }

@@ -6,5 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.83"
+async-trait = "0.1.80"
 inertia-api-domain = { path = "../inertia-api-domain" }
+rs-snowflake = "0.6.0"
 scylla = { version = "0.13.0", features = ["time"] }
+time = { version = "0.3.36", features = ["serde"] }

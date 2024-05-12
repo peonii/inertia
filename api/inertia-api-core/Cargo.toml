@@ -9,3 +9,6 @@ async-graphql-poem = "7.0.5"
 poem = { version = "3.0.0", features = ["websocket", "cookie"] }
 tokio = { version = "1.37.0", features = ["full"] }
 inertia-api-resolvers = { path = "../inertia-api-resolvers" }
+inertia-api-services = { path = "../inertia-api-services" }
+tracing-subscriber = "0.3.18"
+tracing = "0.1.40"
